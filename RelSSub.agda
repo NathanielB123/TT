@@ -10,7 +10,8 @@ open import Common.SortEq
 --
 -- We use single substitutions as in 
 -- https://raw.githubusercontent.com/szumixie/single-subst/main/lfmtp/p.pdf
--- as this drastically cuts down on the number of operations we need
+-- (also https://github.com/NathanielB123/dep-ty-chk)
+-- as this drastically cuts down on the number of operations
 module RelSSub where
 
 data Ctx    : Set
@@ -73,7 +74,9 @@ data _[_]T≔_ where
   El[] : t [ δ ] U[] ≔ t[] → El t [ δ ]T≔ El t[]
   Π[]  : ∀ (A𝒢 : A [ δ ]T≔ A[]) → B [ δ ^ A𝒢 ]T≔ B[] → Π A B [ δ ]T≔ Π A[] B[]
 
+-- Laws
 wk<>  : A [ wk ]T≔ A[] → A[] [ < t > ]T≔ A
+
 wk^   : A [ wk ]T≔ A[]₁ → A [ δ ]T≔ A[]₂
       → A[]₁ [ δ ^ B𝒢 ]T≔ A[][]
       → A[]₂ [ wk ]T≔ A[][]
@@ -94,6 +97,9 @@ data _[_]_≔_ where
   vz<>  : ∀ {A𝒢 : A [ wk ]T≔ A[]} {u₁ : Tm Γ A} {A𝒢₂ : A[] [ < u₁ > ]T≔ A[][]}
         → coeTm A≡ u₁ ≡ᴾ u₂ 
         → vz A𝒢 [ < u₁ > ] A𝒢₂ ≔ u₂
+  -- I think we could define the substitution relation without
+  -- reference to the laws (we can just ask for the relevant equations
+  -- when necessary).
   vs<>  : vs i A𝒢 [ < u > ] wk<> A𝒢 ≔ (` i)
   vs^   : i [ δ ] A𝒢₂ ≔ i[] → i[] [ wk ] wk^ A𝒢₁ A𝒢₂ A𝒢₃ ≔ i[][]
         → vs i A𝒢₁ [ δ ^ B𝒢 ] A𝒢₃ ≔ i[][]
@@ -104,6 +110,9 @@ data _[_]_≔_ where
         → app t u B𝒢₁ [ δ ] B𝒢₃
         ≔ app t[] u[] (^<> B𝒢₁ B𝒢₂ B𝒢₃ u𝒢)
 
+-- To prove the laws, we need to handle arbitrary context extensions 
+-- (telescopes)
+-- This enables us to recurse under binders properly
 data Tel (Γ : Ctx) : Set
 
 _▷▷_ : ∀ Γ → Tel Γ → Ctx
@@ -158,6 +167,11 @@ wk<>^^ {t = vs i A𝒢} {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} (vs^ i�
 wk<>^^ {t = vz A𝒢} {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} vz^ = vz^
 
 wk<> = wk<>T^^
+
+-- TODO: Prove other laws similarly
+
+
+-- Now we show that substitution is computable
 
 _[_]T : Ty Γ → Sub[ q ] Δ Γ → Ty Δ
 _[_]  : Tm[ q ] Γ A → ∀ (δ : Sub[ r ] Δ Γ) → Tm[ q ⊔ r ] Δ (A [ δ ]T)
