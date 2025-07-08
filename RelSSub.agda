@@ -26,7 +26,7 @@ variable
   Γ Δ Θ         : Ctx
   A B A₁ A₂ A[] A[]₁ A[]₂ A[][] B[]   : Ty Γ
   δ σ           : Sub[ q ] Δ Γ
-  t u v t[] t[]₁ t[]₂ t[][] u[] i[] i[][] u₁ u₂ : Tm[ q ] Γ A
+  t u v t[] t[]₁ t[]₂ t[][] u[] i[] i[][] t₁ t₂ u₁ u₂ : Tm[ q ] Γ A
   i j k         : Var Γ A
   
 data Ctx where
@@ -62,7 +62,7 @@ data Tm[_] where
 -- Subsingleton elim
 -- I don't think |Prop| is essential to the technique anyhow though
 coeTm : A₁ ≡ᴾ A₂ → Tm[ q ] Γ A₁ → Tm[ q ] Γ A₂
-
+coeTm A≡ t with refl ← ≡↑ A≡ = t
 
 tm⊑ : q ⊑ r → Tm[ q ] Γ A → Tm[ r ] Γ A
 tm⊑ {q = V} {r = V} _ i = i
@@ -94,12 +94,20 @@ wk^  : t [ wk ] A𝒢₁ ≔ t[]₁ → t [ δ ] A𝒢₂ ≔ t[]₂
 variable
   A≡ : A₁ ≡ᴾ A₂
 
+-- We "Ford" with *inductively defined* dependent identity to ensure strict
+-- positivity
+data _≡[_]Tm_ (t : Tm Γ A₁) : A₁ ≡ᴾ A₂ → Tm Γ A₂ → Set where
+  refl : t ≡[ refl ]Tm t
+
+coe-≡[]Tm : t₁ ≡[ A≡ ]Tm t₂ → coeTm A≡ t₁ ≡ᴾ t₂
+coe-≡[]Tm refl = refl
+
 data _[_]_≔_ where
   i[wk] : i [ wk ] A𝒢 ≔ vs i A𝒢
   -- Much neater, but produces recursive unification equations
   -- vz<> : vz A𝒢 [ < u₁ > ] wk<> A𝒢 ≔ u₂
   vz<>  : ∀ {A𝒢 : A [ wk ]T≔ A[]} {u₁ : Tm Γ A} {A𝒢₂ : A[] [ < u₁ > ]T≔ A[][]}
-        → coeTm A≡ u₁ ≡ᴾ u₂ 
+        → u₁ ≡[ A≡ ]Tm u₂
         → vz A𝒢 [ < u₁ > ] A𝒢₂ ≔ u₂
   -- I think we could define the substitution relation without
   -- reference to the laws (we can just ask for the relevant equations
@@ -185,7 +193,7 @@ _[_]  : Tm[ q ] Γ A → ∀ (δ : Sub[ r ] Δ Γ) → Tm[ q ⊔ r ] Δ (A [ δ 
 []    : t [ δ ] []T ≔ (_[_] {r = r} t δ)
 
 []T≡ : A [ δ ]T≔ A[] → (A [ δ ]T) ≡ᴾ A[]
-[]≡  : t [ δ ] []T ≔ t[] → (_[_] {q = q} {A = A} t δ) ≡ᴾ t[]
+[]≡  : t [ δ ] []T ≔ t[] → (_[_] {q = q} {A = A} {r = r} t δ) ≡ᴾ t[]
 
 U     [ δ ]T = U
 El t  [ δ ]T = El (t [ δ ])
@@ -198,7 +206,7 @@ El t  [ δ ]T = El (t [ δ ])
 (vz A𝒢)    [ wk ]       = vs (vz A𝒢) []T
 (vs i A𝒢)  [ wk ]       = vs (vs i A𝒢) []T
 vz A𝒢      [ < u > ]    = coeTm (symᴾ ([]T≡ (wk<>T A𝒢))) u
-vs i A𝒢    [ < u > ]    = ` coeTm (symᴾ ([]T≡ (wk<>T A𝒢))) i
+vs i A𝒢    [ < u > ]    = coeTm (symᴾ ([]T≡ (wk<>T A𝒢))) (` i)
 vz A𝒢₁     [ δ ^ A𝒢₂ ] = tm⊑ V⊑ (vz (wk^T A𝒢₁ A𝒢₂ []T))
 _[_] {r = V} (vs i A𝒢) (δ ^ B𝒢) = vs (i [ δ ]) (wk^T A𝒢 []T []T)
 _[_] {r = T} (vs i A𝒢) (δ ^ B𝒢) 
@@ -208,17 +216,26 @@ _[_] {r = T} (vs i A𝒢) (δ ^ B𝒢)
 lam t      [ δ ] = lam (t [ δ ^ []T ])
 app t u B𝒢 [ δ ] = app (t [ δ ]) (u [ δ ]) (^<>T B𝒢 []T []T [])
 
+coe[]T-lhs : A₁ ≡ᴾ A₂ → A₁ [ δ ]T≔ A → A₂ [ δ ]T≔ A
+coe[]T-lhs refl A𝒢 = A𝒢
+
+coe[]T-rhs : A[]₁ ≡ᴾ A[]₂ → A [ δ ]T≔ A[]₁ → A [ δ ]T≔ A[]₂
+coe[]T-rhs refl A𝒢 = A𝒢
+
+[]coh : t [ δ ] coe[]T-rhs (symᴾ A≡) A𝒢 ≔ t[] → t [ δ ] A𝒢 ≔ coeTm A≡ t[]
+[]coh {A≡ = refl} t𝒢 = t𝒢
+
 []T {A = U}     = U[]
 []T {A = El t}  = El[] []
 []T {A = Π A B} = Π[] []T []T
 
 [] {t = vz A𝒢}    {δ = wk}      = i[wk]
 [] {t = vs i A𝒢}  {δ = wk}      = i[wk]
-[] {t = vz A𝒢}    {δ = < u >}   = vz<> refl
-[] {t = vs i A𝒢}  {δ = < u >}   = {!vs<>!}
+[] {t = vz A𝒢}    {δ = < u >}   = []coh (vz<> refl)
+[] {t = vs i A𝒢}  {δ = < u >}   = []coh vs<>
 [] {t = vz A𝒢₁}   {δ = δ ^ A𝒢₂} = vz^
 [] {t = vs i A𝒢₁} {r = V} {δ = δ ^ A𝒢₂} = vs^ [] i[wk]
-[] {t = vs i A𝒢₁} {r = T} {δ = δ ^ A𝒢₂} = vs^ [] {![] {t = i [ δ ]} {δ = wk}!}
+[] {t = vs i A𝒢₁} {r = T} {δ = δ ^ A𝒢₂} = vs^ [] ([]coh [])
 
 [] {t = ` i}        = `[] []
 [] {t = lam t}      = lam[] []
@@ -228,11 +245,13 @@ app t u B𝒢 [ δ ] = app (t [ δ ]) (u [ δ ]) (^<>T B𝒢 []T []T [])
 []T≡ (El[] t𝒢)   = {!  []≡ t𝒢 !}
 []T≡ (Π[] A𝒢 B𝒢) = {! []T≡ B𝒢  !}
 
-[]≡ {q = T} (`[] t𝒢)      = {!t𝒢   !}
-[]≡ {q = T} (lam[] t𝒢)    = {!   !}
+[]≡ {q = T} (`[] t𝒢)      = congᴾ (tm⊑ ⊑T) ([]≡ t𝒢)
+[]≡ {q = T} (lam[] t𝒢)    = congᴾ lam ([]≡ t𝒢)
 []≡ {q = T} (app[] t𝒢 u𝒢) = {!   !}
-[]≡ {q = V} vz^           = {! t𝒢 !}
-[]≡ {q = V} (vs^ i𝒢 i[]𝒢) = {! t𝒢 !}
-[]≡ {q = V} vs<>          = {!!}
-[]≡ {q = V} i[wk]         = {!!}
-[]≡ {q = V} (vz<> t≡)     = t≡
+[]≡ {q = V} vz^           = refl
+[]≡ {q = V} {r = V} (vs^ i𝒢 i[]𝒢) = {!  !}
+[]≡ {q = V} {r = T} (vs^ i𝒢 i[]𝒢) = {!  refl !}
+[]≡ {q = V} vs<>          = refl
+[]≡ {q = V} {t = vz A𝒢}   i[wk] = refl
+[]≡ {q = V} {t = vs i A𝒢} i[wk] = refl
+[]≡ {q = V} (vz<> t≡)     = coe-≡[]Tm t≡

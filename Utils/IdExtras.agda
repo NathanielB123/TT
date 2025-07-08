@@ -27,6 +27,7 @@ postulate
   ≡↑  : x ≡ᴾ y → x ≡ y
   ≡↑β : ≡↑ (refl {x = x}) ≡ refl
 
+{-# POLARITY ≡↑ ++ ++ ++ ++ ++ #-}
 {-# REWRITE ≡↑β #-}
 
 ≡↓ : x ≡ y → x ≡ᴾ y
@@ -39,7 +40,7 @@ _≡[_]≡ᴾ_ : A → A ≡ᴾ B → B → Prop _
 x ≡[ p ]≡ᴾ y with refl ← ≡↑ p = x ≡ᴾ y
 
 ≡[]↑ : x ≡[ ≡↓ p ]≡ᴾ y → x ≡[ p ]≡ y
-≡[]↑ {p = refl} = ≡↑
+≡[]↑ {p = refl} p = ≡↑ p
 
 ≡[]↓ : x ≡[ p ]≡ y → x ≡[ ≡↓ p ]≡ᴾ y
 ≡[]↓ {p = refl} = ≡↓
