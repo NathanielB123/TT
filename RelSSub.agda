@@ -23,11 +23,11 @@ Tm  = Tm[ T ]
 Var = Tm[ V ]
 
 variable
-  Γ Δ Θ         : Ctx
-  A B A₁ A₂ A[] A[]₁ A[]₂ A[][] B[]   : Ty Γ
-  δ σ           : Sub[ q ] Δ Γ
-  t u v t[] t[]₁ t[]₂ t[][] u[] i[] i[][] t₁ t₂ u₁ u₂ : Tm[ q ] Γ A
-  i j k         : Var Γ A
+  Γ Δ Θ Γ₁ Γ₂         : Ctx
+  A B A₁ A₂ A[] A[]₁ A[]₂ A[][] B₁ B₂ B[]   : Ty Γ
+  δ σ  δ₁ δ₂          : Sub[ q ] Δ Γ
+  t u v t[] t[]₁ t[]₂ t[][] u[] i[] i[][] t₁ t₂ t₃ u₁ u₂ : Tm[ q ] Γ A
+  i j k i₁ i₂        : Var Γ A
   
 data Ctx where
   •   : Ctx
@@ -91,13 +91,24 @@ wk^  : t [ wk ] A𝒢₁ ≔ t[]₁ → t [ δ ] A𝒢₂ ≔ t[]₂
        → u [ δ ] B𝒢 ≔ u[]
        → A[]₂ [ < u[] > ]T≔ A[][]
 
+Ty≡ : Γ₁ ≡ᴾ Γ₂ → Ty Γ₁ ≡ᴾ Ty Γ₂
+Ty≡ refl = refl
+
 variable
-  A≡ : A₁ ≡ᴾ A₂
+  A≡ A≡₁ A≡₂ B≡ B≡₁ B≡₂ : A₁ ≡ᴾ A₂
 
 -- We "Ford" with *inductively defined* dependent identity to ensure strict
 -- positivity
-data _≡[_]Tm_ (t : Tm Γ A₁) : A₁ ≡ᴾ A₂ → Tm Γ A₂ → Set where
+data _≡[_]Tm_ (t : Tm[ q ] Γ A₁) : A₁ ≡ᴾ A₂ → Tm[ q ] Γ A₂ → Prop where
   refl : t ≡[ refl ]Tm t
+
+Tm≡ : A₁ ≡ᴾ A₂ → Tm[ q ] Γ A₁ ≡ᴾ Tm[ q ] Γ A₂
+Tm≡ A≡ = congᴾ (Tm[ _ ] _) A≡
+
+↑Tm≡ : t₁ ≡[ A≡ ]Tm t₂ → t₁ ≡[ Tm≡ A≡ ]≡ᴾ t₂
+↑Tm≡ refl = refl
+↓Tm≡ : t₁ ≡[ Tm≡ A≡ ]≡ᴾ t₂ → t₁ ≡[ A≡ ]Tm t₂
+↓Tm≡ {A≡ = refl} refl = refl
 
 coe-≡[]Tm : t₁ ≡[ A≡ ]Tm t₂ → coeTm A≡ t₁ ≡ᴾ t₂
 coe-≡[]Tm refl = refl
@@ -156,6 +167,7 @@ data _[_]Ts≔_ where
 
 variable
   Ξ𝒢 Ξ𝒢₁ Ξ𝒢₂ : Ξ [ δ ]Ts≔ Ξ[]
+  t𝒢 u𝒢 : t [ δ ] _ ≔ t[] 
 
 wk<>Ts  : Ξ [ wk ]Ts≔ Ξ[] → Ξ[] [ < u > ]Ts≔ Ξ
 wk<>T^^ : ∀ {Ξ𝒢₁ : Ξ [ wk ]Ts≔ Ξ[]} {Ξ𝒢₂ : Ξ[] [ < u > ]Ts≔ Ξ}
@@ -184,40 +196,48 @@ wk<>T = wk<>T^^
 
 -- TODO: Prove other laws similarly
 
+π₁Π[] : Π A B [ δ ]T≔ Π A[] B[] → A [ δ ]T≔ A[]
+π₁Π[] (Π[] A𝒢 B𝒢) = A𝒢
+
+π₂Π[] : ∀ (AB𝒢 : Π A B [ δ ]T≔ Π A[] B[]) → B [ δ ^ π₁Π[] AB𝒢 ]T≔ B[] 
+π₂Π[] (Π[] A𝒢 B𝒢) = B𝒢
 
 -- Now we show that substitution is computable
 
 _[_]T : Ty Γ → Sub[ q ] Δ Γ → Ty Δ
-_[_]  : Tm[ q ] Γ A → ∀ (δ : Sub[ r ] Δ Γ) → Tm[ q ⊔ r ] Δ (A [ δ ]T)
+_[_]_ : Tm[ q ] Γ A → ∀ (δ : Sub[ r ] Δ Γ) → A [ δ ]T≔ A[] 
+      → Tm[ q ⊔ r ] Δ A[]
 []T   : A [ δ ]T≔ (A [ δ ]T)
-[]    : t [ δ ] []T ≔ (_[_] {r = r} t δ)
+[]    : t [ δ ] A𝒢 ≔ (_[_]_ {r = r} {A[] = A[]} t δ A𝒢)
 
-[]T≡ : A [ δ ]T≔ A[] → (A [ δ ]T) ≡ᴾ A[]
-[]≡  : t [ δ ] []T ≔ t[] → (_[_] {q = q} {A = A} {r = r} t δ) ≡ᴾ t[]
+[]T≡ : A [ δ ]T≔ A[] → A [ δ ]T ≡ᴾ A[]
+[]≡ : t [ δ ] A𝒢 ≔ t[] → _[_]_ {r = r} t δ A𝒢 ≡ᴾ t[]
 
 U     [ δ ]T = U
-El t  [ δ ]T = El (t [ δ ])
+El t  [ δ ]T = El (t [ δ ] U[])
 Π A B [ δ ]T = Π (A [ δ ]T) (B [ δ ^ []T ]T)
 
 -- Curiously, termination fails if we squish these cases together.
 -- Exact splits for operations (like substitution) is probably a good idea
 -- anyway...
--- _[_] {q = V} i wk  = vs i []T
-(vz A𝒢)    [ wk ]       = vs (vz A𝒢) []T
-(vs i A𝒢)  [ wk ]       = vs (vs i A𝒢) []T
-vz A𝒢      [ < u > ]    = coeTm (symᴾ ([]T≡ (wk<>T A𝒢))) u
-vs i A𝒢    [ < u > ]    = coeTm (symᴾ ([]T≡ (wk<>T A𝒢))) (` i)
-vz A𝒢₁     [ δ ^ A𝒢₂ ] = tm⊑ V⊑ (vz (wk^T A𝒢₁ A𝒢₂ []T))
-_[_] {r = V} (vs i A𝒢) (δ ^ B𝒢) = vs (i [ δ ]) (wk^T A𝒢 []T []T)
-_[_] {r = T} (vs i A𝒢) (δ ^ B𝒢) 
-  = coeTm ([]T≡ (wk^T A𝒢 []T []T)) (i [ δ ] [ wk ])
+vz A𝒢   [ wk ] B𝒢 = vs (vz A𝒢) B𝒢
+vs i A𝒢 [ wk ] B𝒢 = vs (vs i A𝒢) B𝒢
 
-(` i)      [ δ ] = tm⊑ ⊑T (i [ δ ])
-lam t      [ δ ] = lam (t [ δ ^ []T ])
-app t u B𝒢 [ δ ] = app (t [ δ ]) (u [ δ ]) (^<>T B𝒢 []T []T [])
+vz A𝒢₁   [ δ ^ A𝒢₂ ] A𝒢₃ = tm⊑ V⊑ (vz (wk^T A𝒢₁ A𝒢₂ A𝒢₃))
+vz A𝒢₁   [ < u > ]   A𝒢₂ = coeTm (symᴾ ([]T≡ (wk<>T A𝒢₁)) ∙ᴾ []T≡ A𝒢₂) u
+vs i A𝒢₁ [ < u > ]   A𝒢₂ = coeTm (symᴾ ([]T≡ (wk<>T A𝒢₁)) ∙ᴾ []T≡ A𝒢₂) (` i)
 
-coe[]T-lhs : A₁ ≡ᴾ A₂ → A₁ [ δ ]T≔ A → A₂ [ δ ]T≔ A
-coe[]T-lhs refl A𝒢 = A𝒢
+_[_]_ {r = V} (vs i A𝒢₁) (δ ^ B𝒢) A𝒢₂ 
+  = vs (i [ δ ] []T) (wk^T A𝒢₁ []T A𝒢₂)
+_[_]_ {r = T} (vs i A𝒢₁) (δ ^ B𝒢) A𝒢₂ 
+  = (i [ δ ] []T) [ wk ] (wk^T A𝒢₁ []T A𝒢₂)
+
+(` i) [ δ ] A𝒢 = tm⊑ ⊑T (i [ δ ] A𝒢)
+_[_]_ {A[] = Π A[] B[]} (lam t) δ AB𝒢 
+  = lam (t [ δ ^ π₁Π[] AB𝒢 ] π₂Π[] AB𝒢)
+app t u B𝒢₁ [ δ ] B𝒢₂ 
+  = app (t [ δ ] (Π[] []T []T)) (u [ δ ] []T) (^<>T B𝒢₁ []T B𝒢₂ [])
+
 
 coe[]T-rhs : A[]₁ ≡ᴾ A[]₂ → A [ δ ]T≔ A[]₁ → A [ δ ]T≔ A[]₂
 coe[]T-rhs refl A𝒢 = A𝒢
@@ -235,23 +255,57 @@ coe[]T-rhs refl A𝒢 = A𝒢
 [] {t = vs i A𝒢}  {δ = < u >}   = []coh vs<>
 [] {t = vz A𝒢₁}   {δ = δ ^ A𝒢₂} = vz^
 [] {t = vs i A𝒢₁} {r = V} {δ = δ ^ A𝒢₂} = vs^ [] i[wk]
-[] {t = vs i A𝒢₁} {r = T} {δ = δ ^ A𝒢₂} = vs^ [] ([]coh [])
+[] {t = vs i A𝒢₁} {r = T} {δ = δ ^ A𝒢₂} = vs^ [] []
 
 [] {t = ` i}        = `[] []
-[] {t = lam t}      = lam[] []
+[] {t = lam t} {A[] = Π A[] B[]} = lam[] []
 [] {t = app t u B𝒢} = app[] {B𝒢₂ = []T} [] []
 
-[]T≡ U[]         = refl
-[]T≡ (El[] t𝒢)   = {!  []≡ t𝒢 !}
-[]T≡ (Π[] A𝒢 B𝒢) = {! []T≡ B𝒢  !}
 
-[]≡ {q = T} (`[] t𝒢)      = congᴾ (tm⊑ ⊑T) ([]≡ t𝒢)
-[]≡ {q = T} (lam[] t𝒢)    = congᴾ lam ([]≡ t𝒢)
-[]≡ {q = T} (app[] t𝒢 u𝒢) = {!   !}
-[]≡ {q = V} vz^           = refl
-[]≡ {q = V} {r = V} (vs^ i𝒢 i[]𝒢) = {!  !}
-[]≡ {q = V} {r = T} (vs^ i𝒢 i[]𝒢) = {!  refl !}
-[]≡ {q = V} vs<>          = refl
-[]≡ {q = V} {t = vz A𝒢}   i[wk] = refl
-[]≡ {q = V} {t = vs i A𝒢} i[wk] = refl
-[]≡ {q = V} (vz<> t≡)     = coe-≡[]Tm t≡
+[]Tℱ : (A [ δ ]T) ≡ᴾ A[] → A [ δ ]T≔ A[]
+[]Tℱ refl = []T
+
+Π[]≡ : ∀ (A≡ : A [ δ ]T ≡ᴾ A[]) → B [ δ ^ A𝒢 ]T ≡ᴾ B[] 
+      → Π A B [ δ ]T ≡ᴾ Π A[] B[]
+Π[]≡ refl refl = refl
+
+lam[]≡ : t [ δ ^ A𝒢 ] B𝒢 ≡ᴾ t[] 
+        → lam t [ δ ] (Π[] A𝒢 B𝒢) ≡ᴾ lam t[]
+lam[]≡ refl = refl
+
+app[]≡ : A [ δ ]T ≡ᴾ A[] → B [ δ ^ A𝒢 ]T ≡ᴾ B[]
+        → t [ δ ] (Π[] A𝒢 B𝒢₂) ≡ᴾ t[] → u [ δ ] A𝒢 ≡ᴾ u[]
+        → app {A = A} {B = B} t u B𝒢₁ [ δ ] B𝒢₃ 
+        ≡ᴾ app {A = A[]} {B = B[]} t[] u[]  (^<>T B𝒢₁ B𝒢₂ B𝒢₃ u𝒢)
+app[]≡ refl refl refl refl = refl
+
+vs[]≡ : A [ δ ]T ≡ᴾ A[] → i [ δ ] A𝒢₂ ≡ᴾ i[] 
+      → vs {A = A} i A𝒢₁ [ δ ^ B𝒢 ] A𝒢₃ ≡ᴾ vs {A = A[]} i[] (wk^T A𝒢₁ A𝒢₂ A𝒢₃)
+vs[]≡ refl refl = refl
+
+[][wk]≡ : A [ δ ]T ≡ᴾ A[] → _[_]_ {A = A} {A[] = A[]} t δ A𝒢₂ ≡ᴾ t[] 
+        → t[] [ wk ] wk^T A𝒢₁ A𝒢₂ A𝒢₃ ≡ᴾ t[][]
+        → (t [ δ ] []T) [ wk ] wk^T A𝒢₁ []T A𝒢₃ ≡ᴾ t[][]
+[][wk]≡ refl refl refl = refl
+
+
+[]T≡ U[]         = refl
+[]T≡ (El[] t𝒢)   = congᴾ El ([]≡ t𝒢)
+[]T≡ (Π[] A𝒢 B𝒢) = Π[]≡ ([]T≡ A𝒢) ([]T≡ B𝒢)
+
+[]≡ {t = vz A𝒢} i[wk] = refl
+[]≡ {t = vs i A𝒢} i[wk] = refl
+[]≡ (vz<> refl) = refl
+[]≡ vs<> = refl
+
+[]≡ {r = V} (vs^ {i = i} {A𝒢₂ = A𝒢₂} {A𝒢₁ = A𝒢₁} {A𝒢₃ = A𝒢₃} i𝒢 i[wk]) 
+  = vs[]≡ {i = i} {A𝒢₁ = A𝒢₁} {A𝒢₃ = A𝒢₃} ([]T≡ A𝒢₂) ([]≡ i𝒢)
+[]≡ {r = T} (vs^ {i = i} {A𝒢₂ = A𝒢₂} {A𝒢₁ = A𝒢₁} {A𝒢₃ = A𝒢₃} i𝒢 i[]𝒢)
+  = [][wk]≡ {t = i} {A𝒢₁ = A𝒢₁} {A𝒢₃ = A𝒢₃} ([]T≡ A𝒢₂) ([]≡ i𝒢) ([]≡ i[]𝒢)
+[]≡ vz^ = refl
+[]≡ (`[] i𝒢) = congᴾ (tm⊑ ⊑T) ([]≡ i𝒢)
+[]≡ (lam[] {t = t} {B𝒢 = B𝒢} t𝒢) = lam[]≡ {t = t} ([]≡ t𝒢)
+[]≡ (app[] {t = t} {A𝒢 = A𝒢} {B𝒢₂ = B𝒢₂}  {u = u} {B𝒢₁ = B𝒢₁} {B𝒢₃ = B𝒢₃} 
+           t𝒢 u𝒢) 
+  = app[]≡ {t = t} {B𝒢₂ = B𝒢₂} {B𝒢₁ = B𝒢₁} {B𝒢₃ = B𝒢₃} {u𝒢 = u𝒢} 
+           ([]T≡ A𝒢) ([]T≡ B𝒢₂) ([]≡ t𝒢) ([]≡ u𝒢) 
