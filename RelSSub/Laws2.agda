@@ -11,10 +11,6 @@ open import RelSSub.Laws1
 
 module RelSSub.Laws2 where
 
-wk^T  : A [ wk ]T≔ A[]₁ → A [ δ ]T≔ A[]₂
-      → A[]₁ [ δ ^ B𝒢 ]T≔ A[][]
-      → A[]₂ [ wk ]T≔ A[][]
-
 record wk^TOut (δ : Sub[ r ] Δ Γ) A A[][]
                 (Ξ𝒢₁ : Ξ [ δ ]Ts≔ Ξ[]) (Ξ𝒢₂ : Ξ[] [ wk ]Ts≔ Ξ[][]) : Set 
                 where
@@ -109,32 +105,35 @@ wk^^^ : ∀ (δ : Sub[ r ] Δ Γ) {B𝒢}
        → ^wkOut δ B𝒢 t t[][] Ξ𝒢₃ Ξ𝒢₄ 
                 (record {πA[] = A[]′ ; πA𝒢₁ = A𝒢₃ ; πA𝒢₂ = A𝒢₄})
 
-wk^T^^ δ U[] U[] = record { πA𝒢₁ = U[] ; πA𝒢₂ = U[] }
+wk^T^^ δ U[] U[] 
+  = record { πA𝒢₁ = U[] ; πA𝒢₂ = U[] }
 wk^T^^ δ (El[] t𝒢₁) (El[] t𝒢₂) 
+  using t𝒢s ← wk^^^ δ t𝒢₁ t𝒢₂
   = record { πA𝒢₁ = El[] (t𝒢s .πt𝒢₁) ; πA𝒢₂ = El[] (t𝒢s .πt𝒢₂) }
-  where t𝒢s = wk^^^ δ t𝒢₁ t𝒢₂
 wk^T^^ δ (Π[] A𝒢₁ B𝒢₁) (Π[] A𝒢₂ B𝒢₂) 
+  using A𝒢s ← wk^T^^ δ A𝒢₁ A𝒢₂
+      | B𝒢s ← wk^T^^ δ {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} 
+                        {Ξ𝒢₃ = ▷[] _ _} {Ξ𝒢₄ = ▷[] _ _}
+                        B𝒢₁ B𝒢₂
   = record { πA𝒢₁ = Π[] (A𝒢s .πA𝒢₁) (B𝒢s .πA𝒢₁)
            ; πA𝒢₂ = Π[] (A𝒢s .πA𝒢₂) (B𝒢s .πA𝒢₂)
            }
-  where A𝒢s = wk^T^^ δ A𝒢₁ A𝒢₂
-        B𝒢s = wk^T^^ δ {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} 
-                       {Ξ𝒢₃ = ▷[] _ _} {Ξ𝒢₄ = ▷[] _ _}
-                       B𝒢₁ B𝒢₂
 
-^wkT^^ p δ U[] U[] = record { πA𝒢₁ = U[] ; πA𝒢₂ = U[] }
+
+^wkT^^ p δ U[] U[] 
+  = record { πA𝒢₁ = U[] ; πA𝒢₂ = U[] }
 ^wkT^^ p δ (El[] t𝒢₁) (El[] t𝒢₂) 
+  using t𝒢s ← ^wk^^ p δ t𝒢₁ t𝒢₂
   = record { πA𝒢₁ = El[] (t𝒢s .πt𝒢₁) ; πA𝒢₂ = El[] (t𝒢s .πt𝒢₂) }
-  where t𝒢s = ^wk^^ p δ t𝒢₁ t𝒢₂
 ^wkT^^ p δ (Π[] A𝒢₁ B𝒢₁) (Π[] A𝒢₂ B𝒢₂) 
-  = record { πA𝒢₁ = Π[] (A𝒢s .πA𝒢₁) (B𝒢s .πA𝒢₁)
-           ; πA𝒢₂ = Π[] (A𝒢s .πA𝒢₂) (B𝒢s .πA𝒢₂)
-           }
-  where A𝒢s = ^wkT^^ p δ A𝒢₁ A𝒢₂
-        B𝒢s = ^wkT^^ p δ 
+  using A𝒢s ← ^wkT^^ p δ A𝒢₁ A𝒢₂
+      | B𝒢s ← ^wkT^^ p δ 
                      {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} 
                      {Ξ𝒢₃ = ▷[] _ _} {Ξ𝒢₄ = ▷[] _ _}
                      B𝒢₁ B𝒢₂
+  = record { πA𝒢₁ = Π[] (A𝒢s .πA𝒢₁) (B𝒢s .πA𝒢₁)
+           ; πA𝒢₂ = Π[] (A𝒢s .πA𝒢₂) (B𝒢s .πA𝒢₂)
+           }
 
 coh[]≔-lhs : ∀ (A≡ : A[]₁ ≡ᴾ A[]₂)
         → t [ δ ] A𝒢₁ ≔ t[]
@@ -163,15 +162,15 @@ wk^^^ {q = T} δ {A𝒢₃ = Π[] _ _} {A𝒢₄ = Π[] _ _}
                     t𝒢₁ t𝒢₂
 wk^^^ {q = T} δ (app[] {A𝒢 = A𝒢₁} {B𝒢₂ = B𝒢₁} t𝒢₁ u𝒢₁) 
       (app[] {A𝒢 = A𝒢₂} {B𝒢₂ = B𝒢₂} t𝒢₂ u𝒢₂) 
+  using A𝒢s ← wk^T^^ δ A𝒢₁ A𝒢₂
+      | B𝒢s ← wk^T^^ δ {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} 
+                        {Ξ𝒢₃ = ▷[] _ (A𝒢s .πA𝒢₁)} {Ξ𝒢₄ = ▷[] _ (A𝒢s .πA𝒢₂)}
+                        B𝒢₁ B𝒢₂
+      | t𝒢s ← wk^^^ δ t𝒢₁ t𝒢₂
+      | u𝒢s ← wk^^^ δ u𝒢₁ u𝒢₂
   = record { πt𝒢₁ = app[] {B𝒢₂ = B𝒢s .πA𝒢₁} {B𝒢₄ = {!B𝒢s .πA𝒢₂!}} 
                           (t𝒢s .πt𝒢₁) (u𝒢s .πt𝒢₁)  
            ; πt𝒢₂ = app[] {B𝒢₂ = B𝒢s .πA𝒢₂} (t𝒢s .πt𝒢₂) (u𝒢s .πt𝒢₂)  }
-    where A𝒢s = wk^T^^ δ A𝒢₁ A𝒢₂
-          B𝒢s = wk^T^^ δ {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} 
-                         {Ξ𝒢₃ = ▷[] _ (A𝒢s .πA𝒢₁)} {Ξ𝒢₄ = ▷[] _ (A𝒢s .πA𝒢₂)}
-                         B𝒢₁ B𝒢₂
-          t𝒢s = wk^^^ δ t𝒢₁ t𝒢₂
-          u𝒢s = wk^^^ δ u𝒢₁ u𝒢₂
 wk^^^ {q = V} δ {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]}
       {A𝒢₃ = A𝒢₃} {A𝒢₄ = A𝒢₄}
       i[wk] (vs^ {A𝒢₂ = A𝒢₃′} {A𝒢₄ = A𝒢₄′} i𝒢₂ i[]𝒢₂)
@@ -184,41 +183,54 @@ wk^^^ {q = V} δ
       {Ξ𝒢₃ = ▷[] Ξ𝒢₃ A𝒢₂} {Ξ𝒢₄ = ▷[] Ξ𝒢₄ _} 
       {A𝒢₃ = A𝒢₃}
   (vz^ {A𝒢₁ = A𝒢₁}) vz^ 
-  = record { πt𝒢₁ = vz^ {A𝒢₄ = coe[]T-lhs Acoh (πA𝒢₂ A𝒢s)} ; πt𝒢₂ = tm⊑[] vz^ }
-  where A𝒢s = wk^T^^ (δ ^^ Ξ𝒢₃) 
+  using A𝒢s ← wk^T^^ (δ ^^ Ξ𝒢₃) 
                      {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
                      A𝒢₁ A𝒢₃
-        Acoh = []T-uniq (πA𝒢₁ A𝒢s) A𝒢₂
-wk^^^ {q = V}
+      | Acoh ← []T-uniq (πA𝒢₁ A𝒢s) A𝒢₂
+  = record { πt𝒢₁ = vz^ {A𝒢₄ = coe[]T-lhs Acoh (πA𝒢₂ A𝒢s)} ; πt𝒢₂ = tm⊑[] vz^ }
+wk^^^ {r = V} {q = V} {t = vs i A𝒢} {t[] = vs i[] A[]𝒢} δ 
+      {Ξ𝒢₁ = ▷[] Ξ𝒢₁ _} {Ξ𝒢₂ = ▷[] Ξ𝒢₂ _} 
+      {Ξ𝒢₃ = ▷[] Ξ𝒢₃ _} {Ξ𝒢₄ = ▷[] Ξ𝒢₄ B𝒢}
+      {A𝒢₃ = A𝒢₃} {A𝒢₄ = A𝒢₄}
+      (vs^ {A𝒢₂ = A𝒢₁} i𝒢₁ i[wk]) (vs^ {A𝒢₂ = A𝒢₂} i𝒢₂ i[wk]) 
+  using A𝒢s ← wk^T^^ δ A𝒢₁ A𝒢₂
+      | i𝒢s ← wk^^^ δ {A𝒢₃ = πA𝒢₁ A𝒢s} {A𝒢₄ = πA𝒢₂ A𝒢s} i𝒢₁ i𝒢₂
+      | A𝒢s′ ← wk^T^^ (δ ^^ Ξ𝒢₃) 
+                      {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]}
+                      A𝒢 A𝒢₃
+      | Acoh ← []T-uniq (πA𝒢₁ A𝒢s′) (πA𝒢₁ A𝒢s)
+  = record { πt𝒢₁ = vs^ {A𝒢₄ = coe[]T-lhs Acoh (πA𝒢₂ A𝒢s′)} (i𝒢s .πt𝒢₁) i[wk] 
+           ; πt𝒢₂ = vs^ (i𝒢s .πt𝒢₂) i[wk] } 
+wk^^^ {r = T} {q = V}
   {t = vs i A𝒢} {t[] = vs i[] _} δ
   {Ξ𝒢₁ = ▷[] Ξ𝒢₁ _} {Ξ𝒢₂ = ▷[] Ξ𝒢₂ _} 
-  {Ξ𝒢₃ = ▷[] Ξ𝒢₃ _} {Ξ𝒢₄ = ▷[] Ξ𝒢₄ _}
+  {Ξ𝒢₃ = ▷[] Ξ𝒢₃ _} {Ξ𝒢₄ = ▷[] Ξ𝒢₄ B𝒢}
   {A𝒢₃ = A𝒢₃} {A𝒢₄ = A𝒢₄}
   (vs^ {A𝒢₂ = A𝒢₁} i𝒢₁ i[wk]) (vs^ {A𝒢₂ = A𝒢₂} {A𝒢₄ = A[]𝒢₂} i𝒢₂ i[]𝒢₂) 
+  using A[]𝒢s ← wk^T^^ δ {Ξ𝒢₁ = Ξ𝒢₁} {Ξ𝒢₂ = Ξ𝒢₂} {Ξ𝒢₃ = Ξ𝒢₃} {Ξ𝒢₄ = Ξ𝒢₄}
+                      A𝒢₁ A𝒢₂
+      | i[]𝒢s ← wk^^^ δ {Ξ𝒢₁ = Ξ𝒢₁} {Ξ𝒢₂ = Ξ𝒢₂} {Ξ𝒢₃ = Ξ𝒢₃} {Ξ𝒢₄ = Ξ𝒢₄} 
+                      {A𝒢₃ = A[]𝒢s .πA𝒢₁} {A𝒢₄ = A[]𝒢s .πA𝒢₂}
+                      i𝒢₁ i𝒢₂
+      | A𝒢s   ← ^wkT^^ refl (wk ^^ Ξ𝒢₄) {B𝒢 = B𝒢}
+                      {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
+                      (A[]𝒢s .πA𝒢₂) A[]𝒢₂
+      | i𝒢s   ← ^wk^^ {t = i[]𝒢s .πt[]} refl (wk ^^ Ξ𝒢₄)
+                     {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
+                     {A𝒢₃ = πA𝒢₁ A𝒢s} {A𝒢₄ = πA𝒢₂ A𝒢s}
+                     (i[]𝒢s .πt𝒢₂) i[]𝒢₂
+      | A[]𝒢s′ ← wk^T^^ (δ ^^ Ξ𝒢₃)
+                        {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
+                        A𝒢 A𝒢₃
+      | A[]coh ← []T-uniq (πA𝒢₁ A[]𝒢s′) (πA𝒢₁ A[]𝒢s)
+      | Acoh   ← []T-uniq (A𝒢s .πA𝒢₁) (coe[]T-lhs A[]coh (πA𝒢₂ A[]𝒢s′))
   = record { πt𝒢₁ = vs^ {A𝒢₄ = coe[]T-lhs A[]coh (πA𝒢₂ A[]𝒢s′)} 
                         (i[]𝒢s .πt𝒢₁) (coh[]≔-lhs Acoh (i𝒢s .πt𝒢₁)) 
            ; πt𝒢₂ = coh[]≔-rhs Acoh (i𝒢s .πt𝒢₂) }
-  where A[]𝒢s = wk^T^^ δ {Ξ𝒢₁ = Ξ𝒢₁} {Ξ𝒢₂ = Ξ𝒢₂} {Ξ𝒢₃ = Ξ𝒢₃} {Ξ𝒢₄ = Ξ𝒢₄}
-                       A𝒢₁ A𝒢₂
-        i[]𝒢s = wk^^^ δ {Ξ𝒢₁ = Ξ𝒢₁} {Ξ𝒢₂ = Ξ𝒢₂} {Ξ𝒢₃ = Ξ𝒢₃} {Ξ𝒢₄ = Ξ𝒢₄} 
-                      {A𝒢₃ = A[]𝒢s .πA𝒢₁} {A𝒢₄ = A[]𝒢s .πA𝒢₂}
-                      i𝒢₁ i𝒢₂
-        A𝒢s   = ^wkT^^ refl (wk ^^ Ξ𝒢₄)
-                       {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
-                       (A[]𝒢s .πA𝒢₂) A[]𝒢₂
-        i𝒢s   = ^wk^^ {t = i[]𝒢s .πt[]} refl (wk ^^ Ξ𝒢₄)
-                      {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
-                      {A𝒢₃ = πA𝒢₁ A𝒢s} {A𝒢₄ = πA𝒢₂ A𝒢s}
-                      (i[]𝒢s .πt𝒢₂) i[]𝒢₂
-        A[]𝒢s′ = wk^T^^ (δ ^^ Ξ𝒢₃)
-                        {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
-                        A𝒢 A𝒢₃
-        A[]coh = []T-uniq (πA𝒢₁ A[]𝒢s′) (πA𝒢₁ A[]𝒢s)
-        Acoh = []T-uniq (A𝒢s .πA𝒢₁) (coe[]T-lhs A[]coh (πA𝒢₂ A[]𝒢s′))
 
 ^wk^^ {q = T} refl δ (`[] i𝒢₁) (`[] i𝒢₂) 
+  using i𝒢s ← ^wk^^ refl δ i𝒢₁ i𝒢₂
   = record { πt𝒢₁ = `[] (i𝒢s .πt𝒢₁)  ; πt𝒢₂ = `[] (i𝒢s .πt𝒢₂) }
-  where i𝒢s = ^wk^^ refl δ i𝒢₁ i𝒢₂
 ^wk^^ {q = T} p δ {A𝒢₃ = Π[] _ _} {A𝒢₄ = Π[] _ _}
       (lam[] {A𝒢 = A𝒢₁} t𝒢₁) (lam[] {A𝒢 = A𝒢₂} t𝒢₂)
   = record { πt𝒢₁ = lam[] (t𝒢s .πt𝒢₁)  ; πt𝒢₂ = lam[] (t𝒢s .πt𝒢₂) }
@@ -229,15 +241,15 @@ wk^^^ {q = V}
 ^wk^^ {q = T} p δ
       (app[] {A𝒢 = A𝒢₁} {B𝒢₂ = B𝒢₁} t𝒢₁ u𝒢₁) 
       (app[] {A𝒢 = A𝒢₂} {B𝒢₂ = B𝒢₂} t𝒢₂ u𝒢₂) 
+  using A𝒢s ← ^wkT^^ p δ A𝒢₁ A𝒢₂
+      | B𝒢s ← ^wkT^^ p δ {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} 
+                     {Ξ𝒢₃ = ▷[] _ (A𝒢s .πA𝒢₁)} {Ξ𝒢₄ = ▷[] _ (A𝒢s .πA𝒢₂)}
+                     B𝒢₁ B𝒢₂
+      | t𝒢s ← ^wk^^ p δ t𝒢₁ t𝒢₂
+      | u𝒢s ← ^wk^^ p δ u𝒢₁ u𝒢₂
   = record { πt𝒢₁ = app[] {B𝒢₂ = B𝒢s .πA𝒢₁} {B𝒢₄ = {!!}} 
                           (t𝒢s .πt𝒢₁) (u𝒢s .πt𝒢₁)  
            ; πt𝒢₂ = app[] {B𝒢₂ = B𝒢s .πA𝒢₂} (t𝒢s .πt𝒢₂) (u𝒢s .πt𝒢₂)  }
-  where A𝒢s = ^wkT^^ p δ A𝒢₁ A𝒢₂
-        B𝒢s = ^wkT^^ p δ {Ξ𝒢₁ = ▷[] _ _} {Ξ𝒢₂ = ▷[] _ _} 
-                     {Ξ𝒢₃ = ▷[] _ (A𝒢s .πA𝒢₁)} {Ξ𝒢₄ = ▷[] _ (A𝒢s .πA𝒢₂)}
-                     B𝒢₁ B𝒢₂
-        t𝒢s = ^wk^^ p δ t𝒢₁ t𝒢₂
-        u𝒢s = ^wk^^ p δ u𝒢₁ u𝒢₂
 ^wk^^ {q = V} p δ {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} {A𝒢₂ = A𝒢₂}
       i𝒢₁ i𝒢₂
   = record { πt𝒢₁ = i[wk] ; πt𝒢₂ = vs^ i𝒢₁ i𝒢₂ }
@@ -247,25 +259,29 @@ wk^^^ {q = V}
       {Ξ𝒢₃ = ▷[] Ξ𝒢₃ A𝒢₂} {Ξ𝒢₄ = ▷[] Ξ𝒢₄ _} 
       {A𝒢₃ = A𝒢₃} {A𝒢₄ = A𝒢₄}
   (vz^ {A𝒢₁ = A𝒢₁} {A𝒢₂ = wah} {A𝒢₃ = bah}) vz^ 
-  = record { πt𝒢₁ = vz^ {A𝒢₄ = coe[]T-lhs Acoh (πA𝒢₂ A𝒢s)} ; πt𝒢₂ = vz^ }
-  where A𝒢s = wk^T^^ (wk ^^ _)
+  using A𝒢s ← wk^T^^ (wk ^^ _)
                      {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
                      A𝒢₁ A𝒢₃
-        Acoh = []T-uniq (πA𝒢₁ A𝒢s) A𝒢₂
+      | Acoh ← []T-uniq (πA𝒢₁ A𝒢s) A𝒢₂
+  = record { πt𝒢₁ = vz^ {A𝒢₄ = coe[]T-lhs Acoh (πA𝒢₂ A𝒢s)} ; πt𝒢₂ = vz^ }
 ^wk^^ {q = V} {t = vs i A𝒢} {t[] = vs i[] A[]𝒢} p δ
       {Ξ𝒢₁ = ▷[] Ξ𝒢₁ _} {Ξ𝒢₂ = ▷[] Ξ𝒢₂ _} 
       {Ξ𝒢₃ = ▷[] Ξ𝒢₃ _} {Ξ𝒢₄ = ▷[] Ξ𝒢₄ _} 
       {A𝒢₃ = A𝒢₃} {A𝒢₄ = A𝒢₄}
       (vs^ {A𝒢₂ = A𝒢₁} i𝒢₁ i[wk]) 
       (vs^ {A𝒢₂ = A𝒢₂} i𝒢₂ i[wk])
+  using A𝒢s ← ^wkT^^ p δ A𝒢₁ A𝒢₂
+      | i𝒢s ← ^wk^^ p δ {A𝒢₃ = A𝒢s .πA𝒢₁} {A𝒢₄ = A𝒢s .πA𝒢₂} i𝒢₁ i𝒢₂
+      | A[]𝒢s ← wk^T^^ (wk ^^ _) 
+                        {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
+                        A𝒢 A𝒢₃
+      | Acoh ← []T-uniq (πA𝒢₁ A[]𝒢s) (πA𝒢₁ A𝒢s)
   = record { πt𝒢₁ = vs^ {A𝒢₄ = coe[]T-lhs Acoh (πA𝒢₂ A[]𝒢s)} (i𝒢s .πt𝒢₁) i[wk] 
            ; πt𝒢₂ = vs^ (i𝒢s .πt𝒢₂) i[wk] }
-    where A𝒢s = ^wkT^^ p δ A𝒢₁ A𝒢₂
-          i𝒢s = ^wk^^ p δ {A𝒢₃ = A𝒢s .πA𝒢₁} {A𝒢₄ = A𝒢s .πA𝒢₂} i𝒢₁ i𝒢₂
-          A[]𝒢s = wk^T^^ (wk ^^ _) 
-                         {Ξ𝒢₁ = •[]} {Ξ𝒢₂ = •[]} {Ξ𝒢₃ = •[]} {Ξ𝒢₄ = •[]} 
-                         A𝒢 A𝒢₃
-          Acoh = []T-uniq (πA𝒢₁ A[]𝒢s) (πA𝒢₁ A𝒢s)
+
+wk^T  : A [ wk ]T≔ A[]₁ → A [ δ ]T≔ A[]₂
+      → A[]₁ [ δ ^ B𝒢 ]T≔ A[][]
+      → A[]₂ [ wk ]T≔ A[][]
 
 wk^T {δ = δ} A𝒢₁ A𝒢₂ A𝒢₃ 
   using A𝒢s ← wk^T^^ δ {Ξ𝒢₂ = •[]} {Ξ𝒢₄ = •[]} A𝒢₁ A𝒢₃
