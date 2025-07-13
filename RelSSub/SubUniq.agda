@@ -6,6 +6,9 @@ open import Common.SortEq
 
 open import RelSSub.Syntax
 
+-- The substitution relation acts like a function (there is exactly one output 
+-- for every input term/type and substitution) and is a proposition (declaring
+-- substitution in |Prop| would ensure this definitionally)
 module RelSSub.SubUniq where
 
 tm⊑[] : ∀ {q⊑r : q ⊑ r} {δ : Sub[ s ] Δ Γ} {A𝒢} → t [ δ ] A𝒢 ≔ t[] 

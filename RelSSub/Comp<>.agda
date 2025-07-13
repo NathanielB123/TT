@@ -15,6 +15,7 @@ module RelSSub.Comp<> where
 open import RelSSub.CompWk
   renaming (_[_]T to _[_]Tᵂᵏ ; _[_]_ to _[_]ᵂᵏ_; []T to []Tᵂᵏ; [] to []ᵂᵏ
            ; []T≡ to []T≡ᵂᵏ ; []≡ to []≡ᵂᵏ)
+  public
 
 _[_]T : Ty Γ → Sub[ T ] Δ Γ → Ty Δ
 _[_]_ : Tm[ q ] Γ A → ∀ (δ : Sub[ T ] Δ Γ) → A [ δ ]T≔ A[] 
@@ -29,12 +30,11 @@ U     [ δ ]T = U
 El t  [ δ ]T = El (t [ δ ] U[])
 Π A B [ δ ]T = Π (A [ δ ]T) (B [ δ ^ []T ]T)
 
-vz A𝒢₁   [ δ ^ A𝒢₂ ] A𝒢₃ = tm⊑ V⊑ (vz (wk^T A𝒢₁ A𝒢₂ A𝒢₃))
 vz A𝒢₁   [ < u > ]   A𝒢₂ = coeTm (sym ([]T≡ (wk<>T A𝒢₁)) ∙ []T≡ A𝒢₂) u
 vs i A𝒢₁ [ < u > ]   A𝒢₂ = coeTm (sym ([]T≡ (wk<>T A𝒢₁)) ∙ []T≡ A𝒢₂) (` i)
 
-_[_]_ (vs i A𝒢₁) (δ ^ B𝒢) A𝒢₂ 
-  = (i [ δ ] []T) [ wk ]ᵂᵏ (wk^T A𝒢₁ []T A𝒢₂)
+vz A𝒢₁   [ δ ^ A𝒢₂ ] A𝒢₃ = tm⊑ V⊑ (vz (wk^T A𝒢₁ A𝒢₂ A𝒢₃))
+vs i A𝒢₁ [ δ ^ B𝒢 ]  A𝒢₂ = (i [ δ ] []T) [ wk ]ᵂᵏ (wk^T A𝒢₁ []T A𝒢₂)
 
 (` i) [ δ ] A𝒢 = tm⊑ ⊑T (i [ δ ] A𝒢)
 lam t [ δ ] Π[] A𝒢 B𝒢

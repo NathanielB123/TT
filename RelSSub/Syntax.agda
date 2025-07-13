@@ -5,12 +5,12 @@ open import Common.Sort
 open import Common.SortEq
 
 -- Weak Type Theory (no definitional β/η) defined inductive-inductively without 
--- setoids or quotients
+-- setoids or quotients.
 --
 -- We use single substitutions as in 
 -- https://raw.githubusercontent.com/szumixie/single-subst/main/lfmtp/p.pdf
 -- (also https://github.com/NathanielB123/dep-ty-chk)
--- as this drastically cuts down on the number of operations
+-- as this drastically cuts down on the number of operations.
 module RelSSub.Syntax where
 
 data Ctx    : Set
@@ -35,9 +35,8 @@ data Ctx where
 -- Substitution as a relation ("graph of the function")
 --
 -- This would probably be more convenient to place is |Prop| (i.e. so explicitly
--- appealing to uniqueness lemmas would be unnecessary) but I want to
--- see if this approach can work without such extensions (and postulating
--- stuff like subsingleton elim) first.
+-- appealing to uniqueness would be unnecessary), but I think we would probably 
+-- end up needing some form of subsingleton elimination.
 data _[_]T≔_   : Ty Γ → Sub[ q ] Δ Γ → Ty Δ → Set
 data _[_]_≔_   : Tm[ q ] Γ A → ∀ (δ : Sub[ r ] Δ Γ) → A [ δ ]T≔ A[] 
                → Tm[ q ⊔ r ] Δ A[] → Set
