@@ -1,7 +1,6 @@
 {-# OPTIONS --prop --show-irrelevant --rewriting #-}
 
 open import Utils
-open import Utils.IdExtras
 open import Common.Sort
 open import Common.SortEq
 

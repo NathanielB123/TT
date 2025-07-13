@@ -1,7 +1,6 @@
 {-# OPTIONS --prop --show-irrelevant --rewriting #-}
 
 open import Utils
-open import Utils.IdExtras
 open import Common.Sort
 open import Common.SortEq
 
@@ -59,11 +58,6 @@ data Tm[_] where
   app   : Tm Γ (Π A B) → ∀ (u : Tm Γ A)
         → B [ < u > ]T≔ B[] → Tm Γ B[]
 
--- Subsingleton elim
--- I don't think |Prop| is essential to the technique anyhow though
-coeTm : A₁ ≡ᴾ A₂ → Tm[ q ] Γ A₁ → Tm[ q ] Γ A₂
-coeTm A≡ t with refl ← ≡↑ A≡ = t
-
 tm⊑ : q ⊑ r → Tm[ q ] Γ A → Tm[ r ] Γ A
 tm⊑ {q = V} {r = V} _ i = i
 tm⊑ {q = V} {r = T} _ i = ` i
@@ -93,8 +87,16 @@ data _[_]_≔_ where
         → app t u B𝒢₁ [ δ ] B𝒢₃
         ≔ app t[] u[] B𝒢₄
 
-coe[]T-lhs : A₁ ≡ᴾ A₂ → A₁ [ δ ]T≔ A[] → A₂ [ δ ]T≔ A[]
-coe[]T-lhs p A𝒢 with refl ← ≡↑ p = A𝒢 
+coeTm : A₁ ≡ A₂ → Tm[ q ] Γ A₁ → Tm[ q ] Γ A₂
+coeTm refl t = t
 
-coe[]T-rhs : A[]₁ ≡ᴾ A[]₂ → A [ δ ]T≔ A[]₁ → A [ δ ]T≔ A[]₂
-coe[]T-rhs p A𝒢 with refl ← ≡↑ p = A𝒢
+coe[]T-lhs : A₁ ≡ A₂ → A₁ [ δ ]T≔ A[] → A₂ [ δ ]T≔ A[]
+coe[]T-lhs refl A𝒢 = A𝒢 
+
+coe[]T-rhs : A[]₁ ≡ A[]₂ → A [ δ ]T≔ A[]₁ → A [ δ ]T≔ A[]₂
+coe[]T-rhs refl A𝒢 = A𝒢
+
+coe[]-lhs : ∀ (t≡ : t₁ ≡ t₂)
+          → t₁ [ δ ] A𝒢 ≔ t[]
+          → t₂ [ δ ] A𝒢 ≔ t[]
+coe[]-lhs refl t𝒢 = t𝒢
