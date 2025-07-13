@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --show-irrelevant --rewriting #-}
+{-# OPTIONS --with-K --rewriting #-}
 
 open import Utils
 open import Common.Sort
@@ -7,11 +7,12 @@ open import Common.SortEq
 open import RelSSub.Syntax
 open import RelSSub.SubUniq
 open import RelSSub.Laws1
-open import RelSSub.Laws2C
+open import RelSSub.Laws2
 
-module RelSSub.CompB where
+-- Finally, we show substitution is computable!
+module RelSSub.Comp<> where
 
-open import RelSSub.CompA
+open import RelSSub.CompWk
   renaming (_[_]T to _[_]Tⱽ ; _[_]_ to _[_]ⱽ_; []T to []Tⱽ; [] to []ⱽ
            ; []T≡ to []T≡ⱽ ; []≡ to []≡ⱽ)
 

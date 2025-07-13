@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --rewriting #-}
+{-# OPTIONS --with-K --rewriting #-}
 
 open import Agda.Builtin.Equality.Rewrite
 

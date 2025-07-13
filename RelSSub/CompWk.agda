@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --show-irrelevant --rewriting #-}
+{-# OPTIONS --with-K --rewriting #-}
 
 open import Utils
 open import Common.Sort
@@ -7,9 +7,12 @@ open import Common.SortEq
 open import RelSSub.Syntax
 open import RelSSub.SubUniq
 open import RelSSub.Laws1
-open import RelSSub.Laws2C
+open import RelSSub.Laws2
 
-module RelSSub.CompA where
+-- Now we show that weakening is computable (like with |Laws2|, trying to
+-- implement these definitions for weakenings and substitutions simultaneously
+-- fails with a termination error, so we handle the two cases separately)
+module RelSSub.CompWk where
 
 _[_]T : Ty Γ → Sub[ V ] Δ Γ → Ty Δ
 _[_]_ : Tm[ q ] Γ A → ∀ (δ : Sub[ V ] Δ Γ) → A [ δ ]T≔ A[] 

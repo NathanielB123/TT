@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --show-irrelevant --rewriting #-}
+{-# OPTIONS --with-K --rewriting #-}
 
 open import Utils
 open import Common.Sort

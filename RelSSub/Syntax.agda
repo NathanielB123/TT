@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --show-irrelevant --rewriting #-}
+{-# OPTIONS --with-K --rewriting #-}
 
 open import Utils
 open import Common.Sort
@@ -22,17 +22,22 @@ Tm  = Tm[ T ]
 Var = Tm[ V ]
 
 variable
-  Γ Δ Θ Γ₁ Γ₂         : Ctx
-  A B A₁ A₂ A[] A[]₁ A[]₂ A[][] B₁ B₂ B[]   : Ty Γ
-  δ σ  δ₁ δ₂          : Sub[ q ] Δ Γ
+  Γ Δ Θ Γ₁ Γ₂ : Ctx
+  A B A₁ A₂ A[] A[]₁ A[]₂ A[][] B₁ B₂ B[] : Ty Γ
+  δ σ  δ₁ δ₂ : Sub[ q ] Δ Γ
   t u v t[] t[]₁ t[]₂ t[][] u[] i[] i[][] t₁ t₂ t₃ u₁ u₂ : Tm[ q ] Γ A
-  i j k i₁ i₂        : Var Γ A
+  i j k i₁ i₂ : Var Γ A
   
 data Ctx where
   •   : Ctx
   _▷_ : ∀ Γ → Ty Γ → Ctx
 
 -- Substitution as a relation ("graph of the function")
+--
+-- This would probably be more convenient to place is |Prop| (i.e. so explicitly
+-- appealing to uniqueness lemmas would be unnecessary) but I want to
+-- see if this approach can work without such extensions (and postulating
+-- stuff like subsingleton elim) first.
 data _[_]T≔_   : Ty Γ → Sub[ q ] Δ Γ → Ty Δ → Set
 data _[_]_≔_   : Tm[ q ] Γ A → ∀ (δ : Sub[ r ] Δ Γ) → A [ δ ]T≔ A[] 
                → Tm[ q ⊔ r ] Δ A[] → Set
@@ -71,12 +76,6 @@ data _[_]T≔_ where
 data _[_]_≔_ where
   i[wk] : i [ wk ] A𝒢 ≔ vs i A𝒢
   vz<> : vz A𝒢₁ [ < u > ] A𝒢₂ ≔ u
-  -- vz<>  : ∀ {A𝒢 : A [ wk ]T≔ A[]} {u₁ : Tm Γ A} {A𝒢₂ : A[] [ < u₁ > ]T≔ A[][]}
-  --       → u₁ ≡[ A≡ ]Tm u₂
-  --       → vz A𝒢 [ < u₁ > ] A𝒢₂ ≔ u₂
-  -- I think we could define the substitution relation without
-  -- reference to the laws (we can just ask for the relevant equations
-  -- when necessary).
   vs<>  : vs i A𝒢₁ [ < u > ] A𝒢₂ ≔ (` i)
   vs^   : i [ δ ] A𝒢₂ ≔ i[] → i[] [ wk ] A𝒢₄ ≔ i[][]
         → vs i A𝒢₁ [ δ ^ B𝒢 ] A𝒢₃ ≔ i[][]

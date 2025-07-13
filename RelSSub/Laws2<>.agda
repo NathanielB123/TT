@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --show-irrelevant --rewriting #-}
+{-# OPTIONS --with-K --rewriting #-}
 
 open import Utils
 open import Common.Sort
@@ -8,9 +8,11 @@ open import RelSSub.Syntax
 open import RelSSub.SubUniq
 open import RelSSub.Laws1
 
-module RelSSub.Laws2B where
+-- Very similar to |Laws2wk| but dealing with substitutions rather than 
+-- weakenings.
+module RelSSub.Laws2<> where
 
-open import RelSSub.Laws2A
+open import RelSSub.Laws2Wk
   renaming (wk^T^^ to wk^T^^ⱽ ; wk^^^ to wk^^^ⱽ ; ^wkT^^ to ^wkT^^ⱽ
            ; ^wk^^ to ^wk^^ⱽ ; ^<>T^^ to ^<>T^^ⱽ ; ^<>^^ to ^<>^^ⱽ)
   public

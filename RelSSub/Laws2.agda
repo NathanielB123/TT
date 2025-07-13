@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --show-irrelevant --rewriting #-}
+{-# OPTIONS --with-K --rewriting #-}
 
 open import Utils
 open import Common.Sort
@@ -7,9 +7,11 @@ open import Common.SortEq
 open import RelSSub.Syntax
 open import RelSSub.SubUniq
 open import RelSSub.Laws1
-open import RelSSub.Laws2B
+open import RelSSub.Laws2<>
 
-module RelSSub.Laws2C where
+-- The actual proofs for the commuting laws can be found in |Laws2wk| and
+-- |Laws2<>|.
+module RelSSub.Laws2 where
 
 wk^T   : ∀ {δ : Sub[ r ] Δ Γ} {B𝒢}
        → A [ wk ]T≔ A[]₁ → A [ δ ]T≔ A[]₂

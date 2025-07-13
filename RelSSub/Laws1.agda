@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --show-irrelevant --rewriting #-}
+{-# OPTIONS --with-K --rewriting #-}
 
 open import Utils
 open import Common.Sort
@@ -6,6 +6,13 @@ open import Common.SortEq
 
 open import RelSSub.Syntax
 
+-- To implement substitution recursively, we need some laws.
+-- We start by proving that weakening followed by substitution the new
+-- fresh variable is identity.
+--
+-- To prove substitution laws, to deal with the cases for binders 
+-- (|Π| and |lam|) we need to account for arbitrarily-many "lifts" (|_^_|).
+-- Parameterising over telescopes achieves this.
 module RelSSub.Laws1 where
 
 wk<>T  : A [ wk ]T≔ A[] → A[] [ < t > ]T≔ A

@@ -1,4 +1,4 @@
-{-# OPTIONS --prop #-}
+{-# OPTIONS --with-K #-}
 
 open import Utils
 
@@ -19,7 +19,7 @@ V ⊔ q = q
 variable
   q r s : Sort 
 
-data _⊑_ : Sort → Sort → Prop where
+data _⊑_ : Sort → Sort → Set where
   V⊑T : V ⊑ T
   rfl : q ⊑ q
 
