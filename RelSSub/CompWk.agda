@@ -1,4 +1,4 @@
-{-# OPTIONS --with-K --rewriting #-}
+{-# OPTIONS --rewriting #-}
 
 open import Utils
 open import Common.Sort
@@ -46,10 +46,6 @@ lam t [ δ ] Π[] A𝒢 B𝒢
 app {A = A} {B = B} t u B𝒢₁ [ δ ] B𝒢₂ 
   = app (t [ δ ] (Π[] []T []T)) (u [ δ ] []T) (^<>T B𝒢₁ []T B𝒢₂ [])
 
-[]coh : ∀ {A≡ : A₁ ≡ A₂}
-      → t [ δ ] coe[]T-rhs (sym A≡) A𝒢 ≔ t[] → t [ δ ] A𝒢 ≔ coeTm A≡ t[]
-[]coh {A≡ = refl} t𝒢 = t𝒢
-
 []T {A = U}     = U[]
 []T {A = El t}  = El[] []
 []T {A = Π A B} = Π[] []T []T
@@ -63,13 +59,7 @@ app {A = A} {B = B} t u B𝒢₁ [ δ ] B𝒢₂
 [] {t = lam t} {A𝒢 = Π[] _ _} = lam[] []
 [] {t = app t u B𝒢}           = app[] {B𝒢₂ = []T} [] []
 
-module Uhh where
-  []Tℱ : (A [ δ ]T) ≡ A[] → A [ δ ]T≔ A[]
-  []Tℱ refl = []T
-
-  []ℱ : t [ δ ] A𝒢 ≡ t[] → t [ δ ] A𝒢 ≔ t[]
-  []ℱ  refl = []
-
+module Helpersᵂᵏ where
   Π[]≡ : ∀ (A≡ : A [ δ ]T ≡ A[]) → B [ δ ^ A𝒢 ]T ≡ B[] 
         → Π A B [ δ ]T ≡ Π A[] B[]
   Π[]≡ {A𝒢 = A𝒢} refl refl with refl ← u[]Tp []T A𝒢  = refl
@@ -93,18 +83,13 @@ module Uhh where
     with refl ← u[]Tp A𝒢₁ A𝒢₂
     = refl
 
-  vs≡ : i₁ ≡ i₂ → vs i₁ A𝒢₁ ≡ vs i₂ A𝒢₂
-  vs≡ {A𝒢₁ = A𝒢₁} {A𝒢₂ = A𝒢₂} refl
-    with refl ← u[]Tp A𝒢₁ A𝒢₂
-    = refl
-
   vs[]≡ : A [ δ ]T ≡ A[] → i [ δ ] A𝒢₂ ≡ i[] 
         → vs {A = A} i A𝒢₁ [ δ ^ B𝒢 ] A𝒢₃ ≡ vs {A = A[]} i[] A𝒢₄
   vs[]≡ {A𝒢₂ = A𝒢₂} {A𝒢₁ = A𝒢₁} {A𝒢₃ = A𝒢₃} {A𝒢₄ = A𝒢₄} refl refl 
     with refl ← u[]Tp A𝒢₂ []T
       | refl ← u[]Tp (wk^T A𝒢₁ []T A𝒢₃) A𝒢₄
     = refl
-open Uhh
+open Helpersᵂᵏ
 
 []T≡ U[]         = refl
 []T≡ (El[] t𝒢)   = cong El ([]≡ t𝒢)

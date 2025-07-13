@@ -1,4 +1,4 @@
-{-# OPTIONS --with-K --rewriting #-}
+{-# OPTIONS --rewriting #-}
 
 open import Utils
 open import Common.Sort
