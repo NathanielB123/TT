@@ -1,11 +1,11 @@
-{-# OPTIONS --cubical-compatible -WnoUnsupportedIndexedMatch --rewriting #-}
+{-# OPTIONS --cubical-compatible --rewriting #-}
 
 open import Agda.Builtin.Equality.Rewrite
 
 open import Utils
-open import Common.Sort
+open import Common.SortAlt
 
-module Common.SortEq where
+module Common.SortAltEq where
 
 ⊔V : q ⊔ V ≡ q
 ⊔V {q = V} = refl

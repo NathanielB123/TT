@@ -27,7 +27,7 @@ u[]p : ∀ {δ : Sub[ r ] Δ Γ} {A𝒢} (t𝒢₁ t𝒢₂ : t [ δ ] A𝒢 ≔
 
 -- Substitution is a function
 []T-uniq : A [ δ ]T≔ A[]₁ → A [ δ ]T≔ A[]₂ → A[]₁ ≡ A[]₂
-[]-uniq : t [ δ ] A𝒢 ≔ t[]₁ → t [ δ ] A𝒢 ≔ t[]₂ → t[]₁ ≡ t[]₂
+[]-uniq  : t [ δ ] A𝒢 ≔ t[]₁ → t [ δ ] A𝒢 ≔ t[]₂ → t[]₁ ≡ t[]₂
 
 u[]Tp U[]        U[]        = refl
 u[]Tp (El[] t𝒢₁) (El[] t𝒢₂) = cong El[] (u[]p t𝒢₁ t𝒢₂)
@@ -41,8 +41,8 @@ u[]p         vs<>  vs<>  = refl
 u[]p {r = V} vz^   vz^   = refl
 u[]p {r = T} vz^   vz^   = refl
 
-u[]p (vs^ {A𝒢₂ = A𝒢₁} {A𝒢₄ = A𝒢₁′} i𝒢₁ i[]𝒢₁) 
-     (vs^ {A𝒢₂ = A𝒢₂} {A𝒢₄ = A𝒢₂′} i𝒢₂ i[]𝒢₂) 
+u[]p (vs^ {A𝒢₁ = A𝒢₁} {A𝒢₂ = A𝒢₁′} i𝒢₁ i[]𝒢₁) 
+     (vs^ {A𝒢₁ = A𝒢₂} {A𝒢₂ = A𝒢₂′} i𝒢₂ i[]𝒢₂) 
   with refl ← []T-uniq A𝒢₁ A𝒢₂
   with refl ← u[]Tp A𝒢₁ A𝒢₂
   with refl ← []-uniq i𝒢₁ i𝒢₂
@@ -54,8 +54,8 @@ u[]p (vs^ {A𝒢₂ = A𝒢₁} {A𝒢₄ = A𝒢₁′} i𝒢₁ i[]𝒢₁)
 u[]p {r = V} (`[] i𝒢₁)   (`[] i𝒢₂)      = cong `[] (u[]p i𝒢₁ i𝒢₂)
 u[]p {r = T} (`[] i𝒢₁)   (`[] i𝒢₂)      = cong `[] (u[]p i𝒢₁ i𝒢₂)
 u[]p         (lam[] t𝒢₁) (lam[] t𝒢₂) = cong lam[] (u[]p t𝒢₁ t𝒢₂)
-u[]p (app[] {A𝒢 = A𝒢₁} {B𝒢₂ = B𝒢₁} t𝒢₁ u𝒢₁) 
-     (app[] {A𝒢 = A𝒢₂} {B𝒢₂ = B𝒢₂} t𝒢₂ u𝒢₂) 
+u[]p (app[] {A𝒢 = A𝒢₁} {B𝒢₁ = B𝒢₁} t𝒢₁ u𝒢₁) 
+     (app[] {A𝒢 = A𝒢₂} {B𝒢₁ = B𝒢₂} t𝒢₂ u𝒢₂) 
   with refl ← []T-uniq A𝒢₁ A𝒢₂
   with refl ← u[]Tp A𝒢₁ A𝒢₂
   with refl ← []T-uniq B𝒢₁ B𝒢₂
@@ -76,8 +76,8 @@ u[]p (app[] {A𝒢 = A𝒢₁} {B𝒢₂ = B𝒢₁} t𝒢₁ u𝒢₁)
 []-uniq vs<>  vs<>  = refl
 []-uniq (vz^ {A𝒢₄ = A𝒢₁}) (vz^ {A𝒢₄ = A𝒢₂})  
   = cong (λ □ → tm⊑ V⊑ (vz □)) (u[]Tp A𝒢₁ A𝒢₂)
-[]-uniq (vs^ {A𝒢₂ = A𝒢₁} {A𝒢₄ = A𝒢₁′} i𝒢₁ i[]𝒢₁) 
-        (vs^ {A𝒢₂ = A𝒢₂} {A𝒢₄ = A𝒢₂′} i𝒢₂ i[]𝒢₂)
+[]-uniq (vs^ {A𝒢₁ = A𝒢₁} {A𝒢₂ = A𝒢₁′} i𝒢₁ i[]𝒢₁) 
+        (vs^ {A𝒢₁ = A𝒢₂} {A𝒢₂ = A𝒢₂′} i𝒢₂ i[]𝒢₂)
   with refl ← []T-uniq A𝒢₁ A𝒢₂
   with refl ← u[]Tp A𝒢₁ A𝒢₂
   with refl ← []-uniq i𝒢₁ i𝒢₂
@@ -86,8 +86,8 @@ u[]p (app[] {A𝒢 = A𝒢₁} {B𝒢₂ = B𝒢₁} t𝒢₁ u𝒢₁)
   = []-uniq i[]𝒢₁ i[]𝒢₂
 []-uniq (`[] i𝒢₁)   (`[] i𝒢₂)   = cong (tm⊑ ⊑T) ([]-uniq i𝒢₁ i𝒢₂)
 []-uniq (lam[] t𝒢₁) (lam[] t𝒢₂) = cong lam ([]-uniq t𝒢₁ t𝒢₂)
-[]-uniq (app[] {A𝒢 = A𝒢₁} {B𝒢₂ = B𝒢₁} t𝒢₁ u𝒢₁) 
-        (app[] {A𝒢 = A𝒢₂} {B𝒢₂ = B𝒢₂} t𝒢₂ u𝒢₂)
+[]-uniq (app[] {A𝒢 = A𝒢₁} {B𝒢₁ = B𝒢₁} t𝒢₁ u𝒢₁) 
+        (app[] {A𝒢 = A𝒢₂} {B𝒢₁ = B𝒢₂} t𝒢₂ u𝒢₂)
   with refl ← []T-uniq A𝒢₁ A𝒢₂
   with refl ← u[]Tp A𝒢₁ A𝒢₂
   with refl ← []T-uniq B𝒢₁ B𝒢₂

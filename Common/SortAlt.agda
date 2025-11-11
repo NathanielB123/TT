@@ -1,16 +1,13 @@
-{-# OPTIONS --cubical-compatible -WnoUnsupportedIndexedMatch #-}
+{-# OPTIONS --cubical-compatible #-}
 
-open import Utils
+open import Relation.Nullary.Negation using (¬_)
 
--- A boolean algebra where 'true' ('T') is structurally larger than 'false' 
--- ('V')
-module Common.Sort where
+-- Like |Common.Sort| but without the structural ordering (just to make things
+-- simpler if we don't need it)
+module Common.SortAlt where
 
 data Sort : Set where
-  V   : Sort
-  T>V : ∀ v → v ≡ V → Sort
-
-pattern T = T>V V refl
+  V T : Sort
 
 _⊔_ : Sort → Sort → Sort
 T ⊔ q = T
@@ -49,3 +46,6 @@ V⊑ {q = T} = V⊑T
 s⊔⊑ : q ⊑ r → (s ⊔ q) ⊑ (s ⊔ r)
 s⊔⊑ {s = V} q⊑r = q⊑r
 s⊔⊑ {s = T} _   = rfl
+
+¬T⊑V : ¬ T ⊑ V
+¬T⊑V ()

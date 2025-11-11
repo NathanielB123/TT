@@ -1,4 +1,4 @@
-{-# OPTIONS --rewriting #-}
+{-# OPTIONS --rewriting --without-K #-}
 
 open import Utils
 open import Common.Sort
@@ -24,7 +24,7 @@ Var = Tm[ V ]
 variable
   Γ Δ Θ Γ₁ Γ₂ : Ctx
   A B A₁ A₂ A[] A[]₁ A[]₂ A[][] B₁ B₂ B[] : Ty Γ
-  δ σ  δ₁ δ₂ : Sub[ q ] Δ Γ
+  δ σ δ₁ δ₂ : Sub[ q ] Δ Γ
   t u v t[] t[]₁ t[]₂ t[][] u[] i[] i[][] t₁ t₂ t₃ u₁ u₂ : Tm[ q ] Γ A
   i j k i₁ i₂ : Var Γ A
   
@@ -74,15 +74,15 @@ data _[_]T≔_ where
 
 data _[_]_≔_ where
   i[wk] : i [ wk ] A𝒢 ≔ vs i A𝒢
-  vz<> : vz A𝒢₁ [ < u > ] A𝒢₂ ≔ u
+  vz<>  : vz A𝒢₁ [ < u > ] A𝒢₂ ≔ u
   vs<>  : vs i A𝒢₁ [ < u > ] A𝒢₂ ≔ (` i)
-  vs^   : i [ δ ] A𝒢₂ ≔ i[] → i[] [ wk ] A𝒢₄ ≔ i[][]
-        → vs i A𝒢₁ [ δ ^ B𝒢 ] A𝒢₃ ≔ i[][]
-  vz^   : vz A𝒢₁ [ δ ^ A𝒢₂ ] A𝒢₃ ≔ tm⊑ V⊑ (vz A𝒢₄)
-  `[]   : i [ δ ] A𝒢 ≔ i[] → (` i) [ δ ] A𝒢 ≔ tm⊑ ⊑T i[]
+  vs^   : i [ δ ] A𝒢₁ ≔ i[] → i[] [ wk ] A𝒢₂ ≔ i[][]
+        → vs i A𝒢₃ [ δ ^ B𝒢 ] A𝒢₄ ≔ i[][]
+  vz^   : vz A𝒢₁ [ δ ^ A𝒢₂ ] A𝒢₃ ≔ tm⊑ (V⊑ {q = q}) (vz A𝒢₄)
+  `[]   : i [ δ ] A𝒢 ≔ i[] → (` i) [ δ ] A𝒢 ≔ tm⊑ (⊑T {q = q}) i[]
   lam[] : t [ δ ^ A𝒢 ] B𝒢 ≔ t[] → lam t [ δ ] Π[] A𝒢 B𝒢 ≔ lam t[]
-  app[] : t [ δ ] Π[] A𝒢 B𝒢₂ ≔ t[] → ∀ (u𝒢 : u [ δ ] A𝒢 ≔ u[])
-        → app t u B𝒢₁ [ δ ] B𝒢₃
+  app[] : t [ δ ] Π[] A𝒢 B𝒢₁ ≔ t[] → ∀ (u𝒢 : u [ δ ] A𝒢 ≔ u[])
+        → app t u B𝒢₂ [ δ ] B𝒢₃
         ≔ app t[] u[] B𝒢₄
 
 coeTm : A₁ ≡ A₂ → Tm[ q ] Γ A₁ → Tm[ q ] Γ A₂

@@ -9,7 +9,7 @@ open import RelSSub.SubUniq
 open import RelSSub.Laws1
 open import RelSSub.Laws2<>
 
--- The actual proofs for the commuting laws can be found in |Laws2wk| and
+-- The actual proofs for the commuting laws can be found in |Laws2Wk| and
 -- |Laws2<>|.
 module RelSSub.Laws2 where
 
