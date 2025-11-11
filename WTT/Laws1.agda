@@ -4,7 +4,7 @@ open import Utils
 open import Common.Sort
 open import Common.SortEq
 
-open import RelSSub.Syntax
+open import WTT.Syntax
 
 -- To implement substitution recursively, we need some laws.
 -- We start by proving that weakening followed by substituting the new
@@ -13,7 +13,7 @@ open import RelSSub.Syntax
 -- When proving substitution laws, to deal with the cases for binders 
 -- (|Π| and |lam|) we need to account for arbitrarily-many "lifts" (|_^_|).
 -- Parameterising over telescopes achieves this.
-module RelSSub.Laws1 where
+module WTT.Laws1 where
 
 wk<>T  : A [ wk ]T≔ A[] → A[] [ < t > ]T≔ A
 

@@ -4,15 +4,15 @@ open import Utils
 open import Common.Sort
 open import Common.SortEq
 
-open import RelSSub.Syntax
-open import RelSSub.SubUniq
-open import RelSSub.Laws1
-open import RelSSub.Laws2
+open import WTT.Syntax
+open import WTT.SubUniq
+open import WTT.Laws1
+open import WTT.Laws2
 
 -- Finally, we show substitution is computable!
-module RelSSub.Comp<> where
+module WTT.Comp<> where
 
-open import RelSSub.CompWk
+open import WTT.CompWk
   renaming (_[_]T to _[_]Tᵂᵏ ; _[_]_ to _[_]ᵂᵏ_; []T to []Tᵂᵏ; [] to []ᵂᵏ
            ; []T≡ to []T≡ᵂᵏ ; []≡ to []≡ᵂᵏ)
   public

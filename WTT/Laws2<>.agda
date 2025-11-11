@@ -4,15 +4,15 @@ open import Utils
 open import Common.Sort
 open import Common.SortEq
 
-open import RelSSub.Syntax
-open import RelSSub.SubUniq
-open import RelSSub.Laws1
+open import WTT.Syntax
+open import WTT.SubUniq
+open import WTT.Laws1
 
 -- Very similar to |Laws2wk| but dealing with substitutions rather than 
 -- weakenings.
-module RelSSub.Laws2<> where
+module WTT.Laws2<> where
 
-open import RelSSub.Laws2Wk
+open import WTT.Laws2Wk
   renaming (wk^T^^ to wk^T^^ⱽ ; wk^^^ to wk^^^ⱽ ; ^wkT^^ to ^wkT^^ⱽ
            ; ^wk^^ to ^wk^^ⱽ ; ^<>T^^ to ^<>T^^ⱽ ; ^<>^^ to ^<>^^ⱽ)
   public

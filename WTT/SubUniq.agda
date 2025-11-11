@@ -4,12 +4,12 @@ open import Utils
 open import Common.Sort
 open import Common.SortEq
 
-open import RelSSub.Syntax
+open import WTT.Syntax
 
 -- The substitution relation acts like a function (there is exactly one output 
 -- for every input term/type and substitution) and is a proposition (declaring
 -- substitution in |Prop| would ensure this definitionally)
-module RelSSub.SubUniq where
+module WTT.SubUniq where
 
 tm⊑[] : ∀ {q⊑r : q ⊑ r} {δ : Sub[ s ] Δ Γ} {A𝒢} → t [ δ ] A𝒢 ≔ t[] 
       → tm⊑ q⊑r t [ δ ] A𝒢 ≔ tm⊑ (⊑⊔s {s = s} q⊑r) t[]

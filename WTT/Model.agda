@@ -4,9 +4,9 @@ open import Utils
 open import Common.Sort
 open import Common.SortEq
 
-open import RelSSub.Syntax
+open import WTT.Syntax
 
-module RelSSub.Model where 
+module WTT.Model where 
 
 open import Data.Unit using (⊤; tt)
 open import Data.Product using (Σ; _,_) renaming (proj₁ to fst; proj₂ to snd)

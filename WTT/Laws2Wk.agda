@@ -4,9 +4,9 @@ open import Utils
 open import Common.Sort
 open import Common.SortEq
 
-open import RelSSub.Syntax
-open import RelSSub.SubUniq
-open import RelSSub.Laws1
+open import WTT.Syntax
+open import WTT.SubUniq
+open import WTT.Laws1
 
 -- The commuting laws are more painful, all mutually depending on each other.
 --
@@ -14,7 +14,7 @@ open import RelSSub.Laws1
 -- satisfy Agda's termination checking if we try to prove these laws for both
 -- weakening and substitutions at once, so we deal with weakening and
 -- substitution separately (sadly, copy-and-pasting a lot of code...)
-module RelSSub.Laws2Wk where
+module WTT.Laws2Wk where
 
 record wk^TOut (δ : Sub[ r ] Δ Γ) A A[][]
                (Ξ𝒢₁ : Ξ [ δ ]Ts≔ Ξ[]) (Ξ𝒢₂ : Ξ[] [ wk ]Ts≔ Ξ[][]) : Set 

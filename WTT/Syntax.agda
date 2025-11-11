@@ -11,7 +11,7 @@ open import Common.SortEq
 -- https://raw.githubusercontent.com/szumixie/single-subst/main/lfmtp/p.pdf
 -- (also https://github.com/NathanielB123/dep-ty-chk)
 -- as this drastically cuts down on the number of operations.
-module RelSSub.Syntax where
+module WTT.Syntax where
 
 data Ctx    : Set
 data Ty     : Ctx → Set
