@@ -13,6 +13,8 @@ open import Common.SortEq
 -- as this drastically cuts down on the number of operations.
 module WTT.Syntax where
 
+infix 5 _[_]T≔_ _[_]_≔_
+
 data Ctx    : Set
 data Ty     : Ctx → Set
 data Tm[_] : Sort → ∀ Γ → Ty Γ → Set

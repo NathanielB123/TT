@@ -25,12 +25,4 @@ coe = subst λ □ → □
 _≡[_]≡_ : A → A ≡ B → B → Set _
 x ≡[ p ]≡ y = coe p x ≡ y
 
--- |dcong₂| that computes slightly better than the one in the standard library
-cong₂ : ∀ {B : A → Set ℓ}
-           (f : (x : A) → B x → C) {x₁ x₂ y₁ y₂}
-           (p : x₁ ≡ x₂) 
-      → subst B p y₁ ≡ y₂ → f x₁ y₁ ≡ f x₂ y₂
-cong₂ f refl p = cong (f _) p
-
-{-# DISPLAY _≡_ (coe p x) y = x ≡[ p ]≡ y  #-}
-
+infix 4 _≡[_]≡_
