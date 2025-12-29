@@ -113,7 +113,9 @@ module Grpdᴰ (G : Grpd) where
       idᴰ  : Relᴰ xᴰ xᴰ id
       _⁻¹ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂ → Relᴰ x₂ᴰ x₁ᴰ (x₁₂ ⁻¹)
       _∘ᴰ_ : Relᴰ x₁ᴰ x₂ᴰ x₁₂ → Relᴰ x₂ᴰ x₃ᴰ x₂₃ → Relᴰ x₁ᴰ x₃ᴰ (x₁₂ ∘ x₂₃)
+      
       -- Equations (TODO)
+
       -- Fibrancy
       coeG   : Rel x₁ x₂ → Carᴰ x₁ → Carᴰ x₂
       cohG   : Relᴰ xᴰ (coeG x₁₂ xᴰ) x₁₂
@@ -121,11 +123,6 @@ module Grpdᴰ (G : Grpd) where
       coe-∘  : coeG (x₁₂ ∘ x₂₃) xᴰ ≡ coeG x₂₃ (coeG x₁₂ xᴰ)
       coh-id : cohG ≡[ ap (λ □ → Relᴰ xᴰ □ id) coe-id ]≡ idᴰ
       coh-∘  : cohG ≡[ ap (λ □ → Relᴰ xᴰ □ (x₁₂ ∘ x₂₃)) coe-∘ ]≡ cohG ∘ᴰ cohG
-
-      -- coeRel : Relᴰ x₁ᴰ x₃ᴰ x₁₃ → Relᴰ (coeG x₁₂ x₁ᴰ) (coeG x₃₄ x₃ᴰ) (((x₁₂ ⁻¹) ∘ x₁₃) ∘ x₃₄) 
-      -- coeRel x₁₃ᴰ = ((cohG ⁻¹ᴰ) ∘ᴰ x₁₃ᴰ) ∘ᴰ cohG
-      -- hmm : Relᴰ x₁ᴰ x₂ᴰ x₁₂
-      -- hmm {x₁₂ = x₁₂} = subst (Relᴰ _ _) {!!} (cohG {x₁₂ = x₁₂} ∘ᴰ {!!})
   open Sorts public
   open Data  public
 
