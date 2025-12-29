@@ -30,10 +30,10 @@ u[]p : ∀ {δ : Sub[ r ] Δ Γ} {A𝒢} (t𝒢₁ t𝒢₂ : t [ δ ] A𝒢 ≔
 []-uniq  : t [ δ ] A𝒢 ≔ t[]₁ → t [ δ ] A𝒢 ≔ t[]₂ → t[]₁ ≡ t[]₂
 
 u[]Tp U[]        U[]        = refl
-u[]Tp (El[] t𝒢₁) (El[] t𝒢₂) = cong El[] (u[]p t𝒢₁ t𝒢₂)
+u[]Tp (El[] t𝒢₁) (El[] t𝒢₂) = ap El[] (u[]p t𝒢₁ t𝒢₂)
 u[]Tp (Π[] A𝒢₁ B𝒢₁) (Π[] A𝒢₂ B𝒢₂) 
   with refl ← u[]Tp A𝒢₁ A𝒢₂
-  = cong (Π[] _) (u[]Tp B𝒢₁ B𝒢₂)
+  = ap (Π[] _) (u[]Tp B𝒢₁ B𝒢₂)
 
 u[]p         i[wk] i[wk] = refl
 u[]p         vz<>  vz<>  = refl
@@ -49,11 +49,11 @@ u[]p (vs^ {A𝒢₁ = A𝒢₁} {A𝒢₂ = A𝒢₁′} i𝒢₁ i[]𝒢₁)
   with refl ← u[]p i𝒢₁ i𝒢₂
   with refl ← []T-uniq A𝒢₁′ A𝒢₂′
   with refl ← u[]Tp A𝒢₁′ A𝒢₂′
-  = cong (vs^ _) (u[]p i[]𝒢₁ i[]𝒢₂)
+  = ap (vs^ _) (u[]p i[]𝒢₁ i[]𝒢₂)
 
-u[]p {r = V} (`[] i𝒢₁)   (`[] i𝒢₂)      = cong `[] (u[]p i𝒢₁ i𝒢₂)
-u[]p {r = T} (`[] i𝒢₁)   (`[] i𝒢₂)      = cong `[] (u[]p i𝒢₁ i𝒢₂)
-u[]p         (lam[] t𝒢₁) (lam[] t𝒢₂) = cong lam[] (u[]p t𝒢₁ t𝒢₂)
+u[]p {r = V} (`[] i𝒢₁)   (`[] i𝒢₂)      = ap `[] (u[]p i𝒢₁ i𝒢₂)
+u[]p {r = T} (`[] i𝒢₁)   (`[] i𝒢₂)      = ap `[] (u[]p i𝒢₁ i𝒢₂)
+u[]p         (lam[] t𝒢₁) (lam[] t𝒢₂) = ap lam[] (u[]p t𝒢₁ t𝒢₂)
 u[]p (app[] {A𝒢 = A𝒢₁} {B𝒢₁ = B𝒢₁} t𝒢₁ u𝒢₁) 
      (app[] {A𝒢 = A𝒢₂} {B𝒢₁ = B𝒢₂} t𝒢₂ u𝒢₂) 
   with refl ← []T-uniq A𝒢₁ A𝒢₂
@@ -62,20 +62,20 @@ u[]p (app[] {A𝒢 = A𝒢₁} {B𝒢₁ = B𝒢₁} t𝒢₁ u𝒢₁)
   with refl ← u[]Tp B𝒢₁ B𝒢₂
   with refl ← []-uniq t𝒢₁ t𝒢₂
   with refl ← u[]p t𝒢₁ t𝒢₂
-  = cong (app[] _) (u[]p u𝒢₁ u𝒢₂)
+  = ap (app[] _) (u[]p u𝒢₁ u𝒢₂)
 
 []T-uniq U[]           U[] = refl
-[]T-uniq (El[] t𝒢₁)    (El[] t𝒢₂) = cong El ([]-uniq t𝒢₁ t𝒢₂)
+[]T-uniq (El[] t𝒢₁)    (El[] t𝒢₂) = ap El ([]-uniq t𝒢₁ t𝒢₂)
 []T-uniq (Π[] A𝒢₁ B𝒢₁) (Π[] A𝒢₂ B𝒢₂) 
   with refl ← []T-uniq A𝒢₁ A𝒢₂
   with refl ← u[]Tp A𝒢₁ A𝒢₂
-  = cong (Π _) ([]T-uniq B𝒢₁ B𝒢₂)
+  = ap (Π _) ([]T-uniq B𝒢₁ B𝒢₂)
 
 []-uniq i[wk] i[wk] = refl
 []-uniq vz<>  vz<>  = refl
 []-uniq vs<>  vs<>  = refl
 []-uniq (vz^ {A𝒢₄ = A𝒢₁}) (vz^ {A𝒢₄ = A𝒢₂})  
-  = cong (λ □ → tm⊑ V⊑ (vz □)) (u[]Tp A𝒢₁ A𝒢₂)
+  = ap (λ □ → tm⊑ V⊑ (vz □)) (u[]Tp A𝒢₁ A𝒢₂)
 []-uniq (vs^ {A𝒢₁ = A𝒢₁} {A𝒢₂ = A𝒢₁′} i𝒢₁ i[]𝒢₁) 
         (vs^ {A𝒢₁ = A𝒢₂} {A𝒢₂ = A𝒢₂′} i𝒢₂ i[]𝒢₂)
   with refl ← []T-uniq A𝒢₁ A𝒢₂
@@ -84,8 +84,8 @@ u[]p (app[] {A𝒢 = A𝒢₁} {B𝒢₁ = B𝒢₁} t𝒢₁ u𝒢₁)
   with refl ← []T-uniq A𝒢₁′ A𝒢₂′
   with refl ← u[]Tp A𝒢₁′ A𝒢₂′
   = []-uniq i[]𝒢₁ i[]𝒢₂
-[]-uniq (`[] i𝒢₁)   (`[] i𝒢₂)   = cong (tm⊑ ⊑T) ([]-uniq i𝒢₁ i𝒢₂)
-[]-uniq (lam[] t𝒢₁) (lam[] t𝒢₂) = cong lam ([]-uniq t𝒢₁ t𝒢₂)
+[]-uniq (`[] i𝒢₁)   (`[] i𝒢₂)   = ap (tm⊑ ⊑T) ([]-uniq i𝒢₁ i𝒢₂)
+[]-uniq (lam[] t𝒢₁) (lam[] t𝒢₂) = ap lam ([]-uniq t𝒢₁ t𝒢₂)
 []-uniq (app[] {A𝒢 = A𝒢₁} {B𝒢₁ = B𝒢₁} t𝒢₁ u𝒢₁) 
         (app[] {A𝒢 = A𝒢₂} {B𝒢₁ = B𝒢₂} t𝒢₂ u𝒢₂)
   with refl ← []T-uniq A𝒢₁ A𝒢₂
@@ -94,7 +94,7 @@ u[]p (app[] {A𝒢 = A𝒢₁} {B𝒢₁ = B𝒢₁} t𝒢₁ u𝒢₁)
   with refl ← u[]Tp B𝒢₁ B𝒢₂
   with refl ← []-uniq t𝒢₁ t𝒢₂
   with refl ← []-uniq u𝒢₁ u𝒢₂
-  = cong (app _ _) (u[]Tp _ _)
+  = ap (app _ _) (u[]Tp _ _)
 
 coh[]-rhs : ∀ (A≡ : A[]₁ ≡ A[]₂)
           → t [ δ ] A𝒢₁ ≔ t[]

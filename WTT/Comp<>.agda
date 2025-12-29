@@ -93,7 +93,7 @@ module Helpers where
 open Helpers
 
 []T≡ U[]         = refl
-[]T≡ (El[] t𝒢)   = cong El ([]≡ t𝒢)
+[]T≡ (El[] t𝒢)   = ap El ([]≡ t𝒢)
 []T≡ (Π[] A𝒢 B𝒢) = Π[]≡ ([]T≡ A𝒢) ([]T≡ B𝒢)
 
 []≡ (vz<> {A𝒢₁ = A𝒢₁} {A𝒢₂ = A𝒢₂})
@@ -103,11 +103,11 @@ open Helpers
   with refl ← sym ([]T≡ (wk<>T^^ A𝒢₁)) ∙ []T≡ A𝒢₂
   = refl
 
-[]≡ vz^ = cong (tm⊑ V⊑) vz≡
+[]≡ vz^ = ap (tm⊑ V⊑) vz≡
 []≡ (vs^ {i = i} {A𝒢₁ = A𝒢₁} i𝒢 i[]𝒢)
   = [][wk]≡ {t = i} ([]T≡ A𝒢₁) ([]≡ i𝒢) ([]≡ᵂᵏ i[]𝒢)
 
-[]≡ (`[] i𝒢) = cong (tm⊑ ⊑T) ([]≡ i𝒢)
+[]≡ (`[] i𝒢) = ap (tm⊑ ⊑T) ([]≡ i𝒢)
 []≡ (lam[] {t = t} {B𝒢 = B𝒢} t𝒢) = lam[]≡ {t = t} ([]≡ t𝒢)
 []≡ (app[] {t = t} {A𝒢 = A𝒢} {B𝒢₁ = B𝒢} t𝒢 u𝒢)
   = app[]≡ {t = t} ([]T≡ A𝒢) ([]T≡ B𝒢) ([]≡ t𝒢) ([]≡ u𝒢) 

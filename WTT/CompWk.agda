@@ -84,16 +84,16 @@ module Helpersᵂᵏ where
 open Helpersᵂᵏ
 
 []T≡ U[]         = refl
-[]T≡ (El[] t𝒢)   = cong El ([]≡ t𝒢)
+[]T≡ (El[] t𝒢)   = ap El ([]≡ t𝒢)
 []T≡ (Π[] A𝒢 B𝒢) = Π[]≡ ([]T≡ A𝒢) ([]T≡ B𝒢)
 
 []≡ i[wk] = refl
 
-[]≡ vz^ = cong (tm⊑ V⊑) vz≡
+[]≡ vz^ = ap (tm⊑ V⊑) vz≡
 []≡ (vs^ {i = i} {A𝒢₁ = A𝒢₁} {A𝒢₂ = A𝒢₂} {A𝒢₃ = A𝒢₃} {A𝒢₄ = A𝒢₄} i𝒢 i[wk]) 
   = vs[]≡ {i = i} {A𝒢₂ = A𝒢₃} ([]T≡ A𝒢₁) ([]≡ i𝒢)
 
-[]≡ (`[] i𝒢) = cong (tm⊑ ⊑T) ([]≡ i𝒢)
+[]≡ (`[] i𝒢) = ap (tm⊑ ⊑T) ([]≡ i𝒢)
 []≡ (lam[] {t = t} {B𝒢 = B𝒢} t𝒢) = lam[]≡ {t = t} ([]≡ t𝒢)
 []≡ (app[] {t = t} {A𝒢 = A𝒢} {B𝒢₁ = B𝒢} t𝒢 u𝒢)
   = app[]≡ {t = t} ([]T≡ A𝒢) ([]T≡ B𝒢) ([]≡ t𝒢) ([]≡ u𝒢) 

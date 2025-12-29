@@ -8,10 +8,6 @@ open import WTT.Syntax
 
 module WTT.Model where 
 
-open import Data.Unit using (⊤; tt)
-open import Data.Product using (Σ; _,_) renaming (proj₁ to fst; proj₂ to snd)
-open import Data.Empty using (⊥; ⊥-elim)
-
 ⟦Ctx⟧ : Set₁
 ⟦Ctx⟧ = Set
 
@@ -40,7 +36,7 @@ variable
 variable
   ρ : ⟦Γ⟧
 
-Ty≡ = cong ⟦Ty⟧
+Ty≡ = ap ⟦Ty⟧
 
 ⟦[]T⟧ : ⟦Ty⟧ ⟦Γ⟧ → ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧ → ⟦Ty⟧ ⟦Δ⟧
 ⟦[]T⟧ ⟦A⟧ ⟦δ⟧ ρ = ⟦A⟧ (⟦δ⟧ ρ)
@@ -135,11 +131,11 @@ Tm≡ refl = refl
          →  ⟦[]⟧ ⟦ t ⟧Tm ⟦ δ ⟧Sub 
          ≡[ Tm≡ ⟦ A𝒢 ⟧[]T ]≡ ⟦ t[] ⟧Tm
 
-⟦ •     ⟧Ctx = ⊤
+⟦ •     ⟧Ctx = 𝟙
 ⟦ Γ ▷ A ⟧Ctx = ⟦▷⟧ ⟦ Γ ⟧Ctx ⟦ A ⟧Ty
 
-⟦ U     ⟧Ty ρ = ⊥
-⟦ El t  ⟧Ty ρ = ⊥-elim (⟦ t ⟧Tm ρ)
+⟦ U     ⟧Ty ρ = 𝟘
+⟦ El t  ⟧Ty ρ = absurd (⟦ t ⟧Tm ρ)
 ⟦ Π A B ⟧Ty   = ⟦Π⟧ ⟦ A ⟧Ty ⟦ B ⟧Ty
 
 ⟦ wk     ⟧Sub = ⟦wk⟧
