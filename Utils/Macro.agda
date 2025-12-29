@@ -8,7 +8,8 @@ open import Relation.Nullary.Decidable using (yes; no)
 open import Data.Nat using (ℕ; _<?_) renaming (zero to ze; suc to su)
 open import Data.List using (List; []) renaming (_∷_ to _,-_)
 
--- Adapted from 1Lab
+-- Ported from the 1Lab
+-- https://1lab.dev/1Lab.Reflection.Marker.html
 module Utils.Macro where
 
 open Sort
