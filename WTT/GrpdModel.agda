@@ -154,7 +154,9 @@ module Grpdᴰ (G : Grpd) where
         -- id∘ : id ∘ x₁₂ ≡ x₁₂
         id∘ᴰ  : idᴰ ∘ᴰ x₁₂ᴰ ≡[ ap (Relᴰ _ _) id∘ ]≡ x₁₂ᴰ
         ∘idᴰ : x₁₂ᴰ ∘ᴰ idᴰ ≡[ ap (Relᴰ _ _) ∘id ]≡ x₁₂ᴰ
-        ∘∘ᴰ  : (x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ∘ᴰ x₃₄ᴰ ≡[ ap (Relᴰ _ _) ∘∘ ]≡ x₁₂ᴰ ∘ᴰ (x₂₃ᴰ ∘ᴰ x₃₄ᴰ)
+        ∘∘ᴰ  :  (x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ∘ᴰ x₃₄ᴰ 
+             ≡[ ap (Relᴰ _ _) ∘∘ 
+             ]≡ x₁₂ᴰ ∘ᴰ (x₂₃ᴰ ∘ᴰ x₃₄ᴰ)
         ∘⁻¹ᴰ : x₁₂ᴰ ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ) ≡[ ap (Relᴰ _ _) ∘⁻¹ ]≡ idᴰ
         ⁻¹∘ᴰ : (x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ ≡[ ap (Relᴰ _ _) ⁻¹∘ ]≡ idᴰ
 
@@ -358,13 +360,30 @@ Ty≡ = ap ⟦Ty⟧
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .fst .Carᴰ ρ
   =  Σ ((υ : ⟦A⟧ .fst .Carᴰ ρ) → ⟦B⟧ .fst .Carᴰ (ρ , υ))
      -- Naturality, or something
-     λ f → ∀ {υ₁ υ₂} (υ₁₂ : ⟦A⟧ .fst .Relᴰ υ₁ υ₂ (⟦Γ⟧ .snd .id)) 
-         → ⟦B⟧ .snd .coeG (⟦Γ⟧ .snd .id , υ₁₂) (f υ₁) ≡ f υ₂
+     λ f → ∀ {ρ′} {ρ~ : ⟦Γ⟧ .fst .Rel ρ ρ′} {υ₁ υ₂} 
+             (υ₁₂ : ⟦A⟧ .fst .Relᴰ υ₁ υ₂ ρ~)
+         → ⟦B⟧ .snd .coeG (ρ~ , υ₁₂) (f υ₁) 
+         ≡ ⟦B⟧ .snd .coeG (ρ~ , cohG⁻¹ (⟦A⟧ .snd)) 
+                          (f (coeG⁻¹ (⟦A⟧ .snd) ρ~ υ₂))
+-- Alternative
+        --  → ⟦B⟧ .snd .coeG (⟦Γ⟧ .snd .id   
+        --                   , transp (⟦A⟧ .fst .Relᴰ _ _) (∘⁻¹ (⟦Γ⟧ .snd)) 
+        --                            (⟦A⟧ .snd ._∘ᴰ_ υ₁₂ (⟦A⟧ .snd .cohG))) 
+        --                   (f υ₁) 
+        --  ≡ f (coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₂)
+-- I think this version is too restricted...
+--      λ f → ∀ {υ₁ υ₂} (υ₁₂ : ⟦A⟧ .fst .Relᴰ υ₁ υ₂ (⟦Γ⟧ .snd .id)) 
+--          → ⟦B⟧ .snd .coeG (⟦Γ⟧ .snd .id , υ₁₂) (f υ₁) ≡ f υ₂
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .fst .Relᴰ {x₁ = ρ₁} {x₂ = ρ₂} τ₁ τ₂ ρ₁₂ 
   = ∀ {υ₁} {υ₂} (υ₁₂ : ⟦A⟧ .fst .Relᴰ υ₁ υ₂ ρ₁₂)
   → Relᴰ (⟦B⟧ .fst) (τ₁ .fst υ₁) (τ₂ .fst υ₂) (ρ₁₂ , υ₁₂)
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .idᴰ {xᴰ = τ , τ≡} {υ₁ = υ₁} {υ₂ = υ₂} υ₁₂
-  = transp (λ □ → Relᴰ (⟦B⟧ .fst) (τ υ₁) □ _) (τ≡ υ₁₂) (⟦B⟧ .snd .cohG)
+  = transp (λ □ → Relᴰ (⟦B⟧ .fst) (τ υ₁) □ _) 
+    (⟦B⟧ .snd .coeG (_ , υ₁₂) (τ υ₁)
+    ≡⟨ τ≡ υ₁₂ ⟩
+    ⟦B⟧ .snd .coeG (_ , cohG⁻¹ (⟦A⟧ .snd)) (τ (coeG⁻¹ (⟦A⟧ .snd) _ υ₂))
+    ≡⟨ {!!} ⟩
+    τ υ₂ ∎) (⟦B⟧ .snd .cohG)
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd ._⁻¹ᴰ τ₁₂ {υ₁ = υ₁} {υ₂ = υ₂} υ₁₂
   using υ₂₁ ← transp (⟦A⟧ .fst .Relᴰ _ _) (⁻¹⁻¹ (⟦Γ⟧ .snd)) (⟦A⟧ .snd ._⁻¹ᴰ υ₁₂)
   = transp (⟦B⟧ .fst .Relᴰ _ _) (ap (_ ,_) 
@@ -389,34 +408,40 @@ Ty≡ = ap ⟦Ty⟧
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .∘∘ᴰ    = {!   !}
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .∘⁻¹ᴰ   = {!   !}
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .⁻¹∘ᴰ   = {!   !}
-⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd .coeG   ρ₁₂ (τ , τ≡) .fst υ
+⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd .coeG ρ₁₂ (τ , τ≡) .fst υ
   = ⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd)) 
                    (τ (⟦A⟧ .snd .coeG (⟦Γ⟧ .snd ._⁻¹ ρ₁₂) υ))
-⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd .coeG   ρ₁₂ (τ , τ≡) .snd {υ₁ = υ₁} {υ₂ = υ₂} υ₁₂ = 
+⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd .coeG ρ₁₂ (τ , τ≡) .snd {υ₁ = υ₁} {υ₂ = υ₂} υ₁₂ =
   ⟦B⟧ .snd .coeG (_ , υ₁₂)
       (⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd))
          (τ (⟦A⟧ .snd .coeG _ υ₁)))
   ≡⟨ sym (⟦B⟧ .snd .coe-∘) ⟩
-  ⟦B⟧ .snd .coeG ⌜ ⟦▷⟧ ⟦Γ⟧ ⟦A⟧ .snd ._∘_ (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd)) (_ , υ₁₂) ⌝ 
+  ⟦B⟧ .snd .coeG (⟦▷⟧ ⟦Γ⟧ ⟦A⟧ .snd ._∘_ (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd)) (_ , υ₁₂))
                  (τ (coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₁))
-  ≡⟨ ap! (apd₂ _,_ (sym (id∘id (⟦Γ⟧ .snd))) (cohG~⁻¹ (⟦A⟧ .snd))) ⟩
-  ⟦B⟧ .snd .coeG (⟦▷⟧ ⟦Γ⟧ ⟦A⟧ .snd ._∘_ (_ , coeG~ (⟦A⟧ .snd) υ₁₂) 
-                                        (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd))) 
-                 (τ (coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₁))
-  ≡⟨ ⟦B⟧ .snd .coe-∘ ⟩
-  ⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd))
-      ⌜ ⟦B⟧ .snd .coeG (_ , coeG~ (⟦A⟧ .snd) υ₁₂)
-                      (τ (coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₁)) ⌝
-  ≡⟨ ap! (τ≡ {υ₁ = coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₁} {υ₂ = coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₂} 
-             (coeG~ (⟦A⟧ .snd) υ₁₂)) ⟩
-  ⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd)) (τ (coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₂)) ∎
-⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .cohG  {xᴰ = τ , τ≡} υ₁₂ =
-  {!!} 
-  -- transp (⟦B⟧ .fst .Relᴰ _ _) _
-  --        (⟦B⟧ .snd ._∘ᴰ_ 
-  --        (⟦B⟧ .snd ._∘ᴰ_ (⟦B⟧ .snd .cohG) (coeG~ (⟦B⟧ .snd) 
-  --           _))
-  --                        _)
+  ≡⟨ {!!} ⟩
+  ⟦B⟧ .snd .coeG (_ , cohG⁻¹ (⟦A⟧ .snd))
+                 (⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd)) 
+                                 (τ (⟦A⟧ .snd .coeG (⟦Γ⟧ .snd ._⁻¹ ρ₁₂) 
+                                                    (coeG⁻¹ (⟦A⟧ .snd) _ υ₂)))) 
+          
+  ≡⟨⟩
+  ⟦B⟧ .snd .coeG (_ , cohG⁻¹ (⟦A⟧ .snd))
+                 (⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .coeG ρ₁₂ (τ , τ≡) .fst 
+                 (coeG⁻¹ (⟦A⟧ .snd) _ υ₂)) ∎
+  -- OLD:
+  -- ≡⟨ ap! (apd₂ _,_ (sym (id∘id (⟦Γ⟧ .snd))) (cohG~⁻¹ (⟦A⟧ .snd))) ⟩
+  -- ⟦B⟧ .snd .coeG (⟦▷⟧ ⟦Γ⟧ ⟦A⟧ .snd ._∘_ (_ , coeG~ (⟦A⟧ .snd) υ₁₂) 
+  --                                       (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd))) 
+  --                (τ (coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₁))
+  -- ≡⟨ ⟦B⟧ .snd .coe-∘ ⟩
+  -- ⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd))
+  --     ⌜ ⟦B⟧ .snd .coeG (_ , coeG~ (⟦A⟧ .snd) υ₁₂)
+  --                     (τ (coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₁)) ⌝
+  -- ≡⟨ ap! (τ≡ {υ₁ = coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₁} {υ₂ = coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₂} 
+  --            (coeG~ (⟦A⟧ .snd) υ₁₂)) ⟩
+  -- ⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd)) (τ (coeG⁻¹ (⟦A⟧ .snd) ρ₁₂ υ₂)) ∎
+⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .cohG {xᴰ = τ , τ≡} {x₁₂ = ρ₁₂} {υ₁ = υ₁} {υ₂ = υ₂} υ₁₂
+  = transp (λ □ → ⟦B⟧ .fst .Relᴰ _ □ _) (τ≡ υ₁₂) (⟦B⟧ .snd .cohG)
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .coe-id = {!   !}
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .coe-∘  = {!   !}
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .coh-id = {!   !}
@@ -425,7 +450,7 @@ Ty≡ = ap ⟦Ty⟧
 -- Identity types
 ⟦Id⟧ : (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) → ⟦Tm⟧ ⟦Γ⟧ ⟦A⟧ → ⟦Tm⟧ ⟦Γ⟧ ⟦A⟧ → ⟦Ty⟧ ⟦Γ⟧
 ⟦Id⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦t⟧ ⟦u⟧ .fst .Carᴰ ρ 
-  = Relᴰ (⟦A⟧ .fst) (⟦t⟧ .act ρ) (⟦u⟧ .act ρ) (id (⟦Γ⟧ .snd))
+  = Relᴰ (⟦A⟧ .fst) (⟦t⟧ .act ρ) (⟦u⟧ .act ρ) (⟦Γ⟧ .snd .id)
 ⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .fst .Relᴰ tu₁ᴰ tu₂ᴰ ρ₁₂ 
   = ⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .coeG ρ₁₂ tu₁ᴰ ≡ tu₂ᴰ
 ⟦Id⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .idᴰ {xᴰ = tuᴰ}  = 
