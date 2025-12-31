@@ -502,21 +502,24 @@ postulate
     → ⟦Tm⟧ ⟦Γ⟧ (⟦[]T⟧ ⟦P⟧ (⟦,⟧ (⟦,⟧ ⟦id⟧ ⟦t⟧) ⟦refl⟧))
     → (⟦p⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧))
     → ⟦Tm⟧ ⟦Γ⟧ (⟦[]T⟧ ⟦P⟧ (⟦,⟧ (⟦,⟧ ⟦id⟧ ⟦u⟧) ⟦p⟧))
-⟦J⟧ {⟦Γ⟧ = ⟦Γ⟧} {⟦A⟧ = ⟦A⟧} {⟦t⟧ = ⟦t⟧} ⟦P⟧ ⟦d⟧ ⟦p⟧ .act  ρ 
+⟦J⟧ {⟦Γ⟧ = ⟦Γ⟧} {⟦A⟧ = ⟦A⟧} {⟦t⟧ = ⟦t⟧} {⟦u⟧ = ⟦u⟧} ⟦P⟧ ⟦d⟧ ⟦p⟧ .act  ρ 
   = ⟦P⟧ .snd .coeG ((id (⟦Γ⟧ .snd) , ⟦p⟧ .act ρ) , 
+  -- Intuitively, here we are proving that ⟦refl⟧ and ⟦p⟧ are related over ⟦p⟧
+  -- Explicitly, we construct
+  -- ⟦Id⟧ (⟦[]T⟧ ⟦A⟧ ⟦wk⟧) (⟦[]⟧ ⟦t⟧ ⟦wk⟧) ⟦vz⟧ .fst .Relᴰ
+  --      (⟦refl⟧ .act ρ) (⟦p⟧ .act ρ) (⟦Γ⟧ .snd .id , ⟦p⟧ .act ρ)
   (coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ ⌜(⟦t⟧ .pres (id (⟦Γ⟧ .snd)))⌝)
-                         (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ)))
+         (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ)))
   ≡⟨ ap! (⟦t⟧ .id) ⟩
   coe ⌜ _ ⌝ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦A⟧ .snd .idᴰ))
-                        (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ)))
-  
+            (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ)))
   ≡⟨ ap! uip ⟩
   coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦A⟧ .snd .idᴰ))
-                        (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ)))
+        (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ)))
   ≡⟨ extTransp (id⁻¹∘ (⟦Γ⟧ .snd)) (id⁻¹∘ᴰ (⟦A⟧ .snd)) ⟩
   coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ))
   ≡⟨ extTransp (⟦Γ⟧ .snd .id∘) (⟦A⟧ .snd .id∘ᴰ) ⟩
-  coe _ (⟦p⟧ .act ρ)
+  coe refl (⟦p⟧ .act ρ)
   ≡⟨⟩
   ⟦p⟧ .act ρ ∎)) (⟦d⟧ .act ρ)
 ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .pres = {!   !}
