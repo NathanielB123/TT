@@ -151,7 +151,6 @@ module Grpdᴰ (G : Grpd) where
         _∘ᴰ_ : Relᴰ x₁ᴰ x₂ᴰ x₁₂ → Relᴰ x₂ᴰ x₃ᴰ x₂₃ → Relᴰ x₁ᴰ x₃ᴰ (x₁₂ ∘ x₂₃)
         
         -- Equations
-        -- id∘ : id ∘ x₁₂ ≡ x₁₂
         id∘ᴰ  : idᴰ ∘ᴰ x₁₂ᴰ ≡[ ap (Relᴰ _ _) id∘ ]≡ x₁₂ᴰ
         ∘idᴰ : x₁₂ᴰ ∘ᴰ idᴰ ≡[ ap (Relᴰ _ _) ∘id ]≡ x₁₂ᴰ
         ∘∘ᴰ  :  (x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ∘ᴰ x₃₄ᴰ 
@@ -183,16 +182,6 @@ module Grpdᴰ (G : Grpd) where
         = transp (Relᴰ _ _) ⁻¹∘id∘ (((cohG ⁻¹ᴰ) ∘ᴰ xᴰ~) ∘ᴰ cohG)
       coeG⁻¹~ : Relᴰ xᴰ xᴰ′ id → Relᴰ (coeG⁻¹ x₂₁ xᴰ) (coeG⁻¹ x₂₁ xᴰ′) id
       coeG⁻¹~ = coeG~
-
--- Relᴰ (⟦B⟧ .fst)
---       (⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd))
---        (τ (⟦A⟧ .snd .coeG ((⟦Γ⟧ .snd ⁻¹) ρ₁₂) υ₁)))
---       (⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd))
---        (τ (⟦A⟧ .snd .coeG ((⟦Γ⟧ .snd ⁻¹) ρ₁₂) υ₂)))
---       (id (⟦Γ⟧ .snd) , υ₁₂)
--- Have
--- Relᴰ (⟦B⟧ .fst) (τ _υ₁_5317) (τ _υ₂_5318)
---       (id (⟦Γ⟧ .snd) , coeG~ (⟦A⟧ .snd) υ₁₂)
 
       -- Wow this is miserable...
       -- I think we need a better approach for lemmas like this.
@@ -385,7 +374,6 @@ Ty≡ = ap ⟦Ty⟧
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .fst .Relᴰ {x₁ = ρ₁} {x₂ = ρ₂} τ₁ τ₂ ρ₁₂ 
   = ∀ {υ₁} {υ₂} (υ₁₂ : ⟦A⟧ .fst .Relᴰ υ₁ υ₂ ρ₁₂)
   → Relᴰ (⟦B⟧ .fst) (τ₁ .fst υ₁) (τ₂ .fst υ₂) (ρ₁₂ , υ₁₂)
--- If the groupoid laws were strict, this would be a LOT easier
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd .idᴰ {xᴰ = τ , τ~} {υ₁ = υ₁} {υ₂ = υ₂} υ₁₂
   = τ~ υ₁₂
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd ._⁻¹ᴰ τ₁₂ {υ₁ = υ₁} {υ₂ = υ₂} υ₁₂
@@ -408,10 +396,13 @@ Ty≡ = ap ⟦Ty⟧
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd .coeG ρ₁₂ (τ , τ~) .fst υ
   = ⟦B⟧ .snd .coeG (ρ₁₂ , cohG⁻¹ (⟦A⟧ .snd)) 
                    (τ (⟦A⟧ .snd .coeG (⟦Γ⟧ .snd ._⁻¹ ρ₁₂) υ))
+-- The below holes (final args to |apd₂ _,_|) are kinda cursed...
+-- If the groupoid laws were strict, this would be a LOT easier (no transports)
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd .coeG ρ₁₂ (τ , τ~) .snd {υ₁ = υ₁} {υ₂ = υ₂} υ₁₂
   using τυ₁₂ ← τ~ (coeG⁻¹~ (⟦A⟧ .snd) {x₂₁ = ρ₁₂} υ₁₂)
   = transp (⟦B⟧ .fst .Relᴰ _ _) 
-           (apd₂ _,_ (sym (∘∘ (⟦Γ⟧ .snd)) ∙ ⁻¹∘id∘ (⟦Γ⟧ .snd)) {!!})
+           (apd₂ _,_ (sym (∘∘ (⟦Γ⟧ .snd)) ∙ ⁻¹∘id∘ (⟦Γ⟧ .snd)) 
+           {!!})
            (⟦B⟧ .snd ._∘ᴰ_ (⟦B⟧ .snd ._⁻¹ᴰ (⟦B⟧ .snd .cohG)) 
            (⟦B⟧ .snd ._∘ᴰ_ τυ₁₂ (⟦B⟧ .snd .cohG)))
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .snd .cohG {xᴰ = τ , τ~} {x₁₂ = ρ₁₂} 
@@ -419,7 +410,8 @@ Ty≡ = ap ⟦Ty⟧
   using τυ₁₂ ← τ~ (transp (⟦A⟧ .fst .Relᴰ _ _) (⟦Γ⟧ .snd .∘⁻¹) 
                           (⟦A⟧ .snd ._∘ᴰ_ υ₁₂ (⟦A⟧ .snd .cohG)))
   = transp (⟦B⟧ .fst .Relᴰ _ _) 
-           (apd₂ _,_ (⟦Γ⟧ .snd .id∘) {!   !}) 
+           (apd₂ _,_ (⟦Γ⟧ .snd .id∘) 
+           {!   !}) 
            (⟦B⟧ .snd ._∘ᴰ_ τυ₁₂ (⟦B⟧ .snd .cohG))
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .coe-id = {!   !}
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd .coe-∘  = {!   !}
@@ -498,7 +490,7 @@ Ty≡ = ap ⟦Ty⟧
 ⟦app⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Π⟧ ⟦A⟧ ⟦B⟧) → ⟦Tm⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) ⟦B⟧
 ⟦app⟧ ⟦t⟧ .act  (ρ , υ)      = ⟦t⟧ .act ρ .fst υ
 ⟦app⟧ ⟦t⟧ .pres (ρ₁₂ , υ₁₂)  = ⟦t⟧ .pres ρ₁₂ υ₁₂
-⟦app⟧ ⟦t⟧ .id {x = ρ}  = {!!}
+⟦app⟧ ⟦t⟧ .id {x = ρ}  = {!⟦t⟧ .id!}
 ⟦app⟧ ⟦t⟧ ._⁻¹ = {!  !}
 ⟦app⟧ ⟦t⟧ ._∘_ = {!   !}
 
@@ -546,7 +538,7 @@ postulate
   -- Explicitly, we construct
   -- ⟦Id⟧ (⟦[]T⟧ ⟦A⟧ ⟦wk⟧) (⟦[]⟧ ⟦t⟧ ⟦wk⟧) ⟦vz⟧ .fst .Relᴰ
   --      (⟦refl⟧ .act ρ) (⟦p⟧ .act ρ) (⟦Γ⟧ .snd .id , ⟦p⟧ .act ρ)
-  (coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ ⌜(⟦t⟧ .pres (id (⟦Γ⟧ .snd)))⌝)
+  (coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ ⌜ ⟦t⟧ .pres (id (⟦Γ⟧ .snd)) ⌝)
          (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ)))
   ≡⟨ ap! (⟦t⟧ .id) ⟩
   coe ⌜ _ ⌝ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦A⟧ .snd .idᴰ))
@@ -560,7 +552,7 @@ postulate
   coe refl (⟦p⟧ .act ρ)
   ≡⟨⟩
   ⟦p⟧ .act ρ ∎)) (⟦d⟧ .act ρ)
-⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .pres = {!   !}
+⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .pres ρ₁₂ = {!   !}
 ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .id   = {!   !}
 ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ ._⁻¹  = {!   !}
 ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ ._∘_  = {!   !}
