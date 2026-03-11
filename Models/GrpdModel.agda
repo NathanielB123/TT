@@ -1,14 +1,12 @@
-{-# OPTIONS --rewriting --postfix-projections #-}
+{-# OPTIONS --rewriting #-}
+
+open import Agda.Builtin.Equality.Rewrite
 
 open import Utils
 open import Utils.WithK
 open import Utils.Macro
-open import Common.Sort
-open import Common.SortEq
 
-module WTT.GrpdModel where 
-
-open import WTT.Syntax
+module Models.GrpdModel where 
 
 module Grpd where
   record Sorts : Set₁ where no-eta-equality; field
