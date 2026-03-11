@@ -36,8 +36,6 @@ variable
 variable
   ρ : ⟦Γ⟧
 
-Ty≡ = ap ⟦Ty⟧
-
 ⟦[]T⟧ : ⟦Ty⟧ ⟦Γ⟧ → ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧ → ⟦Ty⟧ ⟦Δ⟧
 ⟦[]T⟧ ⟦A⟧ ⟦δ⟧ ρ = ⟦A⟧ (⟦δ⟧ ρ)
 
@@ -88,36 +86,37 @@ Tm≡ refl = refl
 ⟦Π[]⟧ refl refl = refl 
 
 ⟦i[wk]⟧ : ⟦[]⟧ ⟦t⟧ ⟦wk⟧ ≡[ Tm≡ A≡ ]≡ ⟦vs⟧ ⟦t⟧ A≡
-⟦i[wk]⟧ {A≡ = refl} = refl
+⟦i[wk]⟧ {A≡ = refl} = refl[]
 
 ⟦vz<>⟧ : ⟦[]⟧ (⟦vz⟧ A≡₁) (⟦<>⟧ ⟦t[]⟧) ≡[ Tm≡ A≡₂ ]≡ ⟦t[]⟧
-⟦vz<>⟧ {A≡₁ = refl} {A≡₂ = refl} = refl
+⟦vz<>⟧ {A≡₁ = refl} {A≡₂ = refl} = refl[]
 
 ⟦vs<>⟧ : ⟦[]⟧ (⟦vs⟧ ⟦i⟧ A≡₁) (⟦<>⟧ ⟦u⟧) ≡[ Tm≡ A≡₂ ]≡ ⟦i⟧
-⟦vs<>⟧ {A≡₁ = refl} {A≡₂ = refl} = refl
+⟦vs<>⟧ {A≡₁ = refl} {A≡₂ = refl} = refl[]
 
 ⟦vs^⟧ : ⟦[]⟧ ⟦i⟧ ⟦δ⟧ ≡[ Tm≡ A≡₁ ]≡ ⟦i[]⟧
       → ⟦[]⟧ ⟦i[]⟧ ⟦wk⟧ ≡[ Tm≡ A≡₂ ]≡ ⟦i[][]⟧
       → ⟦[]⟧ (⟦vs⟧ ⟦i⟧ A≡₃) (⟦^⟧ ⟦δ⟧ B≡) ≡[ Tm≡ A≡₄ ]≡ ⟦i[][]⟧
-⟦vs^⟧ {A≡₁ = refl} {A≡₂ = refl} {A≡₃ = refl} {B≡ = refl} {A≡₄ = refl} refl refl 
-  = refl
+⟦vs^⟧ {A≡₁ = refl} {A≡₂ = refl} {A≡₃ = refl} {B≡ = refl} {A≡₄ = refl} 
+      refl[] refl[] 
+  = refl[]
 
 ⟦vz^⟧ : ⟦[]⟧ (⟦vz⟧ A≡₁) (⟦^⟧ ⟦δ⟧ A≡₂) ≡[ Tm≡ A≡₃ ]≡ ⟦vz⟧ A≡₄
-⟦vz^⟧ {A≡₁ = refl} {A≡₂ = refl} {A≡₃ = refl} {A≡₄ = refl} = refl
+⟦vz^⟧ {A≡₁ = refl} {A≡₂ = refl} {A≡₃ = refl} {A≡₄ = refl} = refl[]
 
 ⟦lam[]⟧ : ∀ {⟦t⟧ : ⟦Tm⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) ⟦B⟧}
         → ⟦[]⟧ ⟦t⟧ (⟦^⟧ ⟦δ⟧ A≡) ≡[ Tm≡ B≡ ]≡ ⟦t[]⟧
         →  ⟦[]⟧ (⟦lam⟧ ⟦t⟧) ⟦δ⟧ ≡[ Tm≡ (⟦Π[]⟧ {⟦B⟧ = ⟦B⟧} {⟦δ⟧ = ⟦δ⟧} A≡ B≡) 
         ]≡ ⟦lam⟧ ⟦t[]⟧
-⟦lam[]⟧ {A≡ = refl} {B≡ = refl} refl = refl
+⟦lam[]⟧ {A≡ = refl} {B≡ = refl} refl[] = refl[]
 
 ⟦app[]⟧ : ∀ {⟦t⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Π⟧ ⟦A⟧ ⟦B⟧)}
         → ⟦[]⟧ ⟦t⟧ ⟦δ⟧ ≡[ Tm≡ (⟦Π[]⟧ {⟦B⟧ = ⟦B⟧} {⟦δ⟧ = ⟦δ⟧} A≡ B≡₁) ]≡ ⟦t[]⟧ 
         → ∀ (u≡ : ⟦[]⟧ ⟦u⟧ ⟦δ⟧ ≡[ Tm≡ A≡ ]≡ ⟦u[]⟧)
         → ⟦[]⟧ (⟦app⟧ ⟦t⟧ ⟦u⟧ B≡₂) ⟦δ⟧ ≡[ Tm≡ B≡₃ ]≡ ⟦app⟧ ⟦t[]⟧ ⟦u[]⟧ B≡₄
 ⟦app[]⟧ {A≡ = refl} {B≡₁ = refl} {B≡₂ = refl} {B≡₃ = refl} {B≡₄ = refl} 
-        refl refl
-  = refl
+        refl[] refl[]
+  = refl[]
 
 ⟦_⟧Ctx : Ctx → ⟦Ctx⟧
 ⟦_⟧Ty  : Ty Γ → ⟦Ty⟧ ⟦ Γ ⟧Ctx
@@ -125,11 +124,11 @@ Tm≡ refl = refl
 ⟦_⟧Sub : Sub[ q ] Δ Γ → ⟦Sub⟧ ⟦ Δ ⟧Ctx ⟦ Γ ⟧Ctx
 
 ⟦_⟧[]T : A [ δ ]T≔ A[] 
-          → ⟦[]T⟧ ⟦ A ⟧Ty ⟦ δ ⟧Sub ≡ ⟦ A[] ⟧Ty
+       → ⟦[]T⟧ ⟦ A ⟧Ty ⟦ δ ⟧Sub ≡ ⟦ A[] ⟧Ty
 
-⟦_⟧[] :  t [ δ ] A𝒢 ≔ t[]
-         →  ⟦[]⟧ ⟦ t ⟧Tm ⟦ δ ⟧Sub 
-         ≡[ Tm≡ ⟦ A𝒢 ⟧[]T ]≡ ⟦ t[] ⟧Tm
+⟦_⟧[] : t [ δ ] A𝒢 ≔ t[]
+      →  ⟦[]⟧ ⟦ t ⟧Tm ⟦ δ ⟧Sub 
+      ≡[ Tm≡ ⟦ A𝒢 ⟧[]T ]≡ ⟦ t[] ⟧Tm
 
 ⟦ •     ⟧Ctx = 𝟙
 ⟦ Γ ▷ A ⟧Ctx = ⟦▷⟧ ⟦ Γ ⟧Ctx ⟦ A ⟧Ty

@@ -1,23 +1,12 @@
 {-# OPTIONS --rewriting --postfix-projections #-}
 
 open import Utils
+open import Utils.WithK
 open import Utils.Macro
 open import Common.Sort
 open import Common.SortEq
 
 module WTT.GrpdModel where 
-
-module _ where
-  open UtilVars
-
-  uip : ∀ {p q : x ≡ y} → p ≡ q
-  uip {p = refl} {q = refl} = refl
-
-  apd₂′-K : ∀ (B : A → Set ℓ₁) {C : A → Set ℓ₂} {y : B x₁}
-              (f : ∀ x → B x → C x) (eq₁ : x₁ ≡ x₂) 
-              {eq₂ : C x₁ ≡ C x₂} {eq₃ : B x₁ ≡ B x₂} 
-        → f x₁ y ≡[ eq₂ ]≡ f x₂ (coe eq₃ y)
-  apd₂′-K B f refl {refl} {refl} = refl 
 
 open import WTT.Syntax
 
@@ -29,7 +18,7 @@ module Grpd where
     open Sorts 𝒮
     module Vars where variable
       x y z x₁ x₂ x₃ : Car 
-      x₁₂ x₂₃ x₁₃ x₃₄ x₂₁ x₃₂ x₁₂′ : Rel x₁ x₂
+      x₁₂ x₂₃ x₂₄ x₁₃ x₃₄ x₂₁ x₃₂ x₁₂′ : Rel x₁ x₂
     open Vars
     record Data : Set where 
       no-eta-equality
@@ -173,10 +162,17 @@ module Grpdᴰ (G : Grpd) where
       id⁻¹∘ᴰ : (idᴰ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ ≡[ ap (Relᴰ _ _) id⁻¹∘ ]≡ x₁₂ᴰ
       id⁻¹∘ᴰ = {!!}
 
+      ⁻¹∘id∘ᴰ : ((x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ idᴰ) ∘ᴰ x₁₂ᴰ ≡[ ap (Relᴰ _ _) ⁻¹∘id∘ ]≡ idᴰ
+      ⁻¹∘id∘ᴰ = {!!}
+
       coeG⁻¹  : Rel x₁ x₂ → Carᴰ x₂ → Carᴰ x₁
       coeG⁻¹ x₁₂ = coeG (x₁₂ ⁻¹)
       cohG⁻¹ : Relᴰ (coeG⁻¹ x₂₁ xᴰ) xᴰ x₂₁
       cohG⁻¹ {x₂₁ = x₂₁} = transp (Relᴰ _ _) ⁻¹⁻¹ (cohG {x₁₂ = x₂₁ ⁻¹} ⁻¹ᴰ)
+      
+      coeG~′ : Relᴰ x₁ᴰ x₂ᴰ x₁₂ → Relᴰ (coeG x₁₃ x₁ᴰ) (coeG x₂₄ x₂ᴰ) 
+                                       (((x₁₃ ⁻¹) ∘ x₁₂) ∘ x₂₄)
+      
       coeG~ : Relᴰ xᴰ xᴰ′ id → Relᴰ (coeG x₁₂ xᴰ) (coeG x₁₂ xᴰ′) id
       coeG~ xᴰ~ 
         = transp (Relᴰ _ _) ⁻¹∘id∘ (((cohG ⁻¹ᴰ) ∘ᴰ xᴰ~) ∘ᴰ cohG)
@@ -196,7 +192,7 @@ module Grpdᴰ (G : Grpd) where
       -- finding the right stuff to abstract just takes too long.
       --
       -- Another approach could be to have a bunch of very generic utilities
-      -- for working with equality that rely on |K|. E.g. see |apd₂′-K|.
+      -- for working with equality that rely on |K|. E.g. see |apdd₂-K|.
       -- Figuring out what these utilities should look like is quite painful
       -- but when you do figure it out, it is quite nice.
       --
@@ -204,19 +200,20 @@ module Grpdᴰ (G : Grpd) where
       cohG~ :  xᴰ~ ∘ᴰ cohG {x₁₂ = x₁₂}
             ≡[ ap (Relᴰ _ _) id∘id
             ]≡ cohG ∘ᴰ coeG~ xᴰ~
-      cohG~ {xᴰ~ = xᴰ~} {x₁₂ = x₁₂} = 
+      cohG~ {xᴰ~ = xᴰ~} {x₁₂ = x₁₂} .[]coe = 
         transp (Relᴰ _ _) _ (xᴰ~ ∘ᴰ cohG)
-        ≡⟨ sym (extTransp id∘ id∘ᴰ) ⟩
+        ≡⟨ sym (extTransp id∘ id∘ᴰ .[]coe) ⟩
         transp (Relᴰ _ _) _ (idᴰ ∘ᴰ (xᴰ~ ∘ᴰ cohG))
         ≡⟨ sym (extTransp (ap (_∘ (id ∘ x₁₂)) ∘⁻¹) 
-                          (ap[] (Relᴰ _ _) (λ □ → _∘ᴰ (xᴰ~ ∘ᴰ cohG)) ∘⁻¹ᴰ)) ⟩
+                          (ap[] (Relᴰ _ _) (λ □ → _∘ᴰ (xᴰ~ ∘ᴰ cohG)) ∘⁻¹ᴰ) 
+                          .[]coe) ⟩
         transp (Relᴰ _ _) _ ((cohG ∘ᴰ (cohG ⁻¹ᴰ)) ∘ᴰ (xᴰ~ ∘ᴰ cohG))
-        ≡⟨ sym (extTransp (sym ∘∘) (sym[] ∘∘ᴰ)) ⟩
+        ≡⟨ sym (extTransp (sym ∘∘) (sym[] ∘∘ᴰ) .[]coe) ⟩
         transp (Relᴰ _ _) _ (cohG ∘ᴰ ((cohG ⁻¹ᴰ) ∘ᴰ (xᴰ~ ∘ᴰ cohG)))
         ≡⟨ sym (extTransp (ap (x₁₂ ∘_) ∘∘) 
-                          (ap[] (Relᴰ _ _) (λ _ → cohG ∘ᴰ_) ∘∘ᴰ)) ⟩
+                          (ap[] (Relᴰ _ _) (λ _ → cohG ∘ᴰ_) ∘∘ᴰ) .[]coe) ⟩
         transp (Relᴰ _ _) _ (cohG ∘ᴰ (((cohG ⁻¹ᴰ) ∘ᴰ xᴰ~) ∘ᴰ cohG))
-        ≡⟨ apd₂′-K (Relᴰ _ _) (λ _ □ → cohG ∘ᴰ □) ⁻¹∘id∘ ⟩
+        ≡⟨ apdd₂-K (Relᴰ _ _) (λ _ □ → cohG ∘ᴰ □) ⁻¹∘id∘ .[]coe ⟩
         cohG ∘ᴰ transp (Relᴰ _ _) _ (((cohG ⁻¹ᴰ) ∘ᴰ xᴰ~) ∘ᴰ cohG)
         ≡⟨⟩
         cohG ∘ᴰ coeG~ xᴰ~ ∎
@@ -318,7 +315,7 @@ Ty≡ = ap ⟦Ty⟧
 ⟦[]⟧ ⟦t⟧ ⟦δ⟧ .pres ρ₁₂ = ⟦t⟧ .pres (⟦δ⟧ .pres ρ₁₂)
 ⟦[]⟧ {⟦A⟧ = ⟦A⟧} {⟦Δ⟧ = ⟦Δ⟧} ⟦t⟧ ⟦δ⟧ .id =
   ⟦t⟧ .pres (⟦δ⟧ .pres _)
-  ≡⟨ sym (apd (⟦t⟧ .pres) (sym (⟦δ⟧ .id)))  ⟩
+  ≡⟨ sym (apd (⟦t⟧ .pres) (sym (⟦δ⟧ .id)) .[]coe)  ⟩
   transp (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧ .id)) ⌜ ⟦t⟧ .pres _ ⌝ 
   ≡⟨ ap! (⟦t⟧ .id) ⟩
   transp (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧ .id)) (⟦A⟧ .snd .idᴰ) ∎
@@ -353,9 +350,6 @@ Ty≡ = ap ⟦Ty⟧
 ⟦wk⟧ ._⁻¹ = refl
 ⟦wk⟧ ._∘_ = refl
 
--- Substitution
-⟦<>⟧ : ⟦Tm⟧ ⟦Γ⟧ ⟦A⟧ → ⟦Sub⟧ ⟦Γ⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧)
-
 -- Pi types
 ⟦Π⟧ : ∀ ⟦A⟧ → ⟦Ty⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) → ⟦Ty⟧ ⟦Γ⟧
 ⟦Π⟧ {⟦Γ⟧ = ⟦Γ⟧} ⟦A⟧ ⟦B⟧ .fst .Carᴰ ρ
@@ -380,11 +374,11 @@ Ty≡ = ap ⟦Ty⟧
   using υ₂₁ ← transp (⟦A⟧ .fst .Relᴰ _ _) (⁻¹⁻¹ (⟦Γ⟧ .snd)) (⟦A⟧ .snd ._⁻¹ᴰ υ₁₂)
   = transp (⟦B⟧ .fst .Relᴰ _ _) (ap (_ ,_) 
   (⟦A⟧ .snd ._⁻¹ᴰ υ₂₁
-  ≡⟨ sym (apd₂′-K (Relᴰ (⟦A⟧ .fst) υ₂ υ₁) (λ _ → ⟦A⟧ .snd ._⁻¹ᴰ)  
-         (⁻¹⁻¹ (⟦Γ⟧ .snd))) ⟩ 
+  ≡⟨ sym (apdd₂-K (Relᴰ (⟦A⟧ .fst) υ₂ υ₁) (λ _ → ⟦A⟧ .snd ._⁻¹ᴰ)  
+         (⁻¹⁻¹ (⟦Γ⟧ .snd)) .[]coe) ⟩ 
   transp (⟦A⟧ .fst .Relᴰ _ _) (⁻¹⁻¹ (⟦Γ⟧ .snd)) 
          (⟦A⟧ .snd ._⁻¹ᴰ (⟦A⟧ .snd ._⁻¹ᴰ υ₁₂))
-  ≡⟨ ⁻¹⁻¹ᴰ (⟦A⟧ .snd) ⟩
+  ≡⟨ ⁻¹⁻¹ᴰ (⟦A⟧ .snd) .[]coe ⟩
   υ₁₂ ∎)) (⟦B⟧ .snd ._⁻¹ᴰ (τ₁₂ υ₂₁))
 
 ⟦Π⟧ ⟦A⟧ ⟦B⟧ .snd ._∘ᴰ_   = {!   !}
@@ -437,11 +431,11 @@ Ty≡ = ap ⟦Ty⟧
     (⟦A⟧ .snd ._∘ᴰ_ ((⟦A⟧ .snd ._⁻¹ᴰ) (⟦t⟧ .pres ρ₁₂))  
     (⟦A⟧ .snd ._∘ᴰ_ tuᴰ 
     (⟦u⟧ .pres ρ₁₂)))
-⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .id∘ᴰ = {!   !}
-⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .∘idᴰ = {!   !}
-⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .∘∘ᴰ = {!   !}
-⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .∘⁻¹ᴰ = {!   !}
-⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .⁻¹∘ᴰ = {!   !}
+⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .id∘ᴰ   = coe[] uip
+⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .∘idᴰ   = coe[] uip
+⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .∘∘ᴰ    = coe[] uip
+⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .∘⁻¹ᴰ   = coe[] uip
+⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .⁻¹∘ᴰ   = coe[] uip
 ⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .cohG   = refl
 ⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .coe-id = {!   !}
 ⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ .snd .coe-∘  = {!   !}
@@ -464,20 +458,44 @@ Ty≡ = ap ⟦Ty⟧
 
 ⟦,⟧ : (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) → ⟦Tm⟧ ⟦Δ⟧ (⟦[]T⟧ ⟦A⟧ ⟦δ⟧)
     → ⟦Sub⟧ ⟦Δ⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) 
-⟦,⟧ ⟦δ⟧ ⟦t⟧ .act  ρ = ⟦δ⟧ .act ρ , ⟦t⟧ .act ρ
-⟦,⟧ ⟦δ⟧ ⟦t⟧ .pres = {!   !}
-⟦,⟧ ⟦δ⟧ ⟦t⟧ .id   = {!   !}
-⟦,⟧ ⟦δ⟧ ⟦t⟧ ⁻¹    = {!   !}
-⟦,⟧ ⟦δ⟧ ⟦t⟧ ._∘_  = {!   !}
+⟦,⟧ ⟦δ⟧ ⟦t⟧ .act  ρ   = ⟦δ⟧ .act ρ , ⟦t⟧ .act ρ
+⟦,⟧ ⟦δ⟧ ⟦t⟧ .pres ρ₁₂ = ⟦δ⟧ .pres ρ₁₂ , ⟦t⟧ .pres ρ₁₂
+⟦,⟧ ⟦δ⟧ ⟦t⟧ .id   = apd₂ _,_ (⟦δ⟧ .id) ([]sym (coe[] (sym (⟦t⟧ .id))))
+⟦,⟧ ⟦δ⟧ ⟦t⟧ ._⁻¹  = apd₂ _,_ (⟦δ⟧ ._⁻¹) ([]sym (coe[] (sym (⟦t⟧ ._⁻¹))))
+⟦,⟧ ⟦δ⟧ ⟦t⟧ ._∘_  = apd₂ _,_ (⟦δ⟧ ._∘_) ([]sym (coe[] (sym (⟦t⟧ ._∘_))))
 
 ⟦refl⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦t⟧)
 ⟦refl⟧ {⟦A⟧ = ⟦A⟧} .act ρ = ⟦A⟧ .snd .idᴰ
-⟦refl⟧ .pres = {!   !}
-⟦refl⟧ .id  = {!   !}
-⟦refl⟧ ._⁻¹ = {!   !}
-⟦refl⟧ ._∘_ = {!   !}
+⟦refl⟧ {⟦Γ⟧ = ⟦Γ⟧} {⟦A⟧ = ⟦A⟧} {⟦t⟧ = ⟦t⟧} .pres ρ₁₂ 
+  = coe _ ((⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂)))
+                               (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦t⟧ .pres ρ₁₂)))
+    ≡⟨ sym (extTransp (⟦Γ⟧ .snd .∘∘) (⟦A⟧ .snd .∘∘ᴰ) .[]coe) ⟩
+    coe ⌜ _ ⌝ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂))
+                                              (⟦A⟧ .snd .idᴰ))
+                              (⟦t⟧ .pres ρ₁₂))
+    ≡⟨ ap! uip ⟩
+    coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂))
+                                          (⟦A⟧ .snd .idᴰ))
+                          (⟦t⟧ .pres ρ₁₂))
+    ≡⟨ ⁻¹∘id∘ᴰ (⟦A⟧ .snd) .[]coe ⟩
+    ⟦A⟧ .snd .idᴰ ∎
+⟦refl⟧ .id  = uip
+⟦refl⟧ ._⁻¹ = uip
+⟦refl⟧ ._∘_ = uip
 
 ⟦⨾⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧ → ⟦Sub⟧ ⟦Θ⟧ ⟦Δ⟧ → ⟦Sub⟧ ⟦Θ⟧ ⟦Γ⟧
+⟦⨾⟧ ⟦δ⟧ ⟦σ⟧ .act  ρ   = ⟦δ⟧ .act (⟦σ⟧ .act ρ)
+⟦⨾⟧ ⟦δ⟧ ⟦σ⟧ .pres ρ₁₂ = ⟦δ⟧ .pres (⟦σ⟧ .pres ρ₁₂)
+⟦⨾⟧ {⟦Δ⟧ = ⟦Δ⟧} {⟦Γ⟧ = ⟦Γ⟧} {⟦Θ⟧ = ⟦Θ⟧} ⟦δ⟧ ⟦σ⟧ .id   = 
+  ⟦δ⟧ .pres ⌜ ⟦σ⟧ .pres (⟦Θ⟧ .snd .id) ⌝
+  ≡⟨ ap! (⟦σ⟧ .id) ⟩
+  ⟦δ⟧ .pres (⟦Δ⟧ .snd .id)
+  ≡⟨ ⟦δ⟧ .id ⟩
+  ⟦Γ⟧ .snd .id ∎
+⟦⨾⟧ {⟦Δ⟧ = ⟦Δ⟧} {⟦Γ⟧ = ⟦Γ⟧} {⟦Θ⟧ = ⟦Θ⟧} ⟦δ⟧ ⟦σ⟧ ._⁻¹ {x₁₂ = ρ₁₂} 
+  = {!   !}
+⟦⨾⟧ {⟦Δ⟧ = ⟦Δ⟧} {⟦Γ⟧ = ⟦Γ⟧} {⟦Θ⟧ = ⟦Θ⟧} ⟦δ⟧ ⟦σ⟧ ._∘_ {x₁₂ = ρ₁₂} {x₂₃ = ρ₂₃}
+  = {!   !}
 
 ⟦lam⟧ : ⟦Tm⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) ⟦B⟧ → ⟦Tm⟧ ⟦Γ⟧ (⟦Π⟧ ⟦A⟧ ⟦B⟧)
 ⟦lam⟧ ⟦t⟧ .act ρ .fst υ   = ⟦t⟧ .act (ρ , υ)
@@ -532,7 +550,7 @@ postulate
     → ⟦Tm⟧ ⟦Γ⟧ (⟦[]T⟧ ⟦P⟧ (⟦,⟧ (⟦,⟧ ⟦id⟧ ⟦t⟧) ⟦refl⟧))
     → (⟦p⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧))
     → ⟦Tm⟧ ⟦Γ⟧ (⟦[]T⟧ ⟦P⟧ (⟦,⟧ (⟦,⟧ ⟦id⟧ ⟦u⟧) ⟦p⟧))
-⟦J⟧ {⟦Γ⟧ = ⟦Γ⟧} {⟦A⟧ = ⟦A⟧} {⟦t⟧ = ⟦t⟧} {⟦u⟧ = ⟦u⟧} ⟦P⟧ ⟦d⟧ ⟦p⟧ .act  ρ 
+⟦J⟧ {⟦Γ⟧ = ⟦Γ⟧} {⟦A⟧ = ⟦A⟧} {⟦t⟧ = ⟦t⟧} {⟦u⟧ = ⟦u⟧} ⟦P⟧ ⟦d⟧ ⟦p⟧ .act ρ 
   = ⟦P⟧ .snd .coeG ((id (⟦Γ⟧ .snd) , ⟦p⟧ .act ρ) , 
   -- Intuitively, here we are proving that ⟦refl⟧ and ⟦p⟧ are related over ⟦p⟧
   -- Explicitly, we construct
@@ -546,13 +564,15 @@ postulate
   ≡⟨ ap! uip ⟩
   coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦A⟧ .snd .idᴰ))
         (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ)))
-  ≡⟨ extTransp (id⁻¹∘ (⟦Γ⟧ .snd)) (id⁻¹∘ᴰ (⟦A⟧ .snd)) ⟩
+  ≡⟨ extTransp (id⁻¹∘ (⟦Γ⟧ .snd)) (id⁻¹∘ᴰ (⟦A⟧ .snd)) .[]coe ⟩
   coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ) (⟦p⟧ .act ρ))
-  ≡⟨ extTransp (⟦Γ⟧ .snd .id∘) (⟦A⟧ .snd .id∘ᴰ) ⟩
+  ≡⟨ extTransp (⟦Γ⟧ .snd .id∘) (⟦A⟧ .snd .id∘ᴰ) .[]coe ⟩
   coe refl (⟦p⟧ .act ρ)
   ≡⟨⟩
   ⟦p⟧ .act ρ ∎)) (⟦d⟧ .act ρ)
-⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .pres ρ₁₂ = {!   !}
+⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .pres ρ₁₂ =
+  transp (⟦P⟧ .fst .Relᴰ _ _) (apd₂ _,_ (apd₂ _,_ {!!} {!!}) {!!}) 
+         (coeG~′ (⟦P⟧ .snd) (⟦d⟧ .pres ρ₁₂))
 ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .id   = {!   !}
 ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ ._⁻¹  = {!   !}
 ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ ._∘_  = {!   !}

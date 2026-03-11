@@ -25,6 +25,9 @@ open import Cubical.Foundations.Univalence using (ua; unglue; Glue)
   public
 open import Cubical.Foundations.Equiv using (isEquiv)
   public
+open import Cubical.Data.Equality using (eqToPath; pathToEq) 
+  renaming (refl to reflᴵ; _≡_ to _≡ᴵ_)
+  public
 
 infix 4 _≡[_]≡_
 

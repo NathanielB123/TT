@@ -101,7 +101,8 @@ abstract-marker = go 0 where
     xs ← go* k xs
     just (arg i x ,- xs)
 
-pattern _ⱽ,-_ t xs = arg (arg-info visible (modality relevant quantity-ω)) t ,- xs
+pattern _ⱽ,-_ t xs 
+  = arg (arg-info visible (modality relevant quantity-ω)) t ,- xs
 
 
 private
@@ -131,14 +132,19 @@ private
         unify goal (con (quote mkapdata) 
                    (unknown ⱽ,- unknown ⱽ,- 
                    def (quote ap) (lam visible (abs "□" l) ⱽ,- []) ⱽ,- []))
-      nothing → typeError (strErr "Failed to abstract over marker in term" ,- termErr `x ,- [])
+      nothing → typeError (
+        strErr "Failed to abstract over marker in term" ,- termErr `x ,- [])
 
   open ap-data
 
-  ap!-wrapper : ∀ {ℓ} {A : Set ℓ} {x y : A} {@(tactic ap-worker x) it : ap-data x y} → it .mark → x ≡ y
+  ap!-wrapper : ∀ {ℓ} {A : Set ℓ} {x y : A} 
+                  {@(tactic ap-worker x) it : ap-data x y} 
+              → it .mark → x ≡ y
   ap!-wrapper {it = mkapdata _ _ f} = f
 
-  ap¡-wrapper : ∀ {ℓ} {A : Set ℓ} {x y : A} {@(tactic ap-worker y) it : ap-data x y} → it .mark → x ≡ y
+  ap¡-wrapper : ∀ {ℓ} {A : Set ℓ} {x y : A} 
+                  {@(tactic ap-worker y) it : ap-data x y} 
+              → it .mark → x ≡ y
   ap¡-wrapper {it = mkapdata _ _ f} = f
 
 macro
