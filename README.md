@@ -10,6 +10,6 @@ Some experiments with mechanised metatheory of type theory.
 ### WIP:
 
 - The groupoid model: [GrpdModel](Models/GrpdModel.agda)
-  - I mostly just wanted to understand the computational content of `J` in the groupoid model. I believe finishing this would be extremely painful.
+  - I mostly just wanted to understand the computational content of `J` in the groupoid model. I believe finishing the rest of the mechanisation would be extremely painful.
 - NbE (including trying out an idea I have to deal with non-linear reductions): [NonLinNbE](NonLinNbE/NbE.agda)
   - This is still very-much WIP. I will write more here after I make more progress.
