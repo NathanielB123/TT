@@ -27,27 +27,3 @@ reix[] {p = refl} {q = refl} r = r
 
 coe-K : coe p x ≡ x
 coe-K {p = refl} = refl
-
--- postulate
---   funext : {B : A → Set ℓ} {f g : (x : A) → B x} → (∀ x → f x ≡ g x) → f ≡ g
---   funext-refl : {B : A → Set ℓ} {f : (x : A) → B x} 
---               → funext {f = f} (λ _ → refl) ≡ refl
-
--- funexti : {B : A → Set ℓ} {f g : {x : A} → B x} → (∀ {x} → f {x} ≡ g {x}) 
---         → _≡_ {A = {x : A} → B x} f g
--- funexti {f = f} {g = g} p = ap (λ f {x} → f x) (funext (λ _ → p))
-
--- piext : {B₁ B₂ : A → Set ℓ} → (∀ x → B₁ x ≡ B₂ x) → (∀ x → B₁ x) ≡ (∀ x → B₂ x)
--- piext p = ap (λ □ → ∀ x → □ x) (funext p)
-
--- piexti : {B₁ B₂ : A → Set ℓ} → (∀ {x} → B₁ x ≡ B₂ x) 
---        → (∀ {x} → B₁ x) ≡ (∀ {x} → B₂ x)
--- piexti p = ap (λ □ → ∀ {x} → □ {x}) (funexti p)
-
--- piext[] : {B₁ : A₁ → Set ℓ} {B₂ : A₂ → Set ℓ} (A≡ : A₁ ≡ A₂) 
---         → (∀ {x₁ x₂} (x≡ : x₁ ≡[ A≡ ]≡ x₂) → B₁ x₁ ≡ B₂ x₂) 
---         → (∀ x → B₁ x) ≡ (∀ x → B₂ x)
--- piext[] refl p = piext λ x → p refl[]
-
--- funext[] : {B₁ B₂ : A → Set ℓ} {f : (x : A) → B₁ x} {g : (x : A) → B₂ x} 
---          → (∀ x → f x ≡[ {!!} ]≡ g x) → f ≡[ {!!} ]≡ g
