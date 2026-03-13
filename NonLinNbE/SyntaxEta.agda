@@ -265,7 +265,7 @@ module _ (𝕄 : Motives ℓ₁ ℓ₂ ℓ₃ ℓ₄) where
               ≡[ ap (λ □ → Tmᴹ Δᴹ □ (lam (t [ δ ^ A ]))) Π[]ᴹ 
               ]≡ lamᴹ (tᴹ [ δᴹ ^ᴹ Aᴹ ]ᴹ)
 
-      βᴹ : appᴹ (lamᴹ tᴹ) ≡ tᴹ
+      βᴹ : appᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} (lamᴹ tᴹ) ≡ tᴹ
       ηᴹ : tᴹ ≡[ ap (Tmᴹ Γᴹ (Πᴹ Aᴹ Bᴹ)) η ]≡ lamᴹ (appᴹ tᴹ)
 
       ℤᴹ     : Tyᴹ Γᴹ ℤ

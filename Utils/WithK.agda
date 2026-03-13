@@ -39,3 +39,7 @@ coe≡-K {p = refl} {q = refl} refl = refl
 happlyi : {B : A → Set ℓ} {f g : ∀ {x} → B x} → _≡_ {A = ∀ {x} → B x} f g 
         → f {x} ≡ g {x}
 happlyi p = happly (ap (λ f x → f {x}) p)
+
+apd-K : ∀ {B : A → Set ℓ} (f : (x : A) → B x) {x y}
+      → (p : x ≡ y) {B≡ : B x ≡ B y} → f x ≡[ B≡ ]≡ f y
+apd-K f refl {B≡ = refl} = refl[]

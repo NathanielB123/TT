@@ -224,19 +224,34 @@ opaque
         → δ₁ᴹ ≡ δ₂ᴹ
   eval*≡ p = eval*≡' (funexti (funexti (funext p)))
 
-  eval≡ : {Γᴹ : Env Γ} {Aᴹ : Val Γᴹ A} {t₁ᴹ t₂ᴹ : eval Γᴹ Aᴹ t}
-        → _≡_ {A = ∀ {Δ δ} (ρ : Γᴹ .El Δ δ) → Aᴹ .El ρ (t [ δ ])}
-              (t₁ᴹ .act) (t₂ᴹ .act) → t₁ᴹ ≡ t₂ᴹ
-  eval≡ refl
+  eval≡' : {Γᴹ : Env Γ} {Aᴹ : Val Γᴹ A} {t₁ᴹ t₂ᴹ : eval Γᴹ Aᴹ t}
+         → _≡_ {A = ∀ {Δ δ} (ρ : Γᴹ .El Δ δ) → Aᴹ .El ρ (t [ δ ])}
+               (t₁ᴹ .act) (t₂ᴹ .act) → t₁ᴹ ≡ t₂ᴹ
+  eval≡' refl
     = ap (mk _) (funexti (funexti (funexti (funexti (funexti (funexti uip))))))
+
+  eval≡ : {Γᴹ : Env Γ} {Aᴹ : Val Γᴹ A} {t₁ᴹ t₂ᴹ : eval Γᴹ Aᴹ t}
+        → (∀ {Δ δ} (ρ : Γᴹ .El Δ δ) → t₁ᴹ .act ρ ≡ t₂ᴹ .act ρ)
+        → t₁ᴹ ≡ t₂ᴹ
+  eval≡ p = eval≡' (funexti λ {_} → funexti λ {_} → funext λ ρ → p ρ)
+
+  eval≡[]' : {Γᴹ : Env Γ} {A₁ᴹ A₂ᴹ : Val Γᴹ A} {A≡ᴹ : A₁ᴹ ≡ A₂ᴹ}
+             {t₁ᴹ : eval Γᴹ A₁ᴹ t} {t₂ᴹ : eval Γᴹ A₂ᴹ t} 
+           →  (λ {_} {_} → t₁ᴹ .act) 
+           ≡[ ap (λ □ → ∀ {Δ δ} (ρ : Γᴹ .El Δ δ) → □ .El ρ (t [ δ ])) A≡ᴹ 
+           ]≡ (λ {_} {_} → t₂ᴹ .act)
+           → t₁ᴹ ≡[ ap (λ □ → eval Γᴹ □ t) A≡ᴹ ]≡ t₂ᴹ
+  eval≡[]' {A≡ᴹ = refl} p .[]coe = eval≡' (p .[]coe)
 
   eval≡[] : {Γᴹ : Env Γ} {A₁ᴹ A₂ᴹ : Val Γᴹ A} {A≡ᴹ : A₁ᴹ ≡ A₂ᴹ}
             {t₁ᴹ : eval Γᴹ A₁ᴹ t} {t₂ᴹ : eval Γᴹ A₂ᴹ t} 
-          →  (λ {_} {_} → t₁ᴹ .act) 
-          ≡[ ap (λ □ → ∀ {Δ δ} (ρ : Γᴹ .El Δ δ) → □ .El ρ (t [ δ ])) A≡ᴹ 
-          ]≡ (λ {_} {_} → t₂ᴹ .act)
-          → t₁ᴹ ≡[ ap (λ □ → eval Γᴹ □ t) A≡ᴹ ]≡ t₂ᴹ
-  eval≡[] {A≡ᴹ = refl} p .[]coe = eval≡ (p .[]coe)
+          → (∀ {Δ δ} (ρ : Γᴹ .El Δ δ)
+              →  t₁ᴹ .act ρ 
+              ≡[ ap (λ □ → □ .El ρ (t [ δ ])) A≡ᴹ 
+              ]≡ t₂ᴹ .act ρ)
+           → t₁ᴹ ≡[ ap (λ □ → eval Γᴹ □ t) A≡ᴹ ]≡ t₂ᴹ
+  eval≡[] {A≡ᴹ = refl} p .[]coe = eval≡ (λ ρ → p ρ .[]coe)
+  
 
   ΠVal≡' : {Γᴹ : Env Γ} {Aᴹ : Val Γᴹ A} {Bᴹ : Val (Γᴹ ▷ᴹ' Aᴹ) B}
            {ρ : Γᴹ .El Δ δ} {t : Tm Δ (Π A B [ δ ]T)}
