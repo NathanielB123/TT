@@ -26,7 +26,7 @@ open Tms
 variable  
   Γ Δ Θ Λ Γ₁ Γ₂ Δ₁ Δ₂ Θ₁ Θ₂ : Ctx
   A B A₁ A₂ B₁ B₂ : Ty _
-  t u v t₁ t₂ : Tm _ _
+  t u v t₁ t₂ t₃ : Tm _ _
   δ σ γ : Tms _ _
 
 -- We define contexts as a datatype to get disjointness and injectivity of

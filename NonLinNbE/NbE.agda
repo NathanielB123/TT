@@ -6,6 +6,7 @@ open import Utils renaming (_,_ to _Σ,_)
 open import Utils.WithK
 
 open import NonLinNbE.SyntaxEta
+open import NonLinNbE.Nf
 open import NonLinNbE.Thin
 open import NonLinNbE.NbEMotives
 
@@ -106,59 +107,69 @@ eval𝕞 .▷ηᴹ {Aᴹ = Aᴹ} {δᴹ = δᴹ} = eval*≡ λ ρ → ap (_ Σ,_
   ≡⟨ apdd₂ (λ □ → eval _ □ _) (λ _ □ → □ .act ρ) (val≡' refl _) .[]coe ⟩
   _ ∎)
 
-eval𝕞 .Πᴹ {Γᴹ = Γᴹ} Aᴹ Bᴹ .El ρ t = ΠVal Aᴹ Bᴹ ρ t
-eval𝕞 .Πᴹ {Γᴹ = Γᴹ} Aᴹ Bᴹ ._[_]V {t = t} τ σTh .act γTh υ 
-  = transp (λ □ → Bᴹ .El □ (app t [ _ , _ ])) 
-           (apd₂ _Σ,_ (sym (Γᴹ .[][]E)) sym-transp[]) 
-           (τ .act (σTh ⨾Th γTh) (transp (λ □ → Aᴹ .El □ _) (Γᴹ .[][]E) υ))
-eval𝕞 .Πᴹ Aᴹ Bᴹ ._[_]V τ σTh .nat γTh θTh υ = cheat
-eval𝕞 .Πᴹ Aᴹ Bᴹ .[id]V = cheat
-eval𝕞 .Πᴹ Aᴹ Bᴹ .[][]V = cheat
-eval𝕞 .lamᴹ tᴹ .act ρ .act σTh υ     = tᴹ .act (_ Σ, υ)
-eval𝕞 .lamᴹ tᴹ .act ρ .nat σTh γTh υ = cheat
-eval𝕞 .appᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} tᴹ .act (ρ Σ, υ)
-  = transp (λ □ → Bᴹ .El □ _) (apd₂ _Σ,_ (Γᴹ .[id]E) transp-sym[])
-           (tᴹ .act ρ .act idTh (transp (λ □ → Aᴹ .El □ _) (sym (Γᴹ .[id]E)) υ))
-eval𝕞 .appᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} tᴹ .nat = cheat
--- Below implements more of this case but takes a while to typecheck
-eval𝕞 .Π[]ᴹ {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} {Δᴹ = Δᴹ} {δᴹ = δᴹ} 
-  = val≡
-  (λ ρ t → apd₂ ΠVal' (piexti λ {_} → piexti λ {_} → piexti λ {_} 
-  → piext λ σTh → piext[] (ap (λ □ → Aᴹ .El □ _) (δᴹ .nat)) λ {υ₁ υ₂} υ≡ 
-  → ap (λ □ → Bᴹ .El □ (app t [ _ ])) (apd₂ _Σ,_ (δᴹ .nat) (coe[] (
-  transp (λ □ → El Aᴹ □ _) (δᴹ .nat) υ₁
-  ≡⟨ υ≡ .[]coe ⟩
-  υ₂
-  ≡⟨ sym coe-K ⟩
-  coe _ υ₂
-  ≡⟨ apdd₂ (λ □ → eval (eval𝕞 ._▷ᴹ_ Δᴹ (eval𝕞 ._[_]Tᴹ Aᴹ δᴹ)) □ q) 
-           (λ _ □ → □ .act ((ρ Δ.[ σTh ]E) Σ, υ₂)) (val≡' refl _) .[]coe ⟩
-  _ ∎)
-  ))) cheat) -- This is provable with propext 
-  cheat
-  where module Δ = Env Δᴹ
-eval𝕞 .lam[]ᴹ = eval≡[] λ ρ → cheat 
-  -- We have entered the ninth circle of transport hell
-eval𝕞 .βᴹ {Γᴹ = Γᴹ} {tᴹ = tᴹ}
-  = eval≡ λ (ρ Σ, υ) → apd (tᴹ .act) (apd₂ _Σ,_ (Γᴹ .[id]E) transp-sym[]) .[]coe
-eval𝕞 .ηᴹ = cheat
-  -- η is a bit more tedious than β because η is not strict in the syntax
+-- eval𝕞 .Πᴹ {Γᴹ = Γᴹ} Aᴹ Bᴹ .El ρ t = ΠVal Aᴹ Bᴹ ρ t
+-- eval𝕞 .Πᴹ {Γᴹ = Γᴹ} Aᴹ Bᴹ ._[_]V {t = t} τ σTh .act γTh υ 
+--   = transp (λ □ → Bᴹ .El □ (app t [ _ , _ ])) 
+--            (apd₂ _Σ,_ (sym (Γᴹ .[][]E)) sym-transp[]) 
+--            (τ .act (σTh ⨾Th γTh) (transp (λ □ → Aᴹ .El □ _) (Γᴹ .[][]E) υ))
+-- eval𝕞 .Πᴹ Aᴹ Bᴹ ._[_]V τ σTh .nat γTh θTh υ = cheat
+-- eval𝕞 .Πᴹ Aᴹ Bᴹ .[id]V = cheat
+-- eval𝕞 .Πᴹ Aᴹ Bᴹ .[][]V = cheat
+-- eval𝕞 .lamᴹ tᴹ .act ρ .act σTh υ     = tᴹ .act (_ Σ, υ)
+-- eval𝕞 .lamᴹ tᴹ .act ρ .nat σTh γTh υ = cheat
+-- eval𝕞 .appᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} tᴹ .act (ρ Σ, υ)
+--   = transp (λ □ → Bᴹ .El □ _) (apd₂ _Σ,_ (Γᴹ .[id]E) transp-sym[])
+--            (tᴹ .act ρ .act idTh (transp (λ □ → Aᴹ .El □ _) (sym (Γᴹ .[id]E)) υ))
+-- eval𝕞 .appᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} tᴹ .nat = cheat
+-- -- Below implements more of this case but takes a while to typecheck
+-- eval𝕞 .Π[]ᴹ {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} {Δᴹ = Δᴹ} {δᴹ = δᴹ} 
+--   = val≡
+--   (λ ρ t → apd₂ ΠVal' (piexti λ {_} → piexti λ {_} → piexti λ {_} 
+--   → piext λ σTh → piext[] (ap (λ □ → Aᴹ .El □ _) (δᴹ .nat)) λ {υ₁ υ₂} υ≡ 
+--   → ap (λ □ → Bᴹ .El □ (app t [ _ ])) (apd₂ _Σ,_ (δᴹ .nat) (coe[] (
+--   transp (λ □ → El Aᴹ □ _) (δᴹ .nat) υ₁
+--   ≡⟨ υ≡ .[]coe ⟩
+--   υ₂
+--   ≡⟨ sym coe-K ⟩
+--   coe _ υ₂
+--   ≡⟨ apdd₂ (λ □ → eval (eval𝕞 ._▷ᴹ_ Δᴹ (eval𝕞 ._[_]Tᴹ Aᴹ δᴹ)) □ q) 
+--            (λ _ □ → □ .act ((ρ Δ.[ σTh ]E) Σ, υ₂)) (val≡' refl _) .[]coe ⟩
+--   _ ∎)
+--   ))) cheat) -- This is provable with propext 
+--   cheat
+--   where module Δ = Env Δᴹ
+-- eval𝕞 .lam[]ᴹ = eval≡[] λ ρ → cheat 
+--   -- We have entered the ninth circle of transport hell
+-- eval𝕞 .βᴹ {Γᴹ = Γᴹ} {tᴹ = tᴹ}
+--   = eval≡ λ (ρ Σ, υ) → apd (tᴹ .act) (apd₂ _Σ,_ (Γᴹ .[id]E) transp-sym[]) .[]coe
+-- eval𝕞 .ηᴹ = cheat
+--   -- η is a bit more tedious than β because η is not strict in the syntax
 
--- eval𝕞 .ℤᴹ     = {!   !}
--- eval𝕞 .zeᴹ    = {!   !}
--- eval𝕞 .suᴹ    = {!   !}
--- eval𝕞 ._-ᴹ_   = {!   !}
--- eval𝕞 .IF-ZEᴹ = {!   !}
+eval𝕞 .ℤᴹ .El    ρ t = ℤVal _ t
+eval𝕞 .ℤᴹ ._[_]V = {!   !}
+eval𝕞 .ℤᴹ .[id]V = {!   !}
+eval𝕞 .ℤᴹ .[][]V = {!   !}
 
--- eval𝕞 .ℤ[]ᴹ = {!   !}
--- eval𝕞 .ze[]ᴹ = {!   !}
--- eval𝕞 .su[]ᴹ = {!   !}
--- eval𝕞 .-[]ᴹ = {!   !}
--- eval𝕞 .IF-ZE[]ᴹ = {!   !}
+eval𝕞 .zeᴹ .act ρ = zeⱽ
+eval𝕞 .zeᴹ .nat   = {!   !}
 
--- eval𝕞 .-zeᴹ = {!   !}
--- eval𝕞 .-cancelᴹ = {!   !}
--- eval𝕞 .-suᴹ = {!   !}
--- eval𝕞 .IF-ZE-zeᴹ = {!   !}
--- eval𝕞 .IF-ZE-suᴹ = {!   !}
--- eval𝕞 .IF-ZE-ze-ᴹ = {!   !}
+eval𝕞 .suᴹ tᴹ .act ρ = suⱽ (tᴹ .act ρ)
+eval𝕞 .suᴹ tᴹ .nat = {!   !}
+
+eval𝕞 ._-ᴹ_ tᴹ uᴹ .act ρ = tᴹ .act ρ -ⱽ uᴹ .act ρ
+eval𝕞 ._-ᴹ_ tᴹ uᴹ .nat   = {!   !}
+
+eval𝕞 .IF-ZEᴹ = {!   !}
+
+eval𝕞 .ℤ[]ᴹ  = val≡' refl {!!}
+eval𝕞 .ze[]ᴹ = eval≡[]' refl[]-K
+eval𝕞 .su[]ᴹ = {!!}
+eval𝕞 .-[]ᴹ = {!   !}
+eval𝕞 .IF-ZE[]ᴹ = {!   !}
+
+eval𝕞 .-zeᴹ       = eval≡' refl
+eval𝕞 .-cancelᴹ   = eval≡ λ ρ → {!!}
+eval𝕞 .-suᴹ       = eval≡' refl
+eval𝕞 .IF-ZE-zeᴹ  = {!   !}
+eval𝕞 .IF-ZE-suᴹ  = {!   !}
+eval𝕞 .IF-ZE-ze-ᴹ = {!   !}
