@@ -12,7 +12,7 @@ postulate
   Ty  : Ctx → Set
   Tm  : ∀ Γ → Ty Γ → Set
 
--- Hack to get definitional injectivity of and η for substitutions
+-- Hack to get η for substitutions
 Tms' : Ctx → Ctx → Set
 
 record Tms (Δ : Ctx) (Γ : Ctx) : Set where
@@ -29,6 +29,8 @@ variable
   t u v t₁ t₂ : Tm _ _
   δ σ γ : Tms _ _
 
+-- We define contexts as a datatype to get disjointness and injectivity of
+-- constructors during pattern-matching
 data Ctx where
   •   : Ctx
   _▷_ : ∀ Γ → Ty Γ → Ctx

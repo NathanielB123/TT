@@ -63,12 +63,13 @@ transp P p d = coe (ap P p) d
 
 {-# DISPLAY coe (ap P p) = transp P p #-}
 
-happly : {f g : A → B} → f ≡ g → f x ≡ g x
+happly : {B : A → Set ℓ} {f g : ∀ x → B x} → f ≡ g → f x ≡ g x
 happly refl = refl
 
-happly₂ : ∀ {B : A → Set ℓ} {y} {f g : (x : A) → B x → C} 
+happly₂ : ∀ {B : A → Set ℓ₁} {C : ∀ x → B x → Set ℓ₂} {y} 
+            {f g : ∀ x → (y : B x) → C x y} 
         → f ≡ g → f x y ≡ g x y
-happly₂ refl = refl
+happly₂ p = happly (happly p)
 
 record _≡[_]≡_ {A B : Set ℓ} (x : A) (p : A ≡ B) (y : B) : Set ℓ where
   constructor coe[]
@@ -93,6 +94,9 @@ transp-sym[] {p = p} = coe[] (transp-sym p)
 sym-transp[] : {P : A → Set ℓ} {y : P x}
              → transp P p y ≡[ ap P (sym p) ]≡ y
 sym-transp[] {p = p} = coe[] (sym-transp p)
+
+coe-coe : coe p (coe q x) ≡ coe (q ∙ p) x
+coe-coe {q = refl} = refl
 
 ap₂ : (f : A → B → C) → x₁ ≡ x₂ → y₁ ≡ y₂ → f x₁ y₁ ≡ f x₂ y₂
 ap₂ f refl refl = refl
@@ -141,6 +145,11 @@ postulate
   funext : {B : A → Set ℓ} {f g : (x : A) → B x} → (∀ x → f x ≡ g x) → f ≡ g
   funext-refl : {B : A → Set ℓ} {f : (x : A) → B x} 
               → funext {f = f} (λ _ → refl) ≡ refl
+  
+  happly-funext : {B : A → Set ℓ} {f g : (x : A) → B x}
+                  (p : ∀ x → f x ≡ g x) → happly (funext p) ≡ p x
+  funext-happly : {B : A → Set ℓ} {f g : (x : A) → B x}
+                → (p : f ≡ g) → (funext λ x → (happly {x = x} p)) ≡ p
 
 funexti : {B : A → Set ℓ} {f g : {x : A} → B x} → (∀ {x} → f {x} ≡ g {x}) 
         → _≡_ {A = {x : A} → B x} f g
