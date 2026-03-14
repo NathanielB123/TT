@@ -79,7 +79,8 @@ module _ (Γᴹ : Env Γ) (Aᴹ : Val Γᴹ A) (t : Tm Γ A) where
     constructor mk
     field
       act : ∀ {Δ δ} (ρ : Γ.El Δ δ) → A.El ρ (t [ δ ])
-      nat : {ρ : Γ.El Δ δ} → act ρ A.[ σTh ]V ≡ act (ρ Γ.[ σTh ]E)
+      nat : {ρ : Γ.El Δ δ} {σTh : Thin Θ Δ σ} 
+          → act ρ A.[ σTh ]V ≡ act (ρ Γ.[ σTh ]E)
 
 open Env   public
 open Val   public
@@ -253,23 +254,23 @@ opaque
   eval≡[] {A≡ᴹ = refl} p .[]coe = eval≡ (λ ρ → p ρ .[]coe)
   
 
-  ΠVal≡' : {Γᴹ : Env Γ} {Aᴹ : Val Γᴹ A} {Bᴹ : Val (Γᴹ ▷ᴹ' Aᴹ) B}
-           {ρ : Γᴹ .El Δ δ} {t : Tm Δ (Π A B [ δ ]T)}
+  ΠVal≡' : {Γᴹ : Env Γ} (Aᴹ : Val Γᴹ A) (Bᴹ : Val (Γᴹ ▷ᴹ' Aᴹ) B)
+           {ρ : Γᴹ .El Δ δ} (t : Tm Δ (Π A B [ δ ]T))
            {τ₁ τ₂ : ΠVal Aᴹ Bᴹ ρ t}
          → (λ {Θ σ u} → τ₁ .act {Θ} {σ} {u}) ≡ τ₂ .act
          → τ₁ ≡ τ₂
-  ΠVal≡' refl 
+  ΠVal≡' Aᴹ Bᴹ t refl 
     = ap (mk _) 
          ( funexti λ {_} → funexti λ {_} → funexti λ {_} → funexti λ {_} 
          → funexti λ {_} → funext λ σTh → funext λ γTh → funext λ υ → uip[])
 
-  ΠVal≡ : {Γᴹ : Env Γ} {Aᴹ : Val Γᴹ A} {Bᴹ : Val (Γᴹ ▷ᴹ' Aᴹ) B}
-          {ρ : Γᴹ .El Δ δ} {t : Tm Δ (Π A B [ δ ]T)}
+  ΠVal≡ : {Γᴹ : Env Γ} (Aᴹ : Val Γᴹ A) (Bᴹ : Val (Γᴹ ▷ᴹ' Aᴹ) B)
+          {ρ : Γᴹ .El Δ δ} (t : Tm Δ (Π A B [ δ ]T))
           {τ₁ τ₂ : ΠVal Aᴹ Bᴹ ρ t}
         → (∀ {Θ σ u} (σTh : Thin Θ _ σ) (υ : Aᴹ .El (Γᴹ ._[_]E ρ σTh) u) 
            → τ₁ .act σTh υ ≡ τ₂ .act σTh υ)
         → τ₁ ≡ τ₂
-  ΠVal≡ {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} {t = t} p 
-    = ΠVal≡' {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} {t = t}
+  ΠVal≡ Aᴹ Bᴹ t p 
+    = ΠVal≡' Aᴹ Bᴹ t
              ( funexti λ {_} → funexti λ {_} → funexti λ {_} 
              → funext λ ρ → funext λ υ → p ρ υ)

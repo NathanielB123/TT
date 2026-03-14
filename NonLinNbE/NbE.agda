@@ -3,6 +3,7 @@
 open import Agda.Builtin.Equality.Rewrite
 
 open import Utils renaming (_,_ to _Σ,_)
+open import Utils.Trunc
 open import Utils.WithK
 
 open import NonLinNbE.SyntaxEta
@@ -21,6 +22,7 @@ eval𝕄 .Tmᴹ  Γᴹ Aᴹ t = eval Γᴹ Aᴹ t
 eval𝕄 .Tmsᴹ Δᴹ Γᴹ δ = eval* Δᴹ Γᴹ δ
 
 postulate
+  todo  : ∀ {A : Set ℓ} → A
   cheat : ∀ {A : Set ℓ} → A
 
 {-# NON_COVERING #-}
@@ -41,7 +43,7 @@ eval𝕞 ._[_]Tᴹ Aᴹ δᴹ ._[_]V τ σTh
 eval𝕞 ._[_]Tᴹ Aᴹ δᴹ .[id]V = [id]V' Aᴹ
 eval𝕞 ._[_]Tᴹ Aᴹ δᴹ .[][]V = [][]V' Aᴹ
 eval𝕞 ._[_]ᴹ  tᴹ δᴹ .act ρ = tᴹ .act (δᴹ .act ρ)
-eval𝕞 ._[_]ᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Δᴹ = Δᴹ} tᴹ δᴹ .nat {σTh = σTh} {ρ = ρ} = 
+eval𝕞 ._[_]ᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Δᴹ = Δᴹ} tᴹ δᴹ .nat {ρ = ρ} {σTh = σTh} = 
   coe _ (tᴹ .act (δᴹ .act ρ) A.[ σTh ]V)
   ≡⟨ ap (coe _) (tᴹ .nat) ⟩
   coe _ (tᴹ .act (δᴹ .act ρ Γ.[ σTh ]E))
@@ -117,11 +119,12 @@ eval𝕞 .▷ηᴹ {Aᴹ = Aᴹ} {δᴹ = δᴹ} = eval*≡ λ ρ → ap (_ Σ,_
 -- eval𝕞 .Πᴹ Aᴹ Bᴹ .[][]V = cheat
 -- eval𝕞 .lamᴹ tᴹ .act ρ .act σTh υ     = tᴹ .act (_ Σ, υ)
 -- eval𝕞 .lamᴹ tᴹ .act ρ .nat σTh γTh υ = cheat
+-- eval𝕞 .lamᴹ {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} {t = t} tᴹ .nat {δ = δ} {σ = σ}               
+--   = ΠVal≡ Aᴹ Bᴹ (lam t [ δ ⨾ σ ]) λ γTh υ → cheat
 -- eval𝕞 .appᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} tᴹ .act (ρ Σ, υ)
 --   = transp (λ □ → Bᴹ .El □ _) (apd₂ _Σ,_ (Γᴹ .[id]E) transp-sym[])
 --            (tᴹ .act ρ .act idTh (transp (λ □ → Aᴹ .El □ _) (sym (Γᴹ .[id]E)) υ))
 -- eval𝕞 .appᴹ {Γᴹ = Γᴹ} {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} tᴹ .nat = cheat
--- -- Below implements more of this case but takes a while to typecheck
 -- eval𝕞 .Π[]ᴹ {Aᴹ = Aᴹ} {Bᴹ = Bᴹ} {Δᴹ = Δᴹ} {δᴹ = δᴹ} 
 --   = val≡
 --   (λ ρ t → apd₂ ΠVal' (piexti λ {_} → piexti λ {_} → piexti λ {_} 
@@ -146,30 +149,30 @@ eval𝕞 .▷ηᴹ {Aᴹ = Aᴹ} {δᴹ = δᴹ} = eval*≡ λ ρ → ap (_ Σ,_
 --   -- η is a bit more tedious than β because η is not strict in the syntax
 
 eval𝕞 .ℤᴹ .El    ρ t = ℤVal _ t
-eval𝕞 .ℤᴹ ._[_]V = {!   !}
-eval𝕞 .ℤᴹ .[id]V = {!   !}
-eval𝕞 .ℤᴹ .[][]V = {!   !}
+-- eval𝕞 .ℤᴹ ._[_]V = {!   !}
+-- eval𝕞 .ℤᴹ .[id]V = {!   !}
+-- eval𝕞 .ℤᴹ .[][]V = {!   !}
 
 eval𝕞 .zeᴹ .act ρ = zeⱽ
-eval𝕞 .zeᴹ .nat   = {!   !}
+-- eval𝕞 .zeᴹ .nat   = {!   !}
 
 eval𝕞 .suᴹ tᴹ .act ρ = suⱽ (tᴹ .act ρ)
-eval𝕞 .suᴹ tᴹ .nat = {!   !}
+-- eval𝕞 .suᴹ tᴹ .nat = {!   !}
 
 eval𝕞 ._-ᴹ_ tᴹ uᴹ .act ρ = tᴹ .act ρ -ⱽ uᴹ .act ρ
-eval𝕞 ._-ᴹ_ tᴹ uᴹ .nat   = {!   !}
+-- eval𝕞 ._-ᴹ_ tᴹ uᴹ .nat   = {!   !}
 
-eval𝕞 .IF-ZEᴹ = {!   !}
+-- eval𝕞 .IF-ZEᴹ = {!   !}
 
-eval𝕞 .ℤ[]ᴹ  = val≡' refl {!!}
+eval𝕞 .ℤ[]ᴹ  = val≡' refl todo
 eval𝕞 .ze[]ᴹ = eval≡[]' refl[]-K
-eval𝕞 .su[]ᴹ = {!!}
-eval𝕞 .-[]ᴹ = {!   !}
-eval𝕞 .IF-ZE[]ᴹ = {!   !}
+-- eval𝕞 .su[]ᴹ    = {!!}
+-- eval𝕞 .-[]ᴹ     = {!   !}
+-- eval𝕞 .IF-ZE[]ᴹ = {!   !}
 
-eval𝕞 .-zeᴹ       = eval≡' refl
-eval𝕞 .-cancelᴹ   = eval≡ λ ρ → {!!}
-eval𝕞 .-suᴹ       = eval≡' refl
-eval𝕞 .IF-ZE-zeᴹ  = {!   !}
-eval𝕞 .IF-ZE-suᴹ  = {!   !}
-eval𝕞 .IF-ZE-ze-ᴹ = {!   !}
+eval𝕞 .-zeᴹ               = eval≡ λ ρ → ∃squash refl
+eval𝕞 .-cancelᴹ {tᴹ = tᴹ} = eval≡ λ ρ → -cancelⱽ {tⱽ = tᴹ .act ρ}
+eval𝕞 .-suᴹ               = eval≡ λ ρ → ∃squash refl
+-- eval𝕞 .IF-ZE-zeᴹ  = {!   !}
+-- eval𝕞 .IF-ZE-suᴹ  = {!   !}
+-- eval𝕞 .IF-ZE-ze-ᴹ = {!   !}

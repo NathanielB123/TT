@@ -166,3 +166,14 @@ piext[] : {B₁ : A₁ → Set ℓ} {B₂ : A₂ → Set ℓ} (A≡ : A₁ ≡ A
         → (∀ {x₁ x₂} (x≡ : x₁ ≡[ A≡ ]≡ x₂) → B₁ x₁ ≡ B₂ x₂) 
         → (∀ x → B₁ x) ≡ (∀ x → B₂ x)
 piext[] refl p = piext λ x → p refl[]
+
+data _＋_ (A : Set ℓ₁) (B : Set ℓ₂) : Set (ℓ₁ ⊔l ℓ₂) where
+  inl : A → A ＋ B
+  inr : B → A ＋ B
+
+_×_ : Set ℓ₁ → Set ℓ₂ → Set (ℓ₁ ⊔l ℓ₂)
+A × B = Σ A λ _ → B
+
+data Dec (A : Set ℓ) : Set ℓ where
+  yes : A       → Dec A
+  no  : (A → 𝟘) → Dec A

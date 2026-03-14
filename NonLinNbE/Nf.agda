@@ -1,6 +1,8 @@
 {-# OPTIONS --rewriting #-}
 
 open import Utils renaming (_,_ to _Σ,_)
+open import Utils.Trunc
+open import Utils.WithK
 
 open import NonLinNbE.SyntaxEta 
 
@@ -71,7 +73,7 @@ data NeCmpl where
        → (tᴿ ≡ neℤᴿ uᴿ → 𝟘) → NeCmpl Γ ℤ (t - u) (tᴿ -ᴿ neℤᴿ uᴿ)
   -- LHS is neutral and RHS is successor of something
   ne-C : NeCmpl Γ ℤ t tᴿ → NfCmpl Γ ℤ u uᴿ
-       → NeCmpl Γ ℤ (t - su u) (tᴿ -ᴿ suᴿ uᴿ)
+       → NeCmpl Γ ℤ (t - su u) (neℤᴿ tᴿ -ᴿ suᴿ uᴿ)
   -- LHS is zero and RHS is successor of something
   ze-C : NfCmpl Γ ℤ u uᴿ → NeCmpl Γ ℤ (ze - su u) (zeᴿ -ᴿ suᴿ uᴿ)
 
@@ -92,34 +94,29 @@ data ℤCmpl where
   neC  : NeCmpl Γ ℤ t tᴿ → ℤCmpl Γ t (neℤᴿ tᴿ)
 
 Var : ∀ Γ A → Tm Γ A → Set
-Var Γ A t = Σ Raw (VarCmpl Γ A t)
+Var Γ A t = ∃ Raw (VarCmpl Γ A t)
 
 Ne : ∀ Γ A → Tm Γ A → Set
-Ne Γ A t = Σ Raw (NeCmpl Γ A t)
+Ne Γ A t = ∃ Raw (NeCmpl Γ A t)
 
 Nf : ∀ Γ A → Tm Γ A → Set
-Nf Γ A t = Σ Raw (NfCmpl Γ A t)
+Nf Γ A t = ∃ Raw (NfCmpl Γ A t)
 
 ℤPar : ∀ Γ → Tm Γ ℤ → Set
-ℤPar Γ t = Σ Raw (ℤParCmpl Γ t)
+ℤPar Γ t = ∃ Raw (ℤParCmpl Γ t)
 
 ℤVal : ∀ Γ → Tm Γ ℤ → Set
-ℤVal Γ t = Σ Raw (ℤCmpl Γ t)
-
-pattern parⱽ tᴿ tC = tᴿ      Σ, parC tC
-pattern neℤⱽ tᴿ tC = neℤᴿ tᴿ Σ, neC  tC
-pattern zeᴾ        = zeᴿ Σ, zeC
-pattern suᴾ tᴿ tC  = suᴿ tᴿ Σ, suC tC
+ℤVal Γ t = ∃ Raw (ℤCmpl Γ t)
 
 zeⱽ : ℤVal Γ ze
-zeⱽ = zeᴿ Σ, parC zeC
+zeⱽ = zeᴿ ∃, parC zeC
 
 suⱽ : ℤVal Γ t → ℤVal Γ (su t)
-suⱽ (tᴿ Σ, tC) = suᴿ tᴿ Σ, parC (suC tC)
+suⱽ tⱽ = ∃-map suᴿ (λ tC → parC (suC tC)) tⱽ
 
-coeℤ~ : t₁ ~ t₂ → ℤVal Γ t₁ → ℤVal Γ t₂
-coeℤ~ t~ (tᴿ      Σ, parC tC) = tᴿ      Σ, parC (coe~ t~ tC)
-coeℤ~ t~ (neℤᴿ tᴿ Σ, neC  tC) = neℤᴿ tᴿ Σ, neC  (coe~ t~ tC)
+coeℤ~ : t₁ ~ t₂ → ℤCmpl Γ t₁ tᴿ → ℤCmpl Γ t₂ tᴿ
+coeℤ~ t~ (parC tC) = parC (coe~ t~ tC)
+coeℤ~ t~ (neC  tC) = neC  (coe~ t~ tC)
 
 -- Relaxed version of the non-linear '-cancel' conversion rule
 -cancel~ : NeCmpl Γ ℤ t₁ tᴿ → NeCmpl Γ ℤ t₂ tᴿ → (t₁ - t₂) ~ ze
@@ -128,35 +125,67 @@ coeℤ~ t~ (neℤᴿ tᴿ Σ, neC  tC) = neℤᴿ tᴿ Σ, neC  (coe~ t~ tC)
 ℤ/ne : ℤParCmpl Γ t₁ (neℤᴿ tᴿ) → NeCmpl Γ ℤ t₂ tᴿ → 𝟘
 ℤ/ne (coe~ _ tC₁) tC₂ = ℤ/ne tC₁ tC₂
 
--- The decomposition into helpers in needed to ensure termination
-_-ⱽ_  : ℤVal Γ t → ℤVal Γ u → ℤVal Γ (t - u)
-_ⱽ-ᴾ_ : ℤVal Γ t → ℤPar Γ u → ℤVal Γ (t - u)
-_ᴾ-ⱽ_ : ℤPar Γ t → ℤVal Γ u → ℤVal Γ (t - u)
-_ᴾ-ᴾ_ : ℤPar Γ t → ℤPar Γ u → ℤVal Γ (t - u)
+-- Recursive subtraction
+_-ᴿ'_ : Raw → Raw → Raw
+tᴿ      -ᴿ' zeᴿ     = tᴿ
+suᴿ tᴿ  -ᴿ' suᴿ uᴿ  = tᴿ -ᴿ' uᴿ
+neℤᴿ tᴿ -ᴿ' neℤᴿ uᴿ with tᴿ ≟ uᴿ 
+... | yes _ = zeᴿ
+... | no  _ = neℤᴿ (neℤᴿ tᴿ -ᴿ neℤᴿ uᴿ)
+-- Fallthrough
+tᴿ      -ᴿ' uᴿ = neℤᴿ (tᴿ -ᴿ uᴿ)
 
-tⱽ         -ⱽ parⱽ uᴿ uC = tⱽ ⱽ-ᴾ (uᴿ Σ, uC)
-parⱽ tᴿ tC -ⱽ uⱽ         = (tᴿ Σ, tC) ᴾ-ⱽ uⱽ
-neℤⱽ tᴿ tC -ⱽ neℤⱽ uᴿ uC with tᴿ ≟ uᴿ 
-... | yes refl = coeℤ~ (sym~ (-cancel~ tC uC)) (zeᴿ Σ, parC zeC)
-... | no  p    = _ Σ, neC (-neC (valℤC (neC tC)) uC λ where refl → p refl)
+-neᴿ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' neℤᴿ uᴿ ≡ neℤᴿ (tᴿ -ᴿ neℤᴿ uᴿ)
+-neᴿ (coe~ _ tC) = -neᴿ tC
+-neᴿ zeC         = refl
+-neᴿ (suC tC)    = refl
 
-tⱽ         ⱽ-ᴾ zeᴾ       = tⱽ
-neℤⱽ tᴿ tC ⱽ-ᴾ suᴾ uᴿ uC 
-  = neℤⱽ (tᴿ -ᴿ suᴿ uᴿ) (ne-C tC (valℤC uC))
-parⱽ tᴿ tC ⱽ-ᴾ uⱽ = (tᴿ Σ, tC) ᴾ-ᴾ uⱽ
+_ⱽ-ⱽ_ : ℤCmpl Γ t tᴿ → ℤCmpl Γ u uᴿ → ℤCmpl Γ (t - u) (tᴿ -ᴿ' uᴿ)
+_ⱽ-ᴾ_ : ℤCmpl Γ t tᴿ → ℤParCmpl Γ u uᴿ → ℤCmpl Γ (t - u) (tᴿ -ᴿ' uᴿ)
+_ᴾ-ⱽ_ : ℤParCmpl Γ t tᴿ → ℤCmpl Γ u uᴿ → ℤCmpl Γ (t - u) (tᴿ -ᴿ' uᴿ)
+_ᴾ-ᴾ_ : ℤParCmpl Γ t tᴿ → ℤParCmpl Γ u uᴿ → ℤCmpl Γ (t - u) (tᴿ -ᴿ' uᴿ)
 
-_ⱽ-ᴾ_ {t = t} tⱽ (uᴿ Σ, coe~ u~ uC) 
-  = coeℤ~ (ap~ (t -_) u~) (tⱽ ⱽ-ᴾ (uᴿ Σ, uC))
+tC      ⱽ-ⱽ parC uC = tC ⱽ-ᴾ uC
+parC tC ⱽ-ⱽ uC      = tC ᴾ-ⱽ uC
+_ⱽ-ⱽ_ {tᴿ = neℤᴿ tᴿ} {uᴿ = neℤᴿ uᴿ} (neC tC) (neC uC) with tᴿ ≟ uᴿ 
+... | yes refl = coeℤ~ (sym~ (-cancel~ tC uC)) (parC zeC)
+... | no  p    = neC (-neC (valℤC (neC tC)) uC λ where refl → p refl)
 
-tⱽ         ᴾ-ⱽ parⱽ uᴿ uC = tⱽ ᴾ-ᴾ (uᴿ Σ, uC)
-(tᴿ Σ, tC) ᴾ-ⱽ neℤⱽ uᴿ uC 
-  = neℤⱽ _ (-neC (valℤC (parC tC)) uC λ where refl → ℤ/ne tC uC)
+_ⱽ-ᴾ_ {t = t} tC (coe~ u~ uC) 
+  = coeℤ~ (ap~ (t -_) u~) (tC ⱽ-ᴾ uC)
 
-(tᴿ Σ, tC) ᴾ-ᴾ zeᴾ       = parⱽ tᴿ tC
-suᴾ tᴿ tC  ᴾ-ᴾ suᴾ uᴿ uC = (tᴿ Σ, tC) -ⱽ (uᴿ Σ, uC)
-zeᴾ        ᴾ-ᴾ suᴾ uᴿ uC = neℤⱽ (zeᴿ -ᴿ suᴿ uᴿ) (ze-C (valℤC uC))
+tC      ⱽ-ᴾ zeC    = tC
+neC tC  ⱽ-ᴾ suC uC = neC (ne-C tC (valℤC uC))
+parC tC ⱽ-ᴾ uC     = tC ᴾ-ᴾ uC
 
-_ᴾ-ᴾ_ {u = u} (tᴿ Σ, coe~ t~ tC) uⱽ 
-  = coeℤ~ (ap~ (_- u) t~) ((tᴿ Σ, tC) ᴾ-ᴾ uⱽ)
-_ᴾ-ᴾ_ {t = t} tⱽ (uᴿ Σ, coe~ u~ uC) 
-  = coeℤ~ (ap~ (t -_) u~) (tⱽ ᴾ-ᴾ (uᴿ Σ, uC))
+tC ᴾ-ⱽ parC uC = tC ᴾ-ᴾ uC
+tC ᴾ-ⱽ neC uC
+  = transp (ℤCmpl _ _) (sym (-neᴿ tC)) 
+           (neC (-neC (valℤC (parC tC)) uC λ where refl → ℤ/ne tC uC))
+
+tC     ᴾ-ᴾ zeC    = parC tC
+suC tC ᴾ-ᴾ suC uC = tC ⱽ-ⱽ uC
+zeC    ᴾ-ᴾ suC uC = neC (ze-C (valℤC uC))
+
+_ᴾ-ᴾ_ {u = u} (coe~ t~ tC) uC 
+  = coeℤ~ (ap~ (_- u) t~) (tC ᴾ-ᴾ uC)
+_ᴾ-ᴾ_ {t = t} tC (coe~ u~ uC) 
+  = coeℤ~ (ap~ (t -_) u~) (tC ᴾ-ᴾ uC)
+
+_-ⱽ_ : ℤVal Γ t → ℤVal Γ u → ℤVal Γ (t - u)
+tⱽ -ⱽ uⱽ = ∃-map₂ _-ᴿ'_ _ⱽ-ⱽ_ tⱽ uⱽ
+
+-cancelᴿ : ℤCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
+-cancelᴾ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
+
+-cancelᴾ (coe~ t~ tC) = -cancelᴾ tC
+-cancelᴾ zeC          = refl
+-cancelᴾ (suC tC)     = -cancelᴿ tC
+
+-cancelᴿ                (parC tC) = -cancelᴾ tC
+-cancelᴿ {tᴿ = neℤᴿ tᴿ} (neC  tC) with tᴿ ≟ tᴿ
+... | yes _ = refl
+... | no  p = absurd (p refl)
+
+-cancelⱽ : {tⱽ : ℤVal Γ t} → tⱽ -ⱽ tⱽ ≡ zeⱽ
+-cancelⱽ {tⱽ = tᴿ Σ, tC} = ∃squash (∥-∥-rec uip -cancelᴿ tC)
