@@ -2,7 +2,7 @@
 
 open import Utils renaming (_,_ to _Σ,_)
 open import Utils.WithK
-open import Utils.Prop
+open import Utils.STrunc
 
 open import NonLinNbE.SyntaxEta
 open import NonLinNbE.Elim
@@ -76,7 +76,7 @@ opaque
           → uip) 
           ( funexti λ {_} → funexti λ {_} → funexti λ {_} → funexti λ {_} 
           → funexti λ {_} → funexti λ {_} → funexti λ {_} → funexti λ {_}
-          → uip) 
+          → uip)
 
   “”≡ : {A₁ᴹ A₂ᴹ : “” A} 
       → (∀ {Δ δ t} (ρ : env Δ Γ δ) (τ : val A ρ t) 
@@ -131,8 +131,10 @@ opaque
 
 -- “”𝕞 .Π[]ᴹ = “”≡ {!!} {!!}
 
-“”𝕞 .ℤᴹ .“ _ (tᴿ ∃, tC) = tᴿ      ∃, valℤC tC
-“”𝕞 .ℤᴹ .” _ (tᴿ ∃, tC) = neℤᴿ tᴿ ∃, neC tC
+“”𝕞 .ℤᴹ .“ _ (tᴿ Σ, tC) .fst       = tᴿ 
+“”𝕞 .ℤᴹ .“ _ (tᴿ ∃, tC) .snd .proj = incᴾ (valℤC tC)
+“”𝕞 .ℤᴹ .” _ (tᴿ Σ, tC) .fst       = neℤᴿ tᴿ 
+“”𝕞 .ℤᴹ .” _ (tᴿ ∃, tC) .snd .proj = incᴾ (neC tC)
 “”𝕞 .ℤᴹ .“[] = refl
 “”𝕞 .ℤᴹ .”[] = refl
 

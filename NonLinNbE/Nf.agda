@@ -1,7 +1,7 @@
 {-# OPTIONS --rewriting --prop #-}
 
 open import Utils renaming (_,_ to _Σ,_)
-open import Utils.Prop
+open import Utils.STrunc
 open import Utils.WithK
 
 open import NonLinNbE.SyntaxEta 
@@ -45,17 +45,17 @@ variable
 
 -- Implementing this is very standard (I'll do it at some point!)
 postulate
-  _≟_ : (tᴿ uᴿ : Raw n) → Decᴾ (tᴿ ≡ uᴿ)
+  _≟_ : (tᴿ uᴿ : Raw n) → Dec (tᴿ ≡ uᴿ)
 
 -- Relaxed convertibility
 data _~_ : Tm Γ A → Tm Γ A → Set
 
 -- Variable/neutral/normal form predicates
-data VarCmpl  : ∀ Γ A → Tm Γ A → RawVar (len Γ) → Prop
-data NeCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Prop
-data NfCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Prop
-data ℤParCmpl : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Prop
-data ℤCmpl    : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Prop
+data VarCmpl  : ∀ Γ A → Tm Γ A → RawVar (len Γ) → Set
+data NeCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
+data NfCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
+data ℤParCmpl : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
+data ℤCmpl    : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
 
 data _~_ where
   rfl~ : t ~ t
@@ -81,7 +81,7 @@ data NeCmpl where
   -- LHS is normal but RHS is neutral
   -- OR both sides are neutral and not convertible
   -neC : NfCmpl Γ ℤ t tᴿ → NeCmpl Γ ℤ u uᴿ
-       → (tᴿ ≡ neℤᴿ uᴿ → ⊥) → NeCmpl Γ ℤ (t - u) (tᴿ -ᴿ neℤᴿ uᴿ)
+       → (tᴿ ≡ neℤᴿ uᴿ → 𝟘) → NeCmpl Γ ℤ (t - u) (tᴿ -ᴿ neℤᴿ uᴿ)
   -- LHS is neutral and RHS is successor of something
   ne-C : NeCmpl Γ ℤ t tᴿ → NfCmpl Γ ℤ u uᴿ
        → NeCmpl Γ ℤ (t - su u) (neℤᴿ tᴿ -ᴿ suᴿ uᴿ)
@@ -123,7 +123,8 @@ zeⱽ : ℤVal Γ ze
 zeⱽ = zeᴿ ∃, parC zeC
 
 suⱽ : ℤVal Γ t → ℤVal Γ (su t)
-suⱽ (tᴿ ∃, tC) = suᴿ tᴿ ∃, parC (suC tC)
+suⱽ (tᴿ Σ,  tC) .fst       = suᴿ tᴿ
+suⱽ (tᴿ ∃, tC) .snd .proj = incᴾ (parC (suC tC))
 
 coeℤ~ : t₁ ~ t₂ → ℤCmpl Γ t₁ tᴿ → ℤCmpl Γ t₂ tᴿ
 coeℤ~ t~ (parC tC) = parC (coe~ t~ tC)
@@ -133,7 +134,7 @@ coeℤ~ t~ (neC  tC) = neC  (coe~ t~ tC)
 -cancel~ : NeCmpl Γ ℤ t₁ tᴿ → NeCmpl Γ ℤ t₂ tᴿ → (t₁ - t₂) ~ ze
 -cancel~ {t₁ = t₁} {t₂ = t₂} t₁C t₂C = ap~ (_- t₂) (ne~ t₁C t₂C)
 
-ℤ/ne : ℤParCmpl Γ t₁ (neℤᴿ tᴿ) → NeCmpl Γ ℤ t₂ tᴿ → ⊥
+ℤ/ne : ℤParCmpl Γ t₁ (neℤᴿ tᴿ) → NeCmpl Γ ℤ t₂ tᴿ → 𝟘
 ℤ/ne (coe~ _ tC₁) tC₂ = ℤ/ne tC₁ tC₂
 
 -- Recursive subtraction
@@ -146,7 +147,7 @@ neℤᴿ tᴿ -ᴿ' neℤᴿ uᴿ with tᴿ ≟ uᴿ
 -- Fallthrough
 tᴿ      -ᴿ' uᴿ = neℤᴿ (tᴿ -ᴿ uᴿ)
 
--neᴿ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' neℤᴿ uᴿ ≡ᴾ neℤᴿ (tᴿ -ᴿ neℤᴿ uᴿ)
+-neᴿ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' neℤᴿ uᴿ ≡ neℤᴿ (tᴿ -ᴿ neℤᴿ uᴿ)
 -neᴿ (coe~ _ tC) = -neᴿ tC
 -neᴿ zeC         = refl
 -neᴿ (suC tC)    = refl
@@ -171,8 +172,8 @@ parC tC ⱽ-ᴾ uC     = tC ᴾ-ᴾ uC
 
 tC ᴾ-ⱽ parC uC = tC ᴾ-ᴾ uC
 tC ᴾ-ⱽ neC uC
-  = transpᴾ (ℤCmpl _ _) (symᴾ (-neᴿ tC)) 
-            (neC (-neC (valℤC (parC tC)) uC λ where refl → ℤ/ne tC uC))
+  = transp (ℤCmpl _ _) (sym (-neᴿ tC)) 
+           (neC (-neC (valℤC (parC tC)) uC λ where refl → ℤ/ne tC uC))
 
 tC     ᴾ-ᴾ zeC    = parC tC
 suC tC ᴾ-ᴾ suC uC = tC ⱽ-ⱽ uC
@@ -184,10 +185,12 @@ _ᴾ-ᴾ_ {t = t} tC (coe~ u~ uC)
   = coeℤ~ (ap~ (t -_) u~) (tC ᴾ-ᴾ uC)
 
 _-ⱽ_ : ℤVal Γ t → ℤVal Γ u → ℤVal Γ (t - u)
-(tᴿ ∃, tC) -ⱽ (uᴿ ∃, uC) = (tᴿ -ᴿ' uᴿ) ∃, (tC ⱽ-ⱽ uC)
+((tᴿ Σ, tC) -ⱽ (uᴿ Σ, uC)) .fst       = tᴿ -ᴿ' uᴿ
+((tᴿ ∃, tC) -ⱽ (uᴿ ∃, uC)) .snd .proj = incᴾ (tC ⱽ-ⱽ uC)
+  -- (tᴿ -ᴿ' uᴿ) ∃, (tC ⱽ-ⱽ uC)
 
--cancelᴿ : ℤCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ᴾ zeᴿ
--cancelᴾ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ᴾ zeᴿ
+-cancelᴿ : ℤCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
+-cancelᴾ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
 
 -cancelᴾ (coe~ t~ tC) = -cancelᴾ tC
 -cancelᴾ zeC          = refl
@@ -196,16 +199,18 @@ _-ⱽ_ : ℤVal Γ t → ℤVal Γ u → ℤVal Γ (t - u)
 -cancelᴿ                (parC tC) = -cancelᴾ tC
 -cancelᴿ {tᴿ = neℤᴿ tᴿ} (neC  tC) with tᴿ ≟ tᴿ
 ... | yes _ = refl
-... | no  p = absurdᴾ (p refl)
+... | no  p = absurd (p refl)
 
 -cancelⱽ : {tⱽ : ℤVal Γ t} → tⱽ -ⱽ tⱽ ≡ zeⱽ
--cancelⱽ {tⱽ = tᴿ ∃, tC} = ∃≡ (↑≡ (-cancelᴿ tC))
+-cancelⱽ {tⱽ = tᴿ Σ, tC} = ∃≡ (↑∥≡∥ (∥-∥-map -cancelᴿ tC))
 
 vzᴺᵉ : Ne (Γ ▷ A) (A [ p ]T) q
 vzᴺᵉ = varᴿ vzᴿ ∃, varC vzC
 
 lamᴺᶠ : Nf (Γ ▷ A) B t → Nf Γ (Π A B) (lam t)
-lamᴺᶠ (tᴿ ∃, tC) = lamᴿ tᴿ ∃, lamC tC 
+lamᴺᶠ (tᴿ Σ, tC) .fst       = lamᴿ tᴿ
+lamᴺᶠ (tᴿ ∃, tC) .snd .proj = incᴾ (lamC tC)
 
 appᴺᵉ : Ne Γ (Π A B) t → Nf Γ A u → Ne Γ (B [ id , u ]T) (app t [ id , u ])
-appᴺᵉ (tᴿ ∃, tC) (uᴿ ∃, uC) = appᴿ tᴿ uᴿ ∃, appC tC uC
+appᴺᵉ (tᴿ Σ, tC) (uᴿ Σ, uC) .fst       = appᴿ tᴿ uᴿ
+appᴺᵉ (tᴿ ∃, tC) (uᴿ ∃, uC) .snd .proj = incᴾ (appC tC uC)

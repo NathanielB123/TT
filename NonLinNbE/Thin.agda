@@ -3,7 +3,7 @@
 open import Agda.Builtin.Equality.Rewrite
 
 open import Utils renaming (_,_ to _Σ,_)
-open import Utils.Prop
+open import Utils.STrunc
 
 open import NonLinNbE.SyntaxEta
 open import NonLinNbE.Nf
@@ -60,7 +60,7 @@ id⨾ᴿ {σᴿ = σᴿ ⁺ᴿ} = ap _⁺ᴿ id⨾ᴿ
 
 {-# REWRITE id⨾ᴿ ⨾idᴿ ⨾⨾ᴿ #-}
 
-data IsThin : ∀ Δ Γ → Tms Δ Γ → RawThin (len Δ) (len Γ) → Prop where
+data IsThin : ∀ Δ Γ → Tms Δ Γ → RawThin (len Δ) (len Γ) → Set where
   εC  : IsThin • • ε εᴿ
   _^C : IsThin Δ Γ δ δᴿ → IsThin (Δ ▷ (A [ δ ]T)) (Γ ▷ A) (δ ^ A) (δᴿ ^ᴿ)
   _⁺C : IsThin Δ Γ δ δᴿ → IsThin (Δ ▷ A) Γ (δ ⁺ A) (δᴿ ⁺ᴿ)
@@ -182,16 +182,19 @@ Thin : ∀ Δ Γ → Tms Δ Γ → Set
 Thin Δ Γ δ = ∃ (RawThin (len Δ) (len Γ)) (IsThin Δ Γ δ)
 
 _⁺Th_ : Thin Δ Γ δ → ∀ A → Thin (Δ ▷ A) Γ (δ ⁺ A)
-(δᴿ ∃, δC) ⁺Th A = (δᴿ ⁺ᴿ) ∃, (δC ⁺C)
+((δᴿ Σ, δC) ⁺Th A) .fst       = δᴿ ⁺ᴿ
+((δᴿ ∃, δC) ⁺Th A) .snd .proj = incᴾ (δC ⁺C)
 
 _^Th_ : Thin Δ Γ δ → ∀ A → Thin (Δ ▷ (A [ δ ]T)) (Γ ▷ A) (δ ^ A)
-(δᴿ ∃, δC) ^Th A = (δᴿ ^ᴿ) ∃, (δC ^C)
+((δᴿ Σ, δC) ^Th A) .fst       = δᴿ ^ᴿ
+((δᴿ ∃, δC) ^Th A) .snd .proj = incᴾ (δC ^C)
 
 idTh : Thin Γ Γ id
 idTh = idᴿ ∃, idC
 
 _⨾Th_ : Thin Δ Γ δ → Thin Θ Δ σ → Thin Θ Γ (δ ⨾ σ)
-(δᴿ ∃, δC) ⨾Th (σᴿ ∃, σC) = (δᴿ ⨾ᴿ σᴿ) ∃, (δC ⨾C σC)
+((δᴿ Σ, δC) ⨾Th (σᴿ Σ, σC)) .fst       = δᴿ ⨾ᴿ σᴿ
+((δᴿ ∃, δC) ⨾Th (σᴿ ∃, σC)) .snd .proj = incᴾ (δC ⨾C σC)
 
 variable
   δTh σTh γTh : Thin _ _ _
@@ -200,9 +203,14 @@ _[_]Ne : Ne Γ A t → Thin Δ Γ δ → Ne Δ (A [ δ ]T) (t [ δ ])
 _[_]Nf : Nf Γ A t → Thin Δ Γ δ → Nf Δ (A [ δ ]T) (t [ δ ])
 _[_]ℤ  : ℤVal Γ t → Thin Δ Γ δ → ℤVal Δ (t [ δ ])
 
-(tᴿ ∃, tC) [ (δᴿ ∃, δC) ]Ne = (tᴿ [ δᴿ ]ᴿ) ∃, (tC [ δC ]NeC)
-(tᴿ ∃, tC) [ (δᴿ ∃, δC) ]Nf = (tᴿ [ δᴿ ]ᴿ) ∃, (tC [ δC ]NfC)
-(tᴿ ∃, tC) [ (δᴿ ∃, δC) ]ℤ  = (tᴿ [ δᴿ ]ᴿ) ∃, (tC [ δC ]ℤC)
+((tᴿ Σ, tC) [ (δᴿ Σ, δC) ]Ne) .fst       = tᴿ [ δᴿ ]ᴿ
+((tᴿ ∃, tC) [ (δᴿ ∃, δC) ]Ne) .snd .proj = incᴾ (tC [ δC ]NeC)
+
+((tᴿ Σ, tC) [ (δᴿ Σ, δC) ]Nf) .fst       = tᴿ [ δᴿ ]ᴿ
+((tᴿ ∃, tC) [ (δᴿ ∃, δC) ]Nf) .snd .proj = incᴾ (tC [ δC ]NfC)
+
+((tᴿ Σ, tC) [ (δᴿ Σ, δC) ]ℤ) .fst       = tᴿ [ δᴿ ]ᴿ
+((tᴿ ∃, tC) [ (δᴿ ∃, δC) ]ℤ) .snd .proj = incᴾ (tC [ δC ]ℤC)
 
 variable
   tᴺᶠ uᴺᶠ : Nf Γ A t
