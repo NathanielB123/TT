@@ -8,6 +8,13 @@ open import NonLinNbE.SyntaxEta
 
 module NonLinNbE.Nf where
 
+variable
+  n m l : Nat
+
+len : Ctx → Nat
+len •       = zero
+len (Γ ▷ A) = suc (len Γ)
+
 -- We define neutral and normal forms in a slightly unusual way
 -- The idea is twofold:
 -- * We need to be able to syntactically compare normal/neutral forms during
@@ -15,36 +22,40 @@ module NonLinNbE.Nf where
 -- * We need to relax completeness such that we can actually take advantage
 --   of these syntactic normal/neutral comparisons
 
--- Raw syntax of normal forms
-data Raw : Set where
-  vzᴿ  : Raw
-  vsᴿ  : Raw → Raw
-  varᴿ : Raw → Raw
-  neℤᴿ : Raw → Raw
-  
-  lamᴿ : Raw → Raw
-  appᴿ : Raw → Raw → Raw
+-- Well-scoped raw syntax of normal forms
 
-  zeᴿ  : Raw
-  suᴿ  : Raw → Raw
-  _-ᴿ_ : Raw → Raw → Raw
+data RawVar : Nat → Set where
+  vzᴿ  : RawVar (suc n)
+  vsᴿ  : RawVar n → RawVar (suc n)
+
+data Raw (n : Nat) : Set where
+  varᴿ : RawVar n → Raw n
+  neℤᴿ : Raw n → Raw n
+  
+  lamᴿ : Raw (suc n) → Raw n
+  appᴿ : Raw n → Raw n → Raw n
+
+  zeᴿ  : Raw n
+  suᴿ  : Raw n → Raw n
+  _-ᴿ_ : Raw n → Raw n → Raw n
 
 variable
-  tᴿ uᴿ vᴿ : Raw
+  xᴿ yᴿ zᴿ : RawVar _
+  tᴿ uᴿ vᴿ : Raw _
 
 -- Implementing this is very standard (I'll do it at some point!)
 postulate
-  _≟_ : (tᴿ uᴿ : Raw) → Dec (tᴿ ≡ uᴿ)
+  _≟_ : (tᴿ uᴿ : Raw n) → Dec (tᴿ ≡ uᴿ)
 
 -- Relaxed convertibility
 data _~_ : Tm Γ A → Tm Γ A → Set
 
 -- Variable/neutral/normal form predicates
-data VarCmpl  : ∀ Γ A → Tm Γ A → Raw → Set
-data NeCmpl   : ∀ Γ A → Tm Γ A → Raw → Set
-data NfCmpl   : ∀ Γ A → Tm Γ A → Raw → Set
-data ℤParCmpl : ∀ Γ → Tm Γ ℤ → Raw → Set
-data ℤCmpl    : ∀ Γ → Tm Γ ℤ → Raw → Set
+data VarCmpl  : ∀ Γ A → Tm Γ A → RawVar (len Γ) → Set
+data NeCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
+data NfCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
+data ℤParCmpl : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
+data ℤCmpl    : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
 
 data _~_ where
   rfl~ : t ~ t
@@ -59,12 +70,12 @@ data _~_ where
 
 data VarCmpl where
   vzC : VarCmpl (Γ ▷ A) (A [ p ]T) q vzᴿ
-  vsC : VarCmpl Γ A t tᴿ 
-      → VarCmpl (Γ ▷ B) (A [ p ]T) (t [ p ]) (vsᴿ tᴿ)
+  vsC : VarCmpl Γ A t xᴿ 
+      → VarCmpl (Γ ▷ B) (A [ p ]T) (t [ p ]) (vsᴿ xᴿ)
 
 data NeCmpl where
   coe~ : t₁ ~ t₂ → NeCmpl Γ A t₁ tᴿ → NeCmpl Γ A t₂ tᴿ
-  varC : VarCmpl Γ A t tᴿ → NeCmpl Γ A t (varᴿ tᴿ)
+  varC : VarCmpl Γ A t xᴿ → NeCmpl Γ A t (varᴿ xᴿ)
   appC : NeCmpl Γ (Π A B) t tᴿ → NfCmpl Γ A u uᴿ 
         → NeCmpl Γ (B [ id , u ]T) (app t [ id , u ]) (appᴿ tᴿ uᴿ)
   -- LHS is normal but RHS is neutral
@@ -94,19 +105,19 @@ data ℤCmpl where
   neC  : NeCmpl Γ ℤ t tᴿ → ℤCmpl Γ t (neℤᴿ tᴿ)
 
 Var : ∀ Γ A → Tm Γ A → Set
-Var Γ A t = ∃ Raw (VarCmpl Γ A t)
+Var Γ A t = ∃ (RawVar (len Γ)) (VarCmpl Γ A t)
 
 Ne : ∀ Γ A → Tm Γ A → Set
-Ne Γ A t = ∃ Raw (NeCmpl Γ A t)
+Ne Γ A t = ∃ (Raw (len Γ)) (NeCmpl Γ A t)
 
 Nf : ∀ Γ A → Tm Γ A → Set
-Nf Γ A t = ∃ Raw (NfCmpl Γ A t)
+Nf Γ A t = ∃ (Raw (len Γ)) (NfCmpl Γ A t)
 
 ℤPar : ∀ Γ → Tm Γ ℤ → Set
-ℤPar Γ t = ∃ Raw (ℤParCmpl Γ t)
+ℤPar Γ t = ∃ (Raw (len Γ)) (ℤParCmpl Γ t)
 
 ℤVal : ∀ Γ → Tm Γ ℤ → Set
-ℤVal Γ t = ∃ Raw (ℤCmpl Γ t)
+ℤVal Γ t = ∃ (Raw (len Γ)) (ℤCmpl Γ t)
 
 zeⱽ : ℤVal Γ ze
 zeⱽ = zeᴿ ∃, parC zeC
@@ -126,7 +137,7 @@ coeℤ~ t~ (neC  tC) = neC  (coe~ t~ tC)
 ℤ/ne (coe~ _ tC₁) tC₂ = ℤ/ne tC₁ tC₂
 
 -- Recursive subtraction
-_-ᴿ'_ : Raw → Raw → Raw
+_-ᴿ'_ : Raw n → Raw n → Raw n
 tᴿ      -ᴿ' zeᴿ     = tᴿ
 suᴿ tᴿ  -ᴿ' suᴿ uᴿ  = tᴿ -ᴿ' uᴿ
 neℤᴿ tᴿ -ᴿ' neℤᴿ uᴿ with tᴿ ≟ uᴿ 
@@ -189,3 +200,15 @@ tⱽ -ⱽ uⱽ = ∃-map₂ _-ᴿ'_ _ⱽ-ⱽ_ tⱽ uⱽ
 
 -cancelⱽ : {tⱽ : ℤVal Γ t} → tⱽ -ⱽ tⱽ ≡ zeⱽ
 -cancelⱽ {tⱽ = tᴿ Σ, tC} = ∃squash (∥-∥-rec uip -cancelᴿ tC)
+
+vzᴺᵉ : Ne (Γ ▷ A) (A [ p ]T) q
+vzᴺᵉ = varᴿ vzᴿ ∃, varC vzC
+{-# INLINE vzᴺᵉ #-}
+
+lamᴺᶠ : Nf (Γ ▷ A) B t → Nf Γ (Π A B) (lam t)
+lamᴺᶠ (tᴿ Σ, tC) = lamᴿ tᴿ Σ, ∥-∥-map lamC tC 
+{-# INLINE lamᴺᶠ #-}
+
+appᴺᵉ : Ne Γ (Π A B) t → Nf Γ A u → Ne Γ (B [ id , u ]T) (app t [ id , u ])
+appᴺᵉ (tᴿ Σ, tC) (uᴿ Σ, uC) = appᴿ tᴿ uᴿ Σ, ∥-∥-map₂ appC tC uC
+{-# INLINE appᴺᵉ #-}

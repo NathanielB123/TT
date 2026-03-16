@@ -26,24 +26,43 @@ postulate
         → ∥ A ∥ → B
 ∥-∥-rec p f x = ∥-∥-elim _ p f x
 
-∥-∥-rec₂ : (∀ {z₁ z₂ : C} → z₁ ≡ z₂)
-         → (A → B → C)
-         → ∥ A ∥ → ∥ B ∥ → C
-∥-∥-rec₂ p f x y = ∥-∥-rec (funext λ _ → p) (λ x' y → ∥-∥-rec p (f x') y) x y
+-- These do not unfold nicely, so we make them opaque and compute with rewrite
+-- rules
+opaque
+  ∥-∥-rec₂ : (∀ {z₁ z₂ : C} → z₁ ≡ z₂)
+           → (A → B → C)
+           → ∥ A ∥ → ∥ B ∥ → C
+  ∥-∥-rec₂ p f x y = ∥-∥-rec (funext λ _ → p) (λ x' y → ∥-∥-rec p (f x') y) x y
 
-∥-∥-map : (A → B) → ∥ A ∥ → ∥ B ∥
-∥-∥-map f = ∥-∥-rec squash λ x → inc (f x)
+  ∥-∥-map : (A → B) → ∥ A ∥ → ∥ B ∥
+  ∥-∥-map f = ∥-∥-rec squash λ x → inc (f x)
 
-∥-∥-map₂ : (A → B → C) → ∥ A ∥ → ∥ B ∥ → ∥ C ∥
-∥-∥-map₂ f = ∥-∥-rec₂ squash λ x y → inc (f x y)
+  ∥-∥-map₂ : (A → B → C) → ∥ A ∥ → ∥ B ∥ → ∥ C ∥
+  ∥-∥-map₂ f = ∥-∥-rec₂ squash λ x y → inc (f x y)
+
+  ∥-∥-rec₂-inc : {C≡ : (∀ {z₁ z₂ : C} → z₁ ≡ z₂)}
+                 {f : A → B → C}
+                 {x : A} {y : B}
+               → ∥-∥-rec₂ C≡ f (inc x) (inc y) ≡ f x y
+  ∥-∥-rec₂-inc = refl
+
+  ∥-∥-map-inc : {f : A → B} {x : A}
+              → ∥-∥-map f (inc x) ≡ inc (f x)
+  ∥-∥-map-inc = refl
+
+  ∥-∥-map₂-inc : {f : A → B → C} {x : A} {y : B}
+               → ∥-∥-map₂ f (inc x) (inc y) ≡ inc (f x y)
+  ∥-∥-map₂-inc = refl
+{-# REWRITE ∥-∥-rec₂-inc ∥-∥-map-inc ∥-∥-map₂-inc #-}
 
 -- I don't love using '∃' notation for something that contains actual data (the 
 -- first component) but I don't know what else to call this...
 ∃ : (A : Set ℓ₁) → (A → Set ℓ₂) → Set (ℓ₁ ⊔l ℓ₂)
 ∃ A P = Σ A λ x → ∥ P x ∥
 
-∃squash : {P : A → Set ℓ} {x y : ∃ A P} → x .fst ≡ y .fst → x ≡ y
-∃squash refl = ap (_ ,_) squash
+opaque
+  ∃squash : {P : A → Set ℓ} {x y : ∃ A P} → x .fst ≡ y .fst → x ≡ y
+  ∃squash refl = ap (_ ,_) squash
 
 _∃,_ : {P : A → Set ℓ} (x : A) → P x → ∃ A P
 x ∃, p = x , inc p
@@ -58,13 +77,14 @@ x ∃, p = x , inc p
                 (coe[] squash)) 
     (λ p' → f x p' ∃, (p' , refl) ) p .fst
 
-∃-map : {P : A → Set ℓ₁} {Q : B → Set ℓ₂} (f : A → B) → (∀ {x} → P x → Q (f x))
+∃-map : {P : A → Set ℓ₁} {Q : B → Set ℓ₂} (f : A → B) 
+      → (∀ {x} → P x → Q (f x))
       → ∃ A P → ∃ B Q
 ∃-map f g (x , p) .fst = f x
 ∃-map f g (x , p) .snd = ∥-∥-map g p
 
 ∃-map₂ : {P : A → Set ℓ₁} {Q : B → Set ℓ₂} {R : C → Set ℓ₃}
-         (f : A → B → C) → (∀ {x y} → P x → Q y → R (f x y))
-       → ∃ A P → ∃ B Q → ∃ C R
+          (f : A → B → C) → (∀ {x y} → P x → Q y → R (f x y))
+      → ∃ A P → ∃ B Q → ∃ C R
 ∃-map₂ f g (x , p) (y , q) .fst = f x y
 ∃-map₂ f g (x , p) (y , q) .snd = ∥-∥-map₂ g p q

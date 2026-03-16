@@ -7,6 +7,7 @@ open import Agda.Builtin.Sigma public
 open import Agda.Builtin.Equality public
 open import Agda.Builtin.Unit renaming (⊤ to 𝟙; tt to ⟨⟩) public
 open import Agda.Builtin.Bool renaming (true to tt; false to ff) public
+open import Agda.Builtin.Nat using (Nat; zero; suc) public
 
 infix 4 _≡[_]≡_
 infixr 2 step-≡-⟩  step-≡-∣

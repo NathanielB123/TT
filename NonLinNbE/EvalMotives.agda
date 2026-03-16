@@ -7,7 +7,7 @@ open import Utils.Rw
 open import NonLinNbE.SyntaxEta
 open import NonLinNbE.Thin
 
-module NonLinNbE.NbEMotives where
+module NonLinNbE.EvalMotives where
 
 -- Environments are presheaves on thinnings
 record Env (Γ : Ctx) : Set₁ where
