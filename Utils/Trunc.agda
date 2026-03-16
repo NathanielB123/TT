@@ -88,3 +88,9 @@ x ∃, p = x , inc p
       → ∃ A P → ∃ B Q → ∃ C R
 ∃-map₂ f g (x , p) (y , q) .fst = f x y
 ∃-map₂ f g (x , p) (y , q) .snd = ∥-∥-map₂ g p q
+
+transp-∃ : {P : B → A → Set ℓ} {eq : y₁ ≡ y₂} {p : ∥ P y₁ x ∥}
+         → transp (λ □ → ∃ A (P □)) eq (x , p) 
+         ≡ (x , transp (λ □ → ∥ P □ x ∥) eq p)
+transp-∃ {eq = refl} = refl
+

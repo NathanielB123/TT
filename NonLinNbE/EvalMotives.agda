@@ -1,4 +1,4 @@
-{-# OPTIONS --rewriting #-}
+{-# OPTIONS --rewriting --prop #-}
 
 open import Utils renaming (_,_ to _Σ,_)
 open import Utils.WithK

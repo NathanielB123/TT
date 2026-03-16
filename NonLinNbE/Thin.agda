@@ -1,9 +1,9 @@
-{-# OPTIONS --rewriting #-}
+{-# OPTIONS --rewriting --prop #-}
 
 open import Agda.Builtin.Equality.Rewrite
 
 open import Utils renaming (_,_ to _Σ,_)
-open import Utils.Trunc
+open import Utils.Prop
 
 open import NonLinNbE.SyntaxEta
 open import NonLinNbE.Nf
@@ -60,7 +60,7 @@ id⨾ᴿ {σᴿ = σᴿ ⁺ᴿ} = ap _⁺ᴿ id⨾ᴿ
 
 {-# REWRITE id⨾ᴿ ⨾idᴿ ⨾⨾ᴿ #-}
 
-data IsThin : ∀ Δ Γ → Tms Δ Γ → RawThin (len Δ) (len Γ) → Set where
+data IsThin : ∀ Δ Γ → Tms Δ Γ → RawThin (len Δ) (len Γ) → Prop where
   εC  : IsThin • • ε εᴿ
   _^C : IsThin Δ Γ δ δᴿ → IsThin (Δ ▷ (A [ δ ]T)) (Γ ▷ A) (δ ^ A) (δᴿ ^ᴿ)
   _⁺C : IsThin Δ Γ δ δᴿ → IsThin (Δ ▷ A) Γ (δ ⁺ A) (δᴿ ⁺ᴿ)
@@ -143,19 +143,6 @@ lookupᴿ-inj {xᴿ = vsᴿ xᴿ} {δᴿ = δᴿ ^ᴿ} {yᴿ = vsᴿ yᴿ} p
 []ᴿ-inj {tᴿ = t₁ᴿ -ᴿ t₂ᴿ} {uᴿ = u₁ᴿ -ᴿ u₂ᴿ} p 
   = ap₂ _-ᴿ_ ([]ᴿ-inj (-ᴿ-inj₁ p)) ([]ᴿ-inj (-ᴿ-inj₂ p))
 
-lookup-idᴿ : lookupᴿ xᴿ (idᴿ {n = n}) ≡ xᴿ 
-lookup-idᴿ {n = suc n} {xᴿ = vzᴿ}    = refl
-lookup-idᴿ {n = suc n} {xᴿ = vsᴿ xᴿ} = ap vsᴿ lookup-idᴿ
-
-[id]ᴿ : tᴿ [ idᴿ ]ᴿ ≡ tᴿ
-[id]ᴿ {tᴿ = varᴿ xᴿ}    = ap varᴿ lookup-idᴿ
-[id]ᴿ {tᴿ = neℤᴿ tᴿ}    = ap neℤᴿ [id]ᴿ
-[id]ᴿ {tᴿ = lamᴿ tᴿ}    = ap lamᴿ [id]ᴿ
-[id]ᴿ {tᴿ = appᴿ tᴿ uᴿ} = ap₂ appᴿ [id]ᴿ [id]ᴿ
-[id]ᴿ {tᴿ = zeᴿ}        = refl
-[id]ᴿ {tᴿ = suᴿ tᴿ}     = ap suᴿ [id]ᴿ
-[id]ᴿ {tᴿ = tᴿ -ᴿ uᴿ}   = ap₂ _-ᴿ_ [id]ᴿ [id]ᴿ
-
 _[_]VarC : VarCmpl Γ A t xᴿ → (δC : IsThin Δ Γ δ δᴿ) 
          → VarCmpl Δ (A [ δ ]T) (t [ δ ]) (lookupᴿ xᴿ δᴿ)
 _[_]NeC : NeCmpl Γ A t tᴿ → (δC : IsThin Δ Γ δ δᴿ) 
@@ -195,16 +182,16 @@ Thin : ∀ Δ Γ → Tms Δ Γ → Set
 Thin Δ Γ δ = ∃ (RawThin (len Δ) (len Γ)) (IsThin Δ Γ δ)
 
 _⁺Th_ : Thin Δ Γ δ → ∀ A → Thin (Δ ▷ A) Γ (δ ⁺ A)
-δTh ⁺Th A = ∃-map _⁺ᴿ _⁺C δTh
+(δᴿ ∃, δC) ⁺Th A = (δᴿ ⁺ᴿ) ∃, (δC ⁺C)
 
 _^Th_ : Thin Δ Γ δ → ∀ A → Thin (Δ ▷ (A [ δ ]T)) (Γ ▷ A) (δ ^ A)
-δTh ^Th A = ∃-map _^ᴿ _^C δTh
+(δᴿ ∃, δC) ^Th A = (δᴿ ^ᴿ) ∃, (δC ^C)
 
 idTh : Thin Γ Γ id
 idTh = idᴿ ∃, idC
 
 _⨾Th_ : Thin Δ Γ δ → Thin Θ Δ σ → Thin Θ Γ (δ ⨾ σ)
-_⨾Th_ = ∃-map₂ _⨾ᴿ_ _⨾C_
+(δᴿ ∃, δC) ⨾Th (σᴿ ∃, σC) = (δᴿ ⨾ᴿ σᴿ) ∃, (δC ⨾C σC)
 
 variable
   δTh σTh γTh : Thin _ _ _
@@ -213,30 +200,48 @@ _[_]Ne : Ne Γ A t → Thin Δ Γ δ → Ne Δ (A [ δ ]T) (t [ δ ])
 _[_]Nf : Nf Γ A t → Thin Δ Γ δ → Nf Δ (A [ δ ]T) (t [ δ ])
 _[_]ℤ  : ℤVal Γ t → Thin Δ Γ δ → ℤVal Δ (t [ δ ])
 
-_[_]Ne = ∃-map₂ _[_]ᴿ _[_]NeC
-_[_]Nf = ∃-map₂ _[_]ᴿ _[_]NfC
-_[_]ℤ  = ∃-map₂ _[_]ᴿ _[_]ℤC
-
-{-# INLINE _[_]Ne #-}
-{-# INLINE _[_]Nf #-}
-{-# INLINE _[_]ℤ #-}
+(tᴿ ∃, tC) [ (δᴿ ∃, δC) ]Ne = (tᴿ [ δᴿ ]ᴿ) ∃, (tC [ δC ]NeC)
+(tᴿ ∃, tC) [ (δᴿ ∃, δC) ]Nf = (tᴿ [ δᴿ ]ᴿ) ∃, (tC [ δC ]NfC)
+(tᴿ ∃, tC) [ (δᴿ ∃, δC) ]ℤ  = (tᴿ [ δᴿ ]ᴿ) ∃, (tC [ δC ]ℤC)
 
 variable
   tᴺᶠ uᴺᶠ : Nf Γ A t
   tᴺᵉ uᴺᵉ : Ne Γ A t
 
+lookup-idᴿ : lookupᴿ xᴿ (idᴿ {n = n}) ≡ xᴿ 
+lookup-idᴿ {n = suc n} {xᴿ = vzᴿ}    = refl
+lookup-idᴿ {n = suc n} {xᴿ = vsᴿ xᴿ} = ap vsᴿ lookup-idᴿ
 
--- TODO: Laws
+[id]ᴿ : tᴿ [ idᴿ ]ᴿ ≡ tᴿ
+[id]ᴿ {tᴿ = varᴿ xᴿ}    = ap varᴿ lookup-idᴿ
+[id]ᴿ {tᴿ = neℤᴿ tᴿ}    = ap neℤᴿ [id]ᴿ
+[id]ᴿ {tᴿ = lamᴿ tᴿ}    = ap lamᴿ [id]ᴿ
+[id]ᴿ {tᴿ = appᴿ tᴿ uᴿ} = ap₂ appᴿ [id]ᴿ [id]ᴿ
+[id]ᴿ {tᴿ = zeᴿ}        = refl
+[id]ᴿ {tᴿ = suᴿ tᴿ}     = ap suᴿ [id]ᴿ
+[id]ᴿ {tᴿ = tᴿ -ᴿ uᴿ}   = ap₂ _-ᴿ_ [id]ᴿ [id]ᴿ
 
-app[]Ne : appᴺᵉ tᴺᵉ uᴺᶠ [ δTh ]Ne ≡ appᴺᵉ (tᴺᵉ [ δTh ]Ne) (uᴺᶠ [ δTh ]Nf)
-app[]Ne = ∃squash refl
+lookup-lookupᴿ : lookupᴿ (lookupᴿ xᴿ δᴿ) σᴿ ≡ lookupᴿ xᴿ (δᴿ ⨾ᴿ σᴿ)
+lookup-lookupᴿ {δᴿ = δᴿ ⁺ᴿ} {σᴿ = σᴿ ^ᴿ} 
+  = ap vsᴿ lookup-lookupᴿ
+lookup-lookupᴿ {δᴿ = δᴿ ⁺ᴿ} {σᴿ = σᴿ ⁺ᴿ} 
+  = ap vsᴿ (lookup-lookupᴿ {δᴿ = δᴿ ⁺ᴿ})
+lookup-lookupᴿ {xᴿ = vzᴿ} {δᴿ = δᴿ ^ᴿ} {σᴿ = σᴿ ^ᴿ} 
+  = refl
+lookup-lookupᴿ {xᴿ = vzᴿ} {δᴿ = δᴿ ^ᴿ} {σᴿ = σᴿ ⁺ᴿ} 
+  = ap vsᴿ lookup-lookupᴿ
+lookup-lookupᴿ {xᴿ = vsᴿ xᴿ} {δᴿ = δᴿ ^ᴿ} {σᴿ = σᴿ ^ᴿ} 
+  = ap vsᴿ lookup-lookupᴿ
+lookup-lookupᴿ {xᴿ = vsᴿ xᴿ} {δᴿ = δᴿ ^ᴿ} {σᴿ = σᴿ ⁺ᴿ} 
+  = ap vsᴿ (lookup-lookupᴿ {δᴿ = δᴿ ^ᴿ})
 
-app[]Ne' : ∀ {tC : ∥ NeCmpl Γ (Π A B) t tᴿ ∥} {uC : ∥ NfCmpl Γ A u uᴿ ∥}
-         → _[_]Ne {A = ⟨ _ ⟩} (appᴺᵉ (tᴿ Σ, tC) (uᴿ Σ, uC)) δTh
-         ≡ appᴺᵉ ((tᴿ Σ, tC) [ δTh ]Ne) ((uᴿ Σ, uC) [ δTh ]Nf)
-app[]Ne' {tC = tC} = app[]Ne {tᴺᵉ = _ Σ, tC}
-{-# REWRITE app[]Ne' #-}
+[][]ᴿ : tᴿ [ δᴿ ]ᴿ [ σᴿ ]ᴿ ≡ tᴿ [ δᴿ ⨾ᴿ σᴿ ]ᴿ
+[][]ᴿ {tᴿ = varᴿ x}     = ap varᴿ lookup-lookupᴿ
+[][]ᴿ {tᴿ = neℤᴿ tᴿ}    = ap neℤᴿ [][]ᴿ
+[][]ᴿ {tᴿ = lamᴿ tᴿ}    = ap lamᴿ [][]ᴿ
+[][]ᴿ {tᴿ = appᴿ tᴿ uᴿ} = ap₂ appᴿ [][]ᴿ [][]ᴿ
+[][]ᴿ {tᴿ = zeᴿ}        = refl
+[][]ᴿ {tᴿ = suᴿ tᴿ}     = ap suᴿ [][]ᴿ
+[][]ᴿ {tᴿ = tᴿ -ᴿ uᴿ}   = ap₂ _-ᴿ_ [][]ᴿ [][]ᴿ
 
--- [id]Ne : tᴺᵉ [ idTh ]Ne ≡ tᴺᵉ
--- [id]Ne = ∃squash {!!}
-
+{-# REWRITE lookup-idᴿ [id]ᴿ lookup-lookupᴿ [][]ᴿ #-}

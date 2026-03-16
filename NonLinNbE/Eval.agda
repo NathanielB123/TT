@@ -1,9 +1,8 @@
-{-# OPTIONS --rewriting #-}
+{-# OPTIONS --rewriting --prop #-}
 
 open import Agda.Builtin.Equality.Rewrite
 
 open import Utils renaming (_,_ to _Σ,_)
-open import Utils.Trunc
 open import Utils.WithK
 
 open import NonLinNbE.SyntaxEta
@@ -172,9 +171,9 @@ eval𝕞 .ze[]ᴹ = eval≡[]' refl[]-K
 -- eval𝕞 .-[]ᴹ     = {!   !}
 -- eval𝕞 .IF-ZE[]ᴹ = {!   !}
 
-eval𝕞 .-zeᴹ               = eval≡ λ ρ → ∃squash refl
+eval𝕞 .-zeᴹ               = eval≡ λ ρ → refl
 eval𝕞 .-cancelᴹ {tᴹ = tᴹ} = eval≡ λ ρ → -cancelⱽ {tⱽ = tᴹ .act ρ}
-eval𝕞 .-suᴹ               = eval≡ λ ρ → ∃squash refl
+eval𝕞 .-suᴹ               = eval≡ λ ρ → refl
 -- eval𝕞 .IF-ZE-zeᴹ  = {!   !}
 -- eval𝕞 .IF-ZE-suᴹ  = {!   !}
 -- eval𝕞 .IF-ZE-ze-ᴹ = {!   !}

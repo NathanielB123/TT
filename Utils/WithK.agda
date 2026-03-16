@@ -43,3 +43,9 @@ happlyi p = happly (ap (λ f x → f {x}) p)
 apd-K : ∀ {B : A → Set ℓ} (f : (x : A) → B x) {x y}
       → (p : x ≡ y) {B≡ : B x ≡ B y} → f x ≡[ B≡ ]≡ f y
 apd-K f refl {B≡ = refl} = refl[]
+
+-- TODO: Move to ordinary utils
+apdd₂' : ∀ (B : A → Set ℓ₁) {C : ∀ x → B x → Set ℓ₂} {y₁ : B x₁} {y₂ : B x₂}
+           (f : ∀ x y → C x y) (x≡ : x₁ ≡ x₂) (y≡ : y₁ ≡[ ap B x≡ ]≡ y₂)
+       → f x₁ y₁ ≡[ apd₂ C x≡ y≡ ]≡ f x₂ y₂
+apdd₂' B f refl refl[] = refl[]

@@ -71,7 +71,7 @@ module _ (𝕄 : Motives ℓ₁ ℓ₂ ℓ₃ ℓ₄) where
     δᴹ ^ᴹ Aᴹ = (δᴹ ⨾ᴹ pᴹ) ,ᴹ transp (λ □ → Tmᴹ _ □ q) [][]Tᴹ qᴹ
 
     field
-      Πᴹ   : ∀ Aᴹ → Tyᴹ (Γᴹ ▷ᴹ Aᴹ) B → Tyᴹ Γᴹ (Π A B)
+      Πᴹ   : ∀ Aᴹ → Tyᴹ (Γᴹ ▷ᴹ Aᴹ) B → Tyᴹ {Γ = Γ} Γᴹ (Π A B)
       lamᴹ : Tmᴹ (Γᴹ ▷ᴹ Aᴹ) Bᴹ t → Tmᴹ Γᴹ (Πᴹ Aᴹ Bᴹ) (lam t)
       appᴹ : Tmᴹ Γᴹ (Πᴹ Aᴹ Bᴹ) t → Tmᴹ (Γᴹ ▷ᴹ Aᴹ) Bᴹ (app t)
 
