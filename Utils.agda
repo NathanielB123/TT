@@ -18,8 +18,8 @@ variable
   ℓ ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level
 
 module UtilVars where variable
-  A B C A₁ A₂ : Set ℓ
-  x y z x₁ x₂ x₃ y₁ y₂ y₃ : A
+  A B C D E A₁ A₂ : Set ℓ
+  x y z x₁ x₂ x₃ y₁ y₂ y₃ z₁ z₂ w₁ w₂ : A
   p q r : x ≡ y
   x₁₂ x₂₃ x₁₃ x₂₁ : x₁ ≡ x₂
 open UtilVars
@@ -101,6 +101,14 @@ coe-coe {q = refl} = refl
 
 ap₂ : (f : A → B → C) → x₁ ≡ x₂ → y₁ ≡ y₂ → f x₁ y₁ ≡ f x₂ y₂
 ap₂ f refl refl = refl
+
+ap₃ : (f : A → B → C → D) → x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ 
+    → f x₁ y₁ z₁ ≡ f x₂ y₂ z₂
+ap₃ f refl refl refl = refl
+
+ap₄ : (f : A → B → C → D → E) → x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ → w₁ ≡ w₂ 
+    → f x₁ y₁ z₁ w₁ ≡ f x₂ y₂ z₂ w₂
+ap₄ f refl refl refl refl = refl
 
 apd : ∀ {B : A → Set ℓ} (f : (x : A) → B x) {x y}
     → (p : x ≡ y) → f x ≡[ ap B p ]≡ f y

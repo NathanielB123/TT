@@ -112,20 +112,22 @@ opaque
 “”𝕞 .[][]Tᴹ = “”≡' refl refl
 
 “”𝕞 .Πᴹ {A = A} Aᴹ Bᴹ .“ {δ = δ} ρ τ   
-  = lamᴺᶠ (Bᴹ .“ _ (τ .act (idTh ⁺Th (A [ δ ]T)) 
+  = lamᴺᶠ {!!} {!!} 
+          (Bᴹ .“ _ (τ .act (idTh ⁺Th (A [ δ ]T)) 
           (Aᴹ .” _ vzᴺᵉ))) 
-“”𝕞 .Πᴹ  Aᴹ Bᴹ .” ρ tᴺᵉ .act σTh υ = Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ]Ne) (Aᴹ .“ _ υ))
-“”𝕞 .Πᴹ {Γ = Γ} {A = A} {B = B} Aᴹ Bᴹ .” ρ tᴺᵉ .nat σTh γTh υ .[]coe = 
-  coe _ (B ∋ Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ]Ne) (Aᴹ .“ _ υ)) [ γTh ]ⱽ)
-  ≡⟨ coe≡-K (Bᴹ .”[]) ⟩
-  coe _ (Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) ((Aᴹ .“ _ υ) [ γTh ]Nf)))
-  ≡⟨ apdd₂' _ (Bᴹ .”) (apd₂ _Σ,_ ([][]ᴱ Γ) refl[]) refl[]-K .[]coe ⟩
-  Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) ((Aᴹ .“ _ υ) [ γTh ]Nf))
-  ≡⟨ ap (λ □ → Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) □)) (Aᴹ .“[]) ⟩
-  Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“ _ (A ∋ υ [ γTh ]ⱽ)))
-  ≡⟨ apd₂ (λ _ □ → Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“  _ □))) 
-          _ refl[] ⟩
-  Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“ _ (coe _ (A ∋ υ [ γTh ]ⱽ)))) ∎
+“”𝕞 .Πᴹ  Aᴹ Bᴹ .” ρ tᴺᵉ .act σTh υ 
+  = Bᴹ .” _ (appᴺᵉ {!!} {!!} (tᴺᵉ [ σTh ]Ne) (Aᴹ .“ _ υ))
+-- “”𝕞 .Πᴹ {Γ = Γ} {A = A} {B = B} Aᴹ Bᴹ .” ρ tᴺᵉ .nat σTh γTh υ .[]coe = 
+--   coe _ (B ∋ Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ]Ne) (Aᴹ .“ _ υ)) [ γTh ]ⱽ)
+--   ≡⟨ coe≡-K (Bᴹ .”[]) ⟩
+--   coe _ (Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) ((Aᴹ .“ _ υ) [ γTh ]Nf)))
+--   ≡⟨ apdd₂' _ (Bᴹ .”) (apd₂ _Σ,_ ([][]ᴱ Γ) refl[]) refl[]-K .[]coe ⟩
+--   Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) ((Aᴹ .“ _ υ) [ γTh ]Nf))
+--   ≡⟨ ap (λ □ → Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) □)) (Aᴹ .“[]) ⟩
+--   Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“ _ (A ∋ υ [ γTh ]ⱽ)))
+--   ≡⟨ apd₂ (λ _ □ → Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“  _ □))) 
+--           _ refl[] ⟩
+--   Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“ _ (coe _ (A ∋ υ [ γTh ]ⱽ)))) ∎
 -- “”𝕞 .Πᴹ Aᴹ Bᴹ .“[] = {!!}
 -- “”𝕞 .Πᴹ Aᴹ Bᴹ .”[] = {!!}
 

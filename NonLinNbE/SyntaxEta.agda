@@ -25,7 +25,7 @@ open Tms
 
 variable  
   Γ Δ Θ Λ Γ₁ Γ₂ Δ₁ Δ₂ Θ₁ Θ₂ : Ctx
-  A B A₁ A₂ B₁ B₂ : Ty _
+  A B A₁ A₂ A₃ B₁ B₂ B₃ : Ty _
   t u v t₁ t₂ t₃ : Tm _ _
   δ σ γ δ₁ δ₂ : Tms _ _
 
@@ -182,5 +182,12 @@ postulate
   {-# REWRITE IF-ZE-ze #-}
   IF-ZE-su  : IF-ZE (su t) A B ≡ B
   {-# REWRITE IF-ZE-su #-}
-  IF-ZE-ze- : IF-ZE (ze - t) A B ≡ IF-ZE t A B
-  {-# REWRITE IF-ZE-ze- #-}
+  -- This is a weird equation. I think the principled approach would be to add
+  -- addition to the syntax (or if we NEED to handle this exact set of equations
+  -- have two "levels" of neutrals), but much easier is just to make
+  -- 'IF-ZE (ze - t)' stuck.
+  -- I'll probably come back to this later, but dealing with this edge case
+  -- isn't very important for the overall goal of handling non-linear reductions
+  -- IMO.
+  -- IF-ZE-ze- : IF-ZE (ze - t) A B ≡ IF-ZE t A B
+  -- {-# REWRITE IF-ZE-ze- #-}

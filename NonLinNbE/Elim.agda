@@ -116,7 +116,7 @@ module _ (𝕄 : Motives ℓ₁ ℓ₂ ℓ₃ ℓ₄) where
       -suᴹ       : suᴹ tᴹ -ᴹ suᴹ uᴹ ≡ tᴹ -ᴹ uᴹ
       IF-ZE-zeᴹ  : IF-ZEᴹ zeᴹ Aᴹ Bᴹ ≡ Aᴹ
       IF-ZE-suᴹ  : IF-ZEᴹ (suᴹ tᴹ) Aᴹ Bᴹ ≡ Bᴹ
-      IF-ZE-ze-ᴹ : IF-ZEᴹ (zeᴹ -ᴹ tᴹ) Aᴹ Bᴹ ≡ IF-ZEᴹ tᴹ Aᴹ Bᴹ
+      -- IF-ZE-ze-ᴹ : IF-ZEᴹ (zeᴹ -ᴹ tᴹ) Aᴹ Bᴹ ≡ IF-ZEᴹ tᴹ Aᴹ Bᴹ
 
 module _ {𝕄 : Motives ℓ₁ ℓ₂ ℓ₃ ℓ₄} (𝕞 : Methods 𝕄) where  
   open Motives 𝕄
