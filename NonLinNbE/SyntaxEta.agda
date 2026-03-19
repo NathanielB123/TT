@@ -4,7 +4,7 @@ open import Agda.Builtin.Equality.Rewrite
 
 open import Utils renaming (_,_ to _Σ,_)
 
--- We postulate a strictified syntax and induction principle
+-- We postulate a strictified syntax
 module NonLinNbE.SyntaxEta where
 
 data Ctx : Set
@@ -29,8 +29,8 @@ variable
   t u v t₁ t₂ t₃ : Tm _ _
   δ σ γ δ₁ δ₂ : Tms _ _
 
--- We define contexts as a datatype to get disjointness and injectivity of
--- constructors during pattern-matching
+-- We define contexts as a datatype to allow pattern matching and get easy
+-- disjointness and injectivity of constructors
 data Ctx where
   •   : Ctx
   _▷_ : ∀ Γ → Ty Γ → Ctx

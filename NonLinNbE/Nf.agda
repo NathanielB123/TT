@@ -15,15 +15,11 @@ len : Ctx → Nat
 len •       = zero
 len (Γ ▷ A) = suc (len Γ)
 
--- We define neutral and normal forms in a slightly unusual way
--- The idea is twofold:
--- * We need to be able to syntactically compare normal/neutral forms during
---   NbE (when we don't yet have injectivity of type formers)
--- * We need to relax completeness such that we can actually take advantage
---   of these syntactic normal/neutral comparisons
+-- We define neutral and normal forms extrinsically
+-- The motivation is that we need to be able to syntactically compare 
+-- normal/neutral forms during NbE
 
 -- Well-scoped raw syntax of normal forms
-
 data RawVar : Nat → Set where
   vzᴿ  : RawVar (suc n)
   vsᴿ  : RawVar n → RawVar (suc n)
@@ -103,8 +99,6 @@ data ℤCmpl where
 data TyCmpl Γ where
   ΠC     : TyCmpl Γ A Aᴿ → TyCmpl (Γ ▷ A) B Bᴿ → TyCmpl Γ (Π A B) (Πᴿ Aᴿ Bᴿ)
   ℤC     : TyCmpl Γ ℤ ℤᴿ
-  -- As a slightly horrible hack, we explicit disallow the scrutinee to be
-  -- of the form 'zeᴿ - uᴿ', even though we consider this neutral.
   IF-ZEC : NeCmpl Γ ℤ t tᴿ → TyCmpl Γ A Aᴿ → TyCmpl Γ B Bᴿ 
          → TyCmpl Γ (IF-ZE t A B) (IF-ZEᴿ (neℤᴿ tᴿ) Aᴿ Bᴿ)
 
@@ -265,7 +259,7 @@ IF-ZEᴿ' : Raw n → RawTy n → RawTy n → RawTy n
 IF-ZEᴿ' zeᴿ         A B = A
 IF-ZEᴿ' (suᴿ tᴿ)    A B = B
 IF-ZEᴿ' (zeᴿ -ᴿ uᴿ) A B = IF-ZEᴿ' uᴿ A B
--- Fallback
+-- Fallthrough
 IF-ZEᴿ' tᴿ          A B = IF-ZEᴿ tᴿ A B
 
 IF-ZEC' : ℤCmpl Γ t tᴿ → TyCmpl Γ A Aᴿ → TyCmpl Γ B Bᴿ

@@ -4,6 +4,7 @@ open import Utils renaming (_,_ to _Σ,_)
 
 open import NonLinNbE.SyntaxEta
 
+-- We postulate an induction principle for the strictified syntax
 module NonLinNbE.Elim where
 
 record Motives ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Set (lsuc (ℓ₁ ⊔l ℓ₂ ⊔l ℓ₃ ⊔l ℓ₄)) where
