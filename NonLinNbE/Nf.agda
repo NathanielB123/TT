@@ -57,10 +57,6 @@ variable
 postulate
   _≟_ : (tᴿ uᴿ : Raw n) → Dec (tᴿ ≡ uᴿ)
 
--- Relaxed convertibility
-data _~_ : Tm Γ A → Tm Γ A → Set
-data _~Ty_ : Ty Γ → Ty Γ → Set
-
 -- Variable/neutral/normal form predicates
 data VarCmpl  : ∀ Γ A → Tm Γ A → RawVar (len Γ) → Set
 data NeCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
@@ -69,28 +65,12 @@ data ℤParCmpl : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
 data ℤCmpl    : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
 data TyCmpl Γ : Ty Γ → RawTy (len Γ) → Set 
 
-data _~_ where
-  rfl~ : t ~ t
-  sym~ : t₁ ~ t₂ → t₂ ~ t₁
-  _∙~_ : t₁ ~ t₂ → t₂ ~ t₃ → t₁ ~ t₃
-
-  ap~  : (f : Tm Γ A → Tm Δ B) → t₁ ~ t₂ → f t₁ ~ f t₂
-  -- Relaxed neutral convertibility
-  -- I think we have quite a bit of flexibility w.r.t. how much to relax.
-  -- E.g. we could have relaxed convertibility of ℤ-typed neutrals only.
-  ne~  : NeCmpl Γ A t₁ tᴿ → NeCmpl Γ A t₂ tᴿ → t₁ ~ t₂
-
-data _~Ty_ where
-  ap~Ty : (f : Ty Γ → Ty Δ) → A₁ ~Ty A₂ → f A₁ ~Ty f A₂
-  ap~   : (f : Tm Γ A → Ty Δ) → t₁ ~ t₂ → f t₁ ~Ty f t₂
-
 data VarCmpl where
   vzC : VarCmpl (Γ ▷ A) (A [ p ]T) q vzᴿ
   vsC : VarCmpl Γ A t xᴿ 
       → VarCmpl (Γ ▷ B) (A [ p ]T) (t [ p ]) (vsᴿ xᴿ)
 
 data NeCmpl where
-  coe~ : t₁ ~ t₂ → NeCmpl Γ A t₁ tᴿ → NeCmpl Γ A t₂ tᴿ
   varC : VarCmpl Γ A t xᴿ → NeCmpl Γ A t (varᴿ xᴿ)
   appC : TyCmpl Γ A Aᴿ → TyCmpl (Γ ▷ A) B Bᴿ 
        → NeCmpl Γ (Π A B) t tᴿ → NfCmpl Γ A u uᴿ 
@@ -106,14 +86,12 @@ data NeCmpl where
   ze-C : NfCmpl Γ ℤ u uᴿ → NeCmpl Γ ℤ (ze - su u) (zeᴿ -ᴿ suᴿ uᴿ)
 
 data NfCmpl where 
-  coe~  : t₁ ~ t₂ → NfCmpl Γ A t₁ tᴿ → NfCmpl Γ A t₂ tᴿ
   lamC  : TyCmpl Γ A Aᴿ → TyCmpl (Γ ▷ A) B Bᴿ → NfCmpl (Γ ▷ A) B t tᴿ 
         → NfCmpl Γ (Π A B) (lam t) (lamᴿ Aᴿ Bᴿ tᴿ)
   valℤC : ℤCmpl Γ t tᴿ → NfCmpl Γ ℤ t tᴿ
 
 -- Constructor-headed ℤ-typed value
 data ℤParCmpl where
-  coe~   : t₁ ~ t₂ → ℤParCmpl Γ t₁ tᴿ → ℤParCmpl Γ t₂ tᴿ 
   zeC    : ℤParCmpl Γ ze zeᴿ
   suC    : ℤCmpl Γ t tᴿ → ℤParCmpl Γ (su t) (suᴿ tᴿ)
 
@@ -123,13 +101,80 @@ data ℤCmpl where
   neC  : NeCmpl Γ ℤ t tᴿ → ℤCmpl Γ t (neℤᴿ tᴿ)
 
 data TyCmpl Γ where
-  coe~   : A₁ ~Ty A₂ → TyCmpl Γ A₁ Aᴿ → TyCmpl Γ A₂ Aᴿ
   ΠC     : TyCmpl Γ A Aᴿ → TyCmpl (Γ ▷ A) B Bᴿ → TyCmpl Γ (Π A B) (Πᴿ Aᴿ Bᴿ)
   ℤC     : TyCmpl Γ ℤ ℤᴿ
   -- As a slightly horrible hack, we explicit disallow the scrutinee to be
   -- of the form 'zeᴿ - uᴿ', even though we consider this neutral.
   IF-ZEC : NeCmpl Γ ℤ t tᴿ → TyCmpl Γ A Aᴿ → TyCmpl Γ B Bᴿ 
          → TyCmpl Γ (IF-ZE t A B) (IF-ZEᴿ (neℤᴿ tᴿ) Aᴿ Bᴿ)
+
+cmplVar : VarCmpl Γ A₁ t₁ xᴿ → VarCmpl Γ A₂ t₂ xᴿ 
+        → Σ (A₁ ≡ A₂) (λ A≡ → t₁ ≡[ ap (Tm Γ) A≡ ]≡ t₂)
+
+cmplVar vzC       vzC       = refl Σ, refl[]
+cmplVar (vsC tC₁) (vsC tC₂) .fst = ap (_[ p ]T) (cmplVar tC₁ tC₂ .fst)
+cmplVar (vsC {t = t₁} tC₁) (vsC {t = t₂} tC₂) .snd .[]coe = 
+  coe _ (t₁ [ p ])
+  ≡⟨ coe≡-K (refl {x = t₁ [ p ]}) ⟩
+  coe _ (t₁ [ p ])
+  ≡⟨ apdd₂ (Tm _) (λ _ → _[ p ]) (cmplVar tC₁ tC₂ .fst) .[]coe  ⟩
+  transp (Tm _) (cmplVar tC₁ tC₂ .fst) t₁ [ p ]
+  ≡⟨ ap (_[ p ]) (cmplVar tC₁ tC₂ .snd .[]coe) ⟩
+  t₂ [ p ] ∎
+
+cmplTy   : TyCmpl Γ A₁ Aᴿ → TyCmpl Γ A₂ Aᴿ
+         → A₁ ≡ A₂
+cmplNe   : NeCmpl Γ A₁ t₁ tᴿ → NeCmpl Γ A₂ t₂ tᴿ
+         → (A≡ : A₁ ≡ A₂) → (t₁ ≡[ ap (Tm Γ) A≡ ]≡ t₂)
+cmplNf   : NfCmpl Γ A₁ t₁ tᴿ → NfCmpl Γ A₂ t₂ tᴿ
+         → (A≡ : A₁ ≡ A₂) → t₁ ≡[ ap (Tm Γ) A≡ ]≡ t₂
+cmplℤ    : ℤCmpl Γ t₁ tᴿ → ℤCmpl Γ t₂ tᴿ
+         → t₁ ≡ t₂
+cmplℤPar : ℤParCmpl Γ t₁ tᴿ → ℤParCmpl Γ t₂ tᴿ
+         → t₁ ≡ t₂
+
+cmplTy (ΠC AC₁ BC₁) (ΠC AC₂ BC₂) 
+  with refl ← cmplTy AC₁ AC₂
+  = apd₂ Π refl (coe[] (cmplTy BC₁ BC₂))
+cmplTy ℤC ℤC 
+  = refl
+cmplTy (IF-ZEC tC₁ AC₁ AC₂) (IF-ZEC tC₂ BC₁ BC₂) 
+  = ap₃ IF-ZE (cmplNe tC₁ tC₂ refl .[]coe) (cmplTy AC₁ BC₁) (cmplTy AC₂ BC₂)
+
+cmplNe (varC xC₁) (varC xC₂) A≡ 
+  = reix[] (cmplVar xC₁ xC₂ .snd)
+cmplNe (appC AC₁ BC₁ tC₁ uC₁) (appC AC₂ BC₂ tC₂ uC₂) A≡
+  with refl   ← cmplTy AC₁ AC₂
+  with refl   ← cmplTy BC₁ BC₂
+  with refl[] ← cmplNe tC₁ tC₂ refl
+  with refl[] ← cmplNf uC₁ uC₂ refl
+  = refl[]-K 
+cmplNe (-neC tC₁ uC₁ p) (-neC tC₂ uC₂ q) refl .[]coe
+  = ap₂ _-_ (cmplNf tC₁ tC₂ refl .[]coe) (cmplNe uC₁ uC₂ refl .[]coe)
+cmplNe (ne-C tC₁ uC₁) (ne-C tC₂ uC₂) refl .[]coe
+  = ap₂ (λ □₁ □₂ → □₁ - su □₂) 
+        (cmplNe tC₁ tC₂ refl .[]coe) 
+        (cmplNf uC₁ uC₂ refl .[]coe)
+cmplNe (ze-C tC₁) (ze-C tC₂) refl .[]coe
+  = ap (λ □ → ze - su □) (cmplNf tC₁ tC₂ refl .[]coe)
+ 
+cmplNf (lamC AC₁ BC₁ tC₁)  (lamC AC₂ BC₂ tC₂)  A≡ 
+  with refl   ← cmplTy AC₁ AC₂
+  with refl   ← cmplTy BC₁ BC₂
+  with refl[] ← cmplNf tC₁ tC₂ refl
+  = refl[]-K
+cmplNf (valℤC tC₁)         (valℤC tC₂) refl .[]coe 
+  = cmplℤ tC₁ tC₂
+
+-- Impossible cases
+cmplNf (lamC  AC₁ BC₁ tC₁) (valℤC (parC ())) A≡
+cmplNf (valℤC (parC ())) (lamC AC₁ BC₁ tC₂)  A≡
+
+cmplℤ (parC tC₁) (parC tC₂) = cmplℤPar tC₁ tC₂
+cmplℤ (neC  tC₁) (neC  tC₂) = cmplNe tC₁ tC₂ refl .[]coe
+
+cmplℤPar zeC       zeC       = refl
+cmplℤPar (suC tC₁) (suC tC₂) = ap su (cmplℤ tC₁ tC₂)
 
 Var : ∀ Γ A → Tm Γ A → Set
 Var Γ A t = ∃ (RawVar (len Γ)) (VarCmpl Γ A t)
@@ -156,16 +201,8 @@ suⱽ : ℤVal Γ t → ℤVal Γ (su t)
 suⱽ (tᴿ Σ,  tC) .fst       = suᴿ tᴿ
 suⱽ (tᴿ ∃, tC) .snd .proj = incᴾ (parC (suC tC))
 
-coeℤ~ : t₁ ~ t₂ → ℤCmpl Γ t₁ tᴿ → ℤCmpl Γ t₂ tᴿ
-coeℤ~ t~ (parC tC) = parC (coe~ t~ tC)
-coeℤ~ t~ (neC  tC) = neC  (coe~ t~ tC)
-
--- Relaxed version of the non-linear '-cancel' conversion rule
--cancel~ : NeCmpl Γ ℤ t₁ tᴿ → NeCmpl Γ ℤ t₂ tᴿ → (t₁ - t₂) ~ ze
--cancel~ {t₁ = t₁} {t₂ = t₂} t₁C t₂C = ap~ (_- t₂) (ne~ t₁C t₂C)
-
 ℤ/ne : ℤParCmpl Γ t₁ (neℤᴿ tᴿ) → NeCmpl Γ ℤ t₂ tᴿ → 𝟘
-ℤ/ne (coe~ _ tC₁) tC₂ = ℤ/ne tC₁ tC₂
+ℤ/ne () tC₂
 
 -- Recursive subtraction
 _-ᴿ'_ : Raw n → Raw n → Raw n
@@ -178,7 +215,6 @@ neℤᴿ tᴿ -ᴿ' neℤᴿ uᴿ with tᴿ ≟ uᴿ
 tᴿ      -ᴿ' uᴿ = neℤᴿ (tᴿ -ᴿ uᴿ)
 
 -neᴿ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' neℤᴿ uᴿ ≡ neℤᴿ (tᴿ -ᴿ neℤᴿ uᴿ)
--neᴿ (coe~ _ tC) = -neᴿ tC
 -neᴿ zeC         = refl
 -neᴿ (suC tC)    = refl
 
@@ -190,11 +226,8 @@ _ᴾ-ᴾ_ : ℤParCmpl Γ t tᴿ → ℤParCmpl Γ u uᴿ → ℤCmpl Γ (t - u)
 tC      ⱽ-ⱽ parC uC = tC ⱽ-ᴾ uC
 parC tC ⱽ-ⱽ uC      = tC ᴾ-ⱽ uC
 _ⱽ-ⱽ_ {tᴿ = neℤᴿ tᴿ} {uᴿ = neℤᴿ uᴿ} (neC tC) (neC uC) with tᴿ ≟ uᴿ 
-... | yes refl = coeℤ~ (sym~ (-cancel~ tC uC)) (parC zeC)
+... | yes refl with refl ← cmplNe tC uC refl .[]coe = parC zeC
 ... | no  p    = neC (-neC (valℤC (neC tC)) uC λ where refl → p refl)
-
-_ⱽ-ᴾ_ {t = t} tC (coe~ u~ uC) 
-  = coeℤ~ (ap~ (t -_) u~) (tC ⱽ-ᴾ uC)
 
 tC      ⱽ-ᴾ zeC    = tC
 neC tC  ⱽ-ᴾ suC uC = neC (ne-C tC (valℤC uC))
@@ -209,11 +242,6 @@ tC     ᴾ-ᴾ zeC    = parC tC
 suC tC ᴾ-ᴾ suC uC = tC ⱽ-ⱽ uC
 zeC    ᴾ-ᴾ suC uC = neC (ze-C (valℤC uC))
 
-_ᴾ-ᴾ_ {u = u} (coe~ t~ tC) uC 
-  = coeℤ~ (ap~ (_- u) t~) (tC ᴾ-ᴾ uC)
-_ᴾ-ᴾ_ {t = t} tC (coe~ u~ uC) 
-  = coeℤ~ (ap~ (t -_) u~) (tC ᴾ-ᴾ uC)
-
 _-ⱽ_ : ℤVal Γ t → ℤVal Γ u → ℤVal Γ (t - u)
 ((tᴿ Σ, tC) -ⱽ (uᴿ Σ, uC)) .fst       = tᴿ -ᴿ' uᴿ
 ((tᴿ ∃, tC) -ⱽ (uᴿ ∃, uC)) .snd .proj = incᴾ (tC ⱽ-ⱽ uC)
@@ -222,7 +250,6 @@ _-ⱽ_ : ℤVal Γ t → ℤVal Γ u → ℤVal Γ (t - u)
 -cancelᴿ : ℤCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
 -cancelᴾ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
 
--cancelᴾ (coe~ t~ tC) = -cancelᴾ tC
 -cancelᴾ zeC          = refl
 -cancelᴾ (suC tC)     = -cancelᴿ tC
 
@@ -247,8 +274,6 @@ IF-ZEC' : ℤCmpl Γ t tᴿ → TyCmpl Γ A Aᴿ → TyCmpl Γ B Bᴿ
 IF-ZECᴾ : ℤParCmpl Γ t tᴿ → TyCmpl Γ A Aᴿ → TyCmpl Γ B Bᴿ
         → TyCmpl Γ (IF-ZE t A B) (IF-ZEᴿ' tᴿ Aᴿ Bᴿ)
 
-IF-ZECᴾ (coe~ t~ tC) AC BC 
-  = coe~ (ap~ (λ □ → IF-ZE □ _ _) t~) (IF-ZECᴾ tC AC BC)
 IF-ZECᴾ zeC          AC BC = AC
 IF-ZECᴾ (suC tC)     AC BC = BC
 
@@ -272,3 +297,11 @@ appᴺᵉ (Aᴿ Σ, AC) (Bᴿ Σ, BC) (tᴿ Σ, tC) (uᴿ Σ, uC) .fst
   = appᴿ Aᴿ Bᴿ tᴿ uᴿ
 appᴺᵉ (Aᴿ ∃, AC) (Bᴿ ∃, BC) (tᴿ ∃, tC) (uᴿ ∃, uC) .snd .proj 
   = incᴾ (appC AC BC tC uC)
+
+Πᴺᶠ : TyNf Γ A → TyNf (Γ ▷ A) B → TyNf Γ (Π A B)
+Πᴺᶠ (Aᴿ Σ, AC) (Bᴿ Σ, BC) .fst       = Πᴿ Aᴿ Bᴿ
+Πᴺᶠ (Aᴿ ∃, AC) (Bᴿ ∃, BC) .snd .proj = incᴾ (ΠC AC BC)
+
+ℤᴺᶠ : TyNf Γ ℤ
+ℤᴺᶠ .fst       = ℤᴿ
+ℤᴺᶠ .snd .proj = incᴾ ℤC

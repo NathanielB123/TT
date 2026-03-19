@@ -208,7 +208,6 @@ xC     [ δC ⁺C ]VarC = vsC (xC [ δC ]VarC)
 vzC    [ δC ^C ]VarC = vzC
 vsC xC [ δC ^C ]VarC = vsC (xC [ δC ]VarC)
 
-coe~ t~ tC       [ δC ]NeC = coe~ (ap~ (_[ _ ]) t~) (tC [ δC ]NeC)
 varC xC          [ δC ]NeC = varC (xC [ δC ]VarC)
 appC AC BC tC uC [ δC ]NeC 
   = appC (AC [ δC ]TyC) (BC [ δC ^C ]TyC) (tC [ δC ]NeC) (uC [ δC ]NfC)
@@ -217,18 +216,15 @@ appC AC BC tC uC [ δC ]NeC
 ne-C tC uC       [ δC ]NeC = ne-C (tC [ δC ]NeC) (uC [ δC ]NfC)
 ze-C uC          [ δC ]NeC = ze-C (uC [ δC ]NfC)
 
-coe~ t~ tC    [ δC ]NfC = coe~ (ap~ (_[ _ ]) t~) (tC [ δC ]NfC)
 lamC AC BC tC [ δC ]NfC = lamC (AC [ δC ]TyC) (BC [ δC ^C ]TyC) (tC [ δC ^C ]NfC)
 valℤC tC      [ δC ]NfC = valℤC (tC [ δC ]ℤC)
 
 parC tC [ δC ]ℤC = parC (tC [ δC ]ℤParC)
 neC tC  [ δC ]ℤC = neC  (tC [ δC ]NeC)
 
-coe~ t~ tC [ δC ]ℤParC = coe~ (ap~ (_[ _ ]) t~) (tC [ δC ]ℤParC)
 zeC        [ δC ]ℤParC = zeC
 suC tC     [ δC ]ℤParC = suC (tC [ δC ]ℤC)
 
-coe~ A~ AC      [ δC ]TyC = coe~ (ap~Ty (_[ _ ]T) A~) (AC [ δC ]TyC)
 ΠC AC BC        [ δC ]TyC = ΠC (AC [ δC ]TyC) (BC [ δC ^C ]TyC)
 ℤC              [ δC ]TyC = ℤC
 IF-ZEC tC AC BC [ δC ]TyC = IF-ZEC (tC [ δC ]NeC) (AC [ δC ]TyC) (BC [ δC ]TyC)

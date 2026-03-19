@@ -35,6 +35,9 @@ coe-K {p = refl} = refl
 []coe-K : x ≡[ p ]≡ y → x ≡ y
 []coe-K {p = refl} refl[] = refl
 
+[]coe-K' : x ≡[ p ]≡ y → coe q x ≡ coe r y
+[]coe-K' {p = refl} {q = refl} {r = refl} refl[] = refl
+
 coe≡-K : y₁ ≡ y₂ → coe p y₁ ≡ coe q y₂
 coe≡-K {p = refl} {q = refl} refl = refl
 

@@ -1,4 +1,4 @@
-open import Utils
+open import Utils hiding (Dec; yes; no)
 
 open import Agda.Primitive
 open import Reflection as TC hiding (_>>=_)

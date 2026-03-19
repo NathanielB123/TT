@@ -11,6 +11,8 @@ open import NonLinNbE.Thin
 open import NonLinNbE.Eval
 open import NonLinNbE.EvalMotives
 
+-- We implement quoting/unquoting and evaluation of types mutually
+-- (Type evaluation relies on environment extension)
 module NonLinNbE.QuoteUnquote where
 
 env : ∀ Δ Γ → Tms Δ Γ → Set
@@ -48,12 +50,16 @@ A ∋ τ [ σTh ]ⱽ = elimTy eval𝕞 A ._[_]V τ σTh
 record “” (A : Ty Γ) : Set where
   constructor mk
   field
+    evalTy : env Δ Γ δ → TyNf Δ (A [ δ ]T)
+
     -- "Quote"
     “ : (ρ : env Δ Γ δ) → val A ρ t → Nf Δ (A [ δ ]T) t
     -- "Unquote"
     ” : (ρ : env Δ Γ δ) → Ne Δ (A [ δ ]T) t → val A ρ t
 
-
+    natTy    : {ρ : env Δ Γ δ} {σTh : Thin Θ Δ σ}
+             → evalTy ρ [ σTh ]TyNf ≡ evalTy (Γ ⊢ ρ [ σTh ]ᴱ)
+    
     “[] : {ρ : env Δ Γ δ} {τ : val A ρ t} {σTh : Thin Θ Δ σ}
         → _≡_ {A = Nf Θ (A [ δ ⨾ σ ]T) (t [ σ ])}
               ((“ ρ τ) [ σTh ]Nf) (“ (Γ ⊢ ρ [ σTh ]ᴱ) (A ∋ τ [ σTh ]ⱽ))
@@ -64,13 +70,16 @@ open “”
 
 opaque
   “”≡' : {A₁ᴹ A₂ᴹ : “” A}
-      → _≡_ {A = ∀ {Δ δ t} (ρ : env Δ Γ δ) → val A ρ t → Nf Δ (A [ δ ]T) t} 
-            (A₁ᴹ .“) (A₂ᴹ .“)
-      → _≡_ {A = ∀ {Δ δ t} (ρ : env Δ Γ δ) → Ne Δ (A [ δ ]T) t → val A ρ t} 
-            (A₁ᴹ .”) (A₂ᴹ .”)
-      → A₁ᴹ ≡ A₂ᴹ
-  “”≡' refl refl 
-    = ap₂ (mk _ _) 
+       → (λ {Δ δ} → A₁ᴹ .evalTy {Δ} {δ}) ≡ A₂ᴹ .evalTy
+       → _≡_ {A = ∀ {Δ δ t} (ρ : env Δ Γ δ) → val A ρ t → Nf Δ (A [ δ ]T) t} 
+             (A₁ᴹ .“) (A₂ᴹ .“)
+       → _≡_ {A = ∀ {Δ δ t} (ρ : env Δ Γ δ) → Ne Δ (A [ δ ]T) t → val A ρ t} 
+             (A₁ᴹ .”) (A₂ᴹ .”)
+       → A₁ᴹ ≡ A₂ᴹ
+  “”≡' refl refl refl 
+    = ap₃ (mk _ _ _) 
+          ( funexti λ {_} → funexti λ {_} → funexti λ {_} → funexti λ {_} 
+          → funexti λ {_} → funexti λ {_} → uip)
           ( funexti λ {_} → funexti λ {_} → funexti λ {_} → funexti λ {_} 
           → funexti λ {_} → funexti λ {_} → funexti λ {_} → funexti λ {_}
           → uip) 
@@ -79,16 +88,25 @@ opaque
           → uip)
 
   “”≡ : {A₁ᴹ A₂ᴹ : “” A} 
+      → (∀ {Δ δ} (ρ : env Δ Γ δ) → A₁ᴹ .evalTy ρ ≡ A₂ᴹ .evalTy ρ)
       → (∀ {Δ δ t} (ρ : env Δ Γ δ) (τ : val A ρ t) 
         → A₁ᴹ .“ {Δ} {δ} {t} ρ τ ≡ A₂ᴹ .“ ρ τ)
       → (∀ {Δ δ t} (ρ : env Δ Γ δ) (tᴺᵉ : Ne Δ (A [ δ ]T) t) 
         → A₁ᴹ .” {Δ} {δ} {t} ρ tᴺᵉ ≡ A₂ᴹ .” ρ tᴺᵉ)
       → A₁ᴹ ≡ A₂ᴹ
-  “”≡ “≡ ”≡ 
-    = “”≡' ( funexti λ {_} → funexti λ {_} → funexti λ {_} → funext λ ρ 
+  “”≡ eval≡ “≡ ”≡ 
+    = “”≡' ( funexti λ {_} → funexti λ {_} → funext λ ρ → eval≡ ρ)
+           ( funexti λ {_} → funexti λ {_} → funexti λ {_} → funext λ ρ 
            → funext λ τ → “≡ ρ τ) 
            ( funexti λ {_} → funexti λ {_} → funexti λ {_} → funext λ ρ 
            → funext λ tᴺᵉ → ”≡ ρ tᴺᵉ)
+
+wkTh : Thin (Γ ▷ A) Γ p
+wkTh = idTh ⁺Th _
+
+_⊢_^Env_ : ∀ Γ {δ A} → env Δ Γ δ → “” A → env (Δ ▷ (A [ δ ]T)) (Γ ▷ A) (δ ^ A)
+(Γ ⊢ ρ ^Env Aᴹ) .fst = Γ ⊢ ρ [ wkTh ]ᴱ 
+(Γ ⊢ ρ ^Env Aᴹ) .snd = Aᴹ .” (Γ ⊢ ρ [ wkTh ]ᴱ) vzᴺᵉ
 
 “”𝕄 : Motives _ _ _ _
 “”𝕄 .Ctxᴹ _     = 𝟙
@@ -96,11 +114,16 @@ opaque
 “”𝕄 .Tmᴹ  _ _ _ = 𝟙
 “”𝕄 .Tmsᴹ _ _ _ = 𝟙
 
-{-# NON_COVERING #-}
+-- {-# NON_COVERING #-}
 “”𝕞 : Methods “”𝕄
+“”𝕞 ._[_]Tᴹ {δ = δ} Aᴹ ⟨⟩ .evalTy ρ 
+  = Aᴹ .evalTy (elimTms eval𝕞 δ .act ρ)
+“”𝕞 ._[_]Tᴹ {δ = δ} Aᴹ ⟨⟩ .natTy    
+  = Aᴹ .natTy ∙ ap (Aᴹ .evalTy) (elimTms eval𝕞 δ .nat)
+
 “”𝕞 ._[_]Tᴹ Aᴹ ⟨⟩ .“ ρ τ   = Aᴹ .“ _ τ
 “”𝕞 ._[_]Tᴹ Aᴹ ⟨⟩ .” ρ tᴺᵉ = Aᴹ .” _ tᴺᵉ
--- “”𝕞 ._[_]Tᴹ Aᴹ ⟨⟩ .“[] = {!Aᴹ .“[]!}
+“”𝕞 ._[_]Tᴹ Aᴹ ⟨⟩ .“[] = {!Aᴹ .“[]!}
 “”𝕞 ._[_]Tᴹ {A = A} {δ = δ} Aᴹ ⟨⟩ .”[] {ρ = ρ} {tᴺᵉ = tᴺᵉ} {σTh = σTh} =
   coe _ (A ∋ ” Aᴹ (elimTms eval𝕞 δ .act ρ) tᴺᵉ [ σTh ]ⱽ)
   ≡⟨ ap (coe _) (Aᴹ .”[] {tᴺᵉ = tᴺᵉ} {σTh = σTh}) ⟩
@@ -108,30 +131,110 @@ opaque
   ≡⟨ apd (λ □ → Aᴹ .” □ _) (elimTms eval𝕞 δ .nat) .[]coe ⟩
   Aᴹ .” _ (tᴺᵉ [ σTh ]Ne) ∎
 
-“”𝕞 .[id]Tᴹ = “”≡' refl refl
-“”𝕞 .[][]Tᴹ = “”≡' refl refl
+“”𝕞 .[id]Tᴹ = “”≡' refl refl refl
+“”𝕞 .[][]Tᴹ = “”≡' refl refl refl
 
-“”𝕞 .Πᴹ {A = A} Aᴹ Bᴹ .“ {δ = δ} ρ τ   
-  = lamᴺᶠ {!!} {!!} 
-          (Bᴹ .“ _ (τ .act (idTh ⁺Th (A [ δ ]T)) 
-          (Aᴹ .” _ vzᴺᵉ))) 
-“”𝕞 .Πᴹ  Aᴹ Bᴹ .” ρ tᴺᵉ .act σTh υ 
-  = Bᴹ .” _ (appᴺᵉ {!!} {!!} (tᴺᵉ [ σTh ]Ne) (Aᴹ .“ _ υ))
--- “”𝕞 .Πᴹ {Γ = Γ} {A = A} {B = B} Aᴹ Bᴹ .” ρ tᴺᵉ .nat σTh γTh υ .[]coe = 
---   coe _ (B ∋ Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ]Ne) (Aᴹ .“ _ υ)) [ γTh ]ⱽ)
---   ≡⟨ coe≡-K (Bᴹ .”[]) ⟩
---   coe _ (Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) ((Aᴹ .“ _ υ) [ γTh ]Nf)))
---   ≡⟨ apdd₂' _ (Bᴹ .”) (apd₂ _Σ,_ ([][]ᴱ Γ) refl[]) refl[]-K .[]coe ⟩
---   Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) ((Aᴹ .“ _ υ) [ γTh ]Nf))
---   ≡⟨ ap (λ □ → Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) □)) (Aᴹ .“[]) ⟩
---   Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“ _ (A ∋ υ [ γTh ]ⱽ)))
---   ≡⟨ apd₂ (λ _ □ → Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“  _ □))) 
---           _ refl[] ⟩
---   Bᴹ .” _ (appᴺᵉ (tᴺᵉ [ σTh ⨾Th γTh ]Ne) (Aᴹ .“ _ (coe _ (A ∋ υ [ γTh ]ⱽ)))) ∎
--- “”𝕞 .Πᴹ Aᴹ Bᴹ .“[] = {!!}
--- “”𝕞 .Πᴹ Aᴹ Bᴹ .”[] = {!!}
+“”𝕞 .Πᴹ {Γ = Γ} Aᴹ Bᴹ .evalTy ρ 
+  = Πᴺᶠ (Aᴹ .evalTy ρ) (Bᴹ .evalTy (Γ ⊢ ρ ^Env Aᴹ))
 
--- “”𝕞 .Π[]ᴹ = “”≡ {!!} {!!}
+“”𝕞 .Πᴹ {Γ = Γ} {A = A} Aᴹ Bᴹ .“ {δ = δ} ρ τ   
+  = lamᴺᶠ (Aᴹ .evalTy ρ) (Bᴹ .evalTy (Γ ⊢ ρ ^Env Aᴹ))
+          (Bᴹ .“ _ (τ .act wkTh (Aᴹ .” _ vzᴺᵉ))) 
+“”𝕞 .Πᴹ  {Γ = Γ} Aᴹ Bᴹ .” ρ tᴺᵉ .act σTh υ 
+  = Bᴹ .” _ (appᴺᵉ (Aᴹ .evalTy ρ [ σTh ]TyNf) 
+                   (Bᴹ .evalTy (Γ ⊢ ρ ^Env Aᴹ) [ σTh ^Th _ ]TyNf) 
+                   (tᴺᵉ [ σTh ]Ne) (Aᴹ .“ _ υ))
+
+“”𝕞 .Πᴹ {Γ = Γ} {A = A} {B = B} Aᴹ Bᴹ .” {δ = δ} ρ tᴺᵉ .nat σTh γTh υ .[]coe
+  using ρ^    ← Γ ⊢ ρ ^Env Aᴹ
+      | σ^Th  ← σTh ^Th (A [ δ ]T)
+      | σγTh  ← σTh ⨾Th γTh
+      | σγ^Th ← σγTh ^Th (A [ δ ]T) =
+  coe _ (B ∋ Bᴹ .” _ 
+        (appᴺᵉ (Aᴹ .evalTy ρ [ σTh ]TyNf) 
+               (Bᴹ .evalTy ρ^ [ σ^Th ]TyNf) 
+               (tᴺᵉ [ σTh ]Ne) (Aᴹ .“ _ υ)) [ γTh ]ⱽ)
+  ≡⟨ coe≡-K (Bᴹ .”[]) ⟩
+  coe _ (Bᴹ .” _ 
+        (appᴺᵉ (Aᴹ .evalTy ρ [ σγTh ]TyNf) (Bᴹ .evalTy ρ^ [ σγ^Th ]TyNf) 
+               (tᴺᵉ [ σγTh ]Ne) ((Aᴹ .“ _ υ) [ γTh ]Nf)))
+  ≡⟨ apdd₂' _ (Bᴹ .”) (apd₂ _Σ,_ ([][]ᴱ Γ) refl[]) refl[]-K .[]coe ⟩
+  Bᴹ .” _ (appᴺᵉ (Aᴹ .evalTy ρ [ σγTh ]TyNf) (Bᴹ .evalTy ρ^ [ σγ^Th ]TyNf) 
+                 (tᴺᵉ [ σγTh ]Ne) ((Aᴹ .“ _ υ) [ γTh ]Nf))
+  ≡⟨ ap (λ □ → Bᴹ .” _ 
+        (appᴺᵉ (Aᴹ .evalTy ρ [ σγTh ]TyNf) (Bᴹ .evalTy ρ^ [ σγ^Th ]TyNf) 
+        (tᴺᵉ [ σγTh ]Ne) □)) (Aᴹ .“[]) ⟩
+  Bᴹ .” _ (appᴺᵉ (Aᴹ .evalTy ρ [ σγTh ]TyNf) (Bᴹ .evalTy ρ^ [ σγ^Th ]TyNf) 
+                 (tᴺᵉ [ σγTh ]Ne) (Aᴹ .“ _ (A ∋ υ [ γTh ]ⱽ)))
+  ≡⟨ apd₂ (λ _ □ → Bᴹ .” _ 
+          (appᴺᵉ (Aᴹ .evalTy ρ [ σγTh ]TyNf) (Bᴹ .evalTy ρ^ [ σγ^Th ]TyNf) 
+          (tᴺᵉ [ σγTh ]Ne) (Aᴹ .“  _ □))) _ refl[] ⟩
+  Bᴹ .” _ (appᴺᵉ (Aᴹ .evalTy ρ [ σγTh ]TyNf) (Bᴹ .evalTy ρ^ [ σγ^Th ]TyNf)
+                 (tᴺᵉ [ σγTh ]Ne) (Aᴹ .“ _ (coe _ (A ∋ υ [ γTh ]ⱽ)))) ∎
+“”𝕞 .Πᴹ {Γ = Γ} {A = A} {B = B} Aᴹ Bᴹ .“[] 
+        {δ = δ} {t = t} {σ = σ} {ρ = ρ} {τ = τ} {σTh = σTh}
+  = ∃≡ (ap fst wip)
+  where
+    lemmaA :  A ∋ (Aᴹ .” (Γ ⊢ ρ [ wkTh ]ᴱ) vzᴺᵉ) [ σTh ^Th (A [ δ ]T) ]ⱽ
+           ≡[ ap (λ □ → val A □ _) ([][]ᴱ Γ ∙ sym ([][]ᴱ Γ))
+           ]≡ Aᴹ .” (Γ ⊢ Γ ⊢ ρ [ σTh ]ᴱ [ wkTh ]ᴱ) vzᴺᵉ
+    lemmaA .[]coe = 
+      coe _ (A ∋ (Aᴹ .” (Γ ⊢ ρ [ wkTh ]ᴱ) vzᴺᵉ) [ σTh ^Th (A [ δ ]T) ]ⱽ)
+      ≡⟨ ap (coe _) (Aᴹ .”[] {ρ = Γ ⊢ ρ [ wkTh ]ᴱ} {tᴺᵉ = vzᴺᵉ}) ⟩
+      coe _ (Aᴹ .” (Γ ⊢ Γ ⊢ ρ [ wkTh ]ᴱ [ σTh ^Th (A [ δ ]T) ]ᴱ) vzᴺᵉ)
+      ≡⟨ apd (λ □ → Aᴹ .” □ vzᴺᵉ) ([][]ᴱ Γ ∙ sym ([][]ᴱ Γ)) .[]coe ⟩
+      Aᴹ .” (Γ ⊢ Γ ⊢ ρ [ σTh ]ᴱ [ wkTh ]ᴱ) vzᴺᵉ ∎
+
+    lemma : (Γ ▷ A) ⊢ Γ ⊢ ρ ^Env Aᴹ [ σTh ^Th _ ]ᴱ
+          ≡ Γ ⊢ Γ ⊢ ρ [ σTh ]ᴱ ^Env Aᴹ
+    lemma = apd₂ _Σ,_ ([][]ᴱ Γ ∙ sym ([][]ᴱ Γ)) lemmaA
+
+    wip 
+      = ap₃ (lamᴺᶠ {A = A [ δ ⨾ σ ]T} {B = B [ (δ ⨾ σ) ^ _ ]T } 
+                   {t = app t [ σ ^ _ ]}) 
+        (Aᴹ .natTy) 
+        (Bᴹ .evalTy (Γ ⊢ ρ ^Env Aᴹ) [ σTh ^Th _ ]TyNf
+        ≡⟨ Bᴹ .natTy {ρ = Γ ⊢ ρ ^Env Aᴹ} {σTh = σTh ^Th _} ⟩
+        Bᴹ .evalTy ((Γ ▷ A) ⊢ Γ ⊢ ρ ^Env Aᴹ [ σTh ^Th (A [ δ ]T) ]ᴱ)
+        ≡⟨ ap (Bᴹ .evalTy) lemma ⟩
+        Bᴹ .evalTy (Γ ⊢ Γ ⊢ ρ [ σTh ]ᴱ ^Env Aᴹ) ∎)
+        (Bᴹ .“ (Γ ⊢ ρ ^Env Aᴹ) (τ .act wkTh (Aᴹ .” (Γ ⊢ ρ [ wkTh ]ᴱ) vzᴺᵉ))
+               [ σTh ^Th _ ]Nf
+        ≡⟨ Bᴹ .“[] ⟩
+        Bᴹ .“ ((Γ ▷ A) ⊢ Γ ⊢ ρ ^Env Aᴹ [ σTh ^Th _ ]ᴱ) 
+              (B ∋ τ .act wkTh (Aᴹ .” (Γ ⊢ ρ [ wkTh ]ᴱ) vzᴺᵉ) [ σTh ^Th _ ]ⱽ)
+        ≡⟨ apd₂ (Bᴹ .“) lemma (coe[]
+          (coe _ ((B ∋ τ .act wkTh (Aᴹ .” (Γ ⊢ ρ [ wkTh ]ᴱ) vzᴺᵉ) 
+                     [ σTh ^Th (A [ δ ]T) ]ⱽ))
+        ≡⟨ []coe-K' {r = {!!}} (τ .nat wkTh (σTh ^Th (A [ δ ]T)) (Aᴹ .” (Γ ⊢ ρ [ wkTh ]ᴱ) vzᴺᵉ)) ⟩
+          coe {!!} (τ .act (σTh ⨾Th wkTh)
+                (transp (λ □ → val A □ q) ([][]ᴱ Γ)
+                (A ∋ ” Aᴹ (Γ ⊢ ρ [ wkTh ]ᴱ) vzᴺᵉ [ σTh ^Th (A [ δ ]T) ]ⱽ)))
+          ≡⟨ {!(Aᴹ .”[] {ρ = Γ ⊢ ρ [ wkTh ]ᴱ} {tᴺᵉ = vzᴺᵉ} {σTh = σTh ^Th (A [ δ ]T)})!} ⟩
+          coe {!!} (τ .act (σTh ⨾Th wkTh)
+                (transp (λ □ → val A □ q) ([][]ᴱ Γ)
+                (Aᴹ .” (Γ ⊢ Γ ⊢ ρ [ wkTh ]ᴱ [ σTh ^Th (A [ δ ]T) ]ᴱ) vzᴺᵉ)))
+          ≡⟨ []coe-K' {r = ap (λ □ → val B □ (app t [ σ ^ (A [ δ ]T) ])) 
+                 (apd₂ _Σ,_ (sym ([][]ᴱ Γ)) sym-transp[])}
+             {!!} ⟩
+          transp (λ □ → val B □ (app t [ σ ^ (A [ δ ]T) ])) 
+                 (apd₂ _Σ,_ (sym ([][]ᴱ Γ)) sym-transp[]) 
+                 (τ .act (σTh ⨾Th wkTh) 
+                 (transp (λ □ → val A □ q) ([][]ᴱ Γ) 
+                         (Aᴹ .” (Γ ⊢ Γ ⊢ ρ [ σTh ]ᴱ [ wkTh ]ᴱ) vzᴺᵉ)))
+          ≡⟨⟩
+          (Π A B ∋ τ [ σTh ]ⱽ) .act wkTh
+            (Aᴹ .” (Γ ⊢ Γ ⊢ ρ [ σTh ]ᴱ [ wkTh ]ᴱ) vzᴺᵉ) ∎)) ⟩
+        (Bᴹ .“ (Γ ⊢ Γ ⊢ ρ [ σTh ]ᴱ ^Env Aᴹ)
+               ((Π A B ∋ τ [ σTh ]ⱽ) .act wkTh
+                  (Aᴹ .” (Γ ⊢ Γ ⊢ ρ [ σTh ]ᴱ [ wkTh ]ᴱ) vzᴺᵉ))) ∎)
+“”𝕞 .Πᴹ Aᴹ Bᴹ .”[] = {!!}
+
+“”𝕞 .Πᴹ Aᴹ Bᴹ .natTy = {!!}
+“”𝕞 .Π[]ᴹ = “”≡ {!!} {!!} {!!}
+
+“”𝕞 .ℤᴹ .evalTy ρ = ℤᴺᶠ
+“”𝕞 .ℤᴹ .natTy    = refl
 
 “”𝕞 .ℤᴹ .“ _ (tᴿ Σ, tC) .fst       = tᴿ 
 “”𝕞 .ℤᴹ .“ _ (tᴿ ∃, tC) .snd .proj = incᴾ (valℤC tC)
@@ -140,13 +243,22 @@ opaque
 “”𝕞 .ℤᴹ .“[] = refl
 “”𝕞 .ℤᴹ .”[] = refl
 
-“”𝕞 .ℤ[]ᴹ = “”≡' refl refl
--- “”𝕞 .IF-ZEᴹ ⟨⟩ Aᴹ Bᴹ = {!!}
--- “”𝕞 .IF-ZE[]ᴹ = {!   !}
--- “”𝕞 .IF-ZE-zeᴹ = {!   !}
--- “”𝕞 .IF-ZE-suᴹ = {!   !}
--- “”𝕞 .IF-ZE-ze-ᴹ = {!   !}
+“”𝕞 .ℤ[]ᴹ = “”≡' refl refl refl
 
+
+“”𝕞 .IF-ZEᴹ {t = t} ⟨⟩ Aᴹ Bᴹ .evalTy ρ 
+  = IF-ZEⱽ (elimTm eval𝕞 t .act ρ) (Aᴹ .evalTy ρ) (Bᴹ .evalTy ρ)
+“”𝕞 .IF-ZEᴹ ⟨⟩ Aᴹ Bᴹ .natTy 
+  = ∃≡ {!   !}
+“”𝕞 .IF-ZEᴹ ⟨⟩ Aᴹ Bᴹ .“ ρ
+  = {!   !}
+“”𝕞 .IF-ZEᴹ ⟨⟩ Aᴹ Bᴹ .” ρ
+  = {!   !}
+“”𝕞 .IF-ZEᴹ ⟨⟩ Aᴹ Bᴹ .“[] = {!   !}
+“”𝕞 .IF-ZEᴹ ⟨⟩ Aᴹ Bᴹ .”[] = {!   !}
+“”𝕞 .IF-ZE[]ᴹ = {!   !}
+“”𝕞 .IF-ZE-zeᴹ = {!   !}
+“”𝕞 .IF-ZE-suᴹ = {!   !}
 
 “”𝕞 .idᴹ         = ⟨⟩
 “”𝕞 ._⨾ᴹ_ ⟨⟩ ⟨⟩  = ⟨⟩
