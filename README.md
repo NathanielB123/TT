@@ -6,7 +6,7 @@ Some experiments with mechanised metatheory of type theory.
   - The inductive-inductive syntax is defined in [Syntax](WTT/Syntax.agda).
   - We then go on to show that substitution can be computed recursively in [Comp<>](WTT/Comp<>.agda).
   - We also construct the standard model in [Model](WTT/Model.agda).
-  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, it should still be coherent `--without-K` and interpreting this syntax into arbitry n-types (rather than just hSets) should be possible, though I have not yet gone through the details `--without-K` to check this actually works.
+  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax should still be coherent `--without-K` and interpreting this syntax into arbitry n-types (rather than just hSets) should be possible, though I have not yet gone through the details `--without-K` to check this actually works.
 
 ### WIP:
 
