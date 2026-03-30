@@ -15,3 +15,4 @@
 - NbE (including trying out an idea I have to deal with non-linear reductions): [NonLinNbE](NonLinNbE/NbE.agda)
   - This is still very-much WIP. I will write more here after I make more progress.
   - I have now posted a small summary of the idea on Mastodon though: https://types.pl/deck/@NathanielB/116256378457107811
+  - Relies on https://github.com/agda/agda/pull/8463
