@@ -280,8 +280,6 @@ variable
   A≡ A≡₁ A≡₂ A≡₃ A≡₄ B≡ B≡₁ B≡₂ B≡₃ B≡₄                             
     : ⟦A₁⟧ ≡ ⟦A₂⟧
 
-Ty≡ = ap ⟦Ty⟧
-
 ⟦[]T⟧ : ⟦Ty⟧ ⟦Γ⟧ → ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧ → ⟦Ty⟧ ⟦Δ⟧
 ⟦[]T⟧ ⟦A⟧ ⟦δ⟧ .fst .Carᴰ ρ 
   = ⟦A⟧ .fst .Carᴰ (⟦δ⟧ .act ρ)
