@@ -1,4 +1,4 @@
-Some experiments with mechanised metatheory of type theory.
+## Some experiments in mechanised metatheory of type theory
 
 ### Finished:
 
