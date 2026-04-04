@@ -12,7 +12,7 @@
 
 - The groupoid model: [GrpdModel](Models/GrpdModel.agda)
   - I mostly just wanted to understand the computational content of `J` in the groupoid model. I believe finishing the rest of the mechanisation would be extremely painful.
-- NbE (including trying out an idea I have to deal with non-linear reductions): [NonLinNbE](NonLinNbE/NbE.agda)
+- NbE (including trying out an idea I have to deal with non-linear reductions): [NonLinNbE](NonLinNbE/)
   - This is still very-much WIP. I will write more here after I make more progress.
   - I have now posted a small summary of the idea on Mastodon though: https://types.pl/deck/@NathanielB/116256378457107811
   - Relies on https://github.com/agda/agda/pull/8463
