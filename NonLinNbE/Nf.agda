@@ -54,55 +54,55 @@ postulate
   _≟_ : (tᴿ uᴿ : Raw n) → Dec (tᴿ ≡ uᴿ)
 
 -- Variable/neutral/normal form predicates
-data VarCmpl  : ∀ Γ A → Tm Γ A → RawVar (len Γ) → Set
-data NeCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
-data NfCmpl   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
-data ℤParCmpl : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
-data ℤCmpl    : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
-data TyCmpl Γ : Ty Γ → RawTy (len Γ) → Set 
+data VarPred  : ∀ Γ A → Tm Γ A → RawVar (len Γ) → Set
+data NePred   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
+data NfPred   : ∀ Γ A → Tm Γ A → Raw (len Γ) → Set
+data ℤParPred : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
+data ℤPred    : ∀ Γ → Tm Γ ℤ → Raw (len Γ) → Set
+data TyPred Γ : Ty Γ → RawTy (len Γ) → Set 
 
-data VarCmpl where
-  vzC : VarCmpl (Γ ▷ A) (A [ p ]T) q vzᴿ
-  vsC : VarCmpl Γ A t xᴿ 
-      → VarCmpl (Γ ▷ B) (A [ p ]T) (t [ p ]) (vsᴿ xᴿ)
+data VarPred where
+  vzC : VarPred (Γ ▷ A) (A [ p ]T) q vzᴿ
+  vsC : VarPred Γ A t xᴿ 
+      → VarPred (Γ ▷ B) (A [ p ]T) (t [ p ]) (vsᴿ xᴿ)
 
-data NeCmpl where
-  varC : VarCmpl Γ A t xᴿ → NeCmpl Γ A t (varᴿ xᴿ)
-  appC : TyCmpl Γ A Aᴿ → TyCmpl (Γ ▷ A) B Bᴿ 
-       → NeCmpl Γ (Π A B) t tᴿ → NfCmpl Γ A u uᴿ 
-       → NeCmpl Γ (B [ id , u ]T) (app t [ id , u ]) (appᴿ Aᴿ Bᴿ tᴿ uᴿ)
+data NePred where
+  varC : VarPred Γ A t xᴿ → NePred Γ A t (varᴿ xᴿ)
+  appC : TyPred Γ A Aᴿ → TyPred (Γ ▷ A) B Bᴿ 
+       → NePred Γ (Π A B) t tᴿ → NfPred Γ A u uᴿ 
+       → NePred Γ (B [ id , u ]T) (app t [ id , u ]) (appᴿ Aᴿ Bᴿ tᴿ uᴿ)
   -- LHS is normal but RHS is neutral
   -- OR both sides are neutral and not convertible
-  -neC : NfCmpl Γ ℤ t tᴿ → NeCmpl Γ ℤ u uᴿ
-       → (tᴿ ≡ neℤᴿ uᴿ → 𝟘) → NeCmpl Γ ℤ (t - u) (tᴿ -ᴿ neℤᴿ uᴿ)
+  -neC : NfPred Γ ℤ t tᴿ → NePred Γ ℤ u uᴿ
+       → (tᴿ ≡ neℤᴿ uᴿ → 𝟘) → NePred Γ ℤ (t - u) (tᴿ -ᴿ neℤᴿ uᴿ)
   -- LHS is neutral and RHS is successor of something
-  ne-C : NeCmpl Γ ℤ t tᴿ → NfCmpl Γ ℤ u uᴿ
-       → NeCmpl Γ ℤ (t - su u) (neℤᴿ tᴿ -ᴿ suᴿ uᴿ)
+  ne-C : NePred Γ ℤ t tᴿ → NfPred Γ ℤ u uᴿ
+       → NePred Γ ℤ (t - su u) (neℤᴿ tᴿ -ᴿ suᴿ uᴿ)
   -- LHS is zero and RHS is successor of something
-  ze-C : NfCmpl Γ ℤ u uᴿ → NeCmpl Γ ℤ (ze - su u) (zeᴿ -ᴿ suᴿ uᴿ)
+  ze-C : NfPred Γ ℤ u uᴿ → NePred Γ ℤ (ze - su u) (zeᴿ -ᴿ suᴿ uᴿ)
 
-data NfCmpl where 
-  lamC  : TyCmpl Γ A Aᴿ → TyCmpl (Γ ▷ A) B Bᴿ → NfCmpl (Γ ▷ A) B t tᴿ 
-        → NfCmpl Γ (Π A B) (lam t) (lamᴿ Aᴿ Bᴿ tᴿ)
-  valℤC : ℤCmpl Γ t tᴿ → NfCmpl Γ ℤ t tᴿ
+data NfPred where 
+  lamC  : TyPred Γ A Aᴿ → TyPred (Γ ▷ A) B Bᴿ → NfPred (Γ ▷ A) B t tᴿ 
+        → NfPred Γ (Π A B) (lam t) (lamᴿ Aᴿ Bᴿ tᴿ)
+  valℤC : ℤPred Γ t tᴿ → NfPred Γ ℤ t tᴿ
 
 -- Constructor-headed ℤ-typed value
-data ℤParCmpl where
-  zeC    : ℤParCmpl Γ ze zeᴿ
-  suC    : ℤCmpl Γ t tᴿ → ℤParCmpl Γ (su t) (suᴿ tᴿ)
+data ℤParPred where
+  zeC    : ℤParPred Γ ze zeᴿ
+  suC    : ℤPred Γ t tᴿ → ℤParPred Γ (su t) (suᴿ tᴿ)
 
 -- Possibly-neutral ℤ-typed value
-data ℤCmpl where
-  parC : ℤParCmpl Γ t tᴿ → ℤCmpl Γ t tᴿ
-  neC  : NeCmpl Γ ℤ t tᴿ → ℤCmpl Γ t (neℤᴿ tᴿ)
+data ℤPred where
+  parC : ℤParPred Γ t tᴿ → ℤPred Γ t tᴿ
+  neC  : NePred Γ ℤ t tᴿ → ℤPred Γ t (neℤᴿ tᴿ)
 
-data TyCmpl Γ where
-  ΠC     : TyCmpl Γ A Aᴿ → TyCmpl (Γ ▷ A) B Bᴿ → TyCmpl Γ (Π A B) (Πᴿ Aᴿ Bᴿ)
-  ℤC     : TyCmpl Γ ℤ ℤᴿ
-  IF-ZEC : NeCmpl Γ ℤ t tᴿ → TyCmpl Γ A Aᴿ → TyCmpl Γ B Bᴿ 
-         → TyCmpl Γ (IF-ZE t A B) (IF-ZEᴿ (neℤᴿ tᴿ) Aᴿ Bᴿ)
+data TyPred Γ where
+  ΠC     : TyPred Γ A Aᴿ → TyPred (Γ ▷ A) B Bᴿ → TyPred Γ (Π A B) (Πᴿ Aᴿ Bᴿ)
+  ℤC     : TyPred Γ ℤ ℤᴿ
+  IF-ZEC : NePred Γ ℤ t tᴿ → TyPred Γ A Aᴿ → TyPred Γ B Bᴿ 
+         → TyPred Γ (IF-ZE t A B) (IF-ZEᴿ (neℤᴿ tᴿ) Aᴿ Bᴿ)
 
-cmplVar : VarCmpl Γ A₁ t₁ xᴿ → VarCmpl Γ A₂ t₂ xᴿ 
+cmplVar : VarPred Γ A₁ t₁ xᴿ → VarPred Γ A₂ t₂ xᴿ 
         → Σ (A₁ ≡ A₂) (λ A≡ → t₁ ≡[ ap (Tm Γ) A≡ ]≡ t₂)
 
 cmplVar vzC       vzC       = refl Σ, refl[]
@@ -116,15 +116,15 @@ cmplVar (vsC {t = t₁} tC₁) (vsC {t = t₂} tC₂) .snd .[]coe =
   ≡⟨ ap (_[ p ]) (cmplVar tC₁ tC₂ .snd .[]coe) ⟩
   t₂ [ p ] ∎
 
-cmplTy   : TyCmpl Γ A₁ Aᴿ → TyCmpl Γ A₂ Aᴿ
+cmplTy   : TyPred Γ A₁ Aᴿ → TyPred Γ A₂ Aᴿ
          → A₁ ≡ A₂
-cmplNe   : NeCmpl Γ A₁ t₁ tᴿ → NeCmpl Γ A₂ t₂ tᴿ
+cmplNe   : NePred Γ A₁ t₁ tᴿ → NePred Γ A₂ t₂ tᴿ
          → (A≡ : A₁ ≡ A₂) → (t₁ ≡[ ap (Tm Γ) A≡ ]≡ t₂)
-cmplNf   : NfCmpl Γ A₁ t₁ tᴿ → NfCmpl Γ A₂ t₂ tᴿ
+cmplNf   : NfPred Γ A₁ t₁ tᴿ → NfPred Γ A₂ t₂ tᴿ
          → (A≡ : A₁ ≡ A₂) → t₁ ≡[ ap (Tm Γ) A≡ ]≡ t₂
-cmplℤ    : ℤCmpl Γ t₁ tᴿ → ℤCmpl Γ t₂ tᴿ
+cmplℤ    : ℤPred Γ t₁ tᴿ → ℤPred Γ t₂ tᴿ
          → t₁ ≡ t₂
-cmplℤPar : ℤParCmpl Γ t₁ tᴿ → ℤParCmpl Γ t₂ tᴿ
+cmplℤPar : ℤParPred Γ t₁ tᴿ → ℤParPred Γ t₂ tᴿ
          → t₁ ≡ t₂
 
 cmplTy (ΠC AC₁ BC₁) (ΠC AC₂ BC₂) 
@@ -171,22 +171,22 @@ cmplℤPar zeC       zeC       = refl
 cmplℤPar (suC tC₁) (suC tC₂) = ap su (cmplℤ tC₁ tC₂)
 
 Var : ∀ Γ A → Tm Γ A → Set
-Var Γ A t = ∃ (RawVar (len Γ)) (VarCmpl Γ A t)
+Var Γ A t = ∃ (RawVar (len Γ)) (VarPred Γ A t)
 
 Ne : ∀ Γ A → Tm Γ A → Set
-Ne Γ A t = ∃ (Raw (len Γ)) (NeCmpl Γ A t)
+Ne Γ A t = ∃ (Raw (len Γ)) (NePred Γ A t)
 
 Nf : ∀ Γ A → Tm Γ A → Set
-Nf Γ A t = ∃ (Raw (len Γ)) (NfCmpl Γ A t)
+Nf Γ A t = ∃ (Raw (len Γ)) (NfPred Γ A t)
 
 ℤPar : ∀ Γ → Tm Γ ℤ → Set
-ℤPar Γ t = ∃ (Raw (len Γ)) (ℤParCmpl Γ t)
+ℤPar Γ t = ∃ (Raw (len Γ)) (ℤParPred Γ t)
 
 ℤVal : ∀ Γ → Tm Γ ℤ → Set
-ℤVal Γ t = ∃ (Raw (len Γ)) (ℤCmpl Γ t)
+ℤVal Γ t = ∃ (Raw (len Γ)) (ℤPred Γ t)
 
 TyNf : ∀ Γ → Ty Γ → Set
-TyNf Γ A = ∃ (RawTy (len Γ)) (TyCmpl Γ A)
+TyNf Γ A = ∃ (RawTy (len Γ)) (TyPred Γ A)
 
 zeⱽ : ℤVal Γ ze
 zeⱽ = zeᴿ ∃, parC zeC
@@ -195,7 +195,7 @@ suⱽ : ℤVal Γ t → ℤVal Γ (su t)
 suⱽ (tᴿ Σ,  tC) .fst       = suᴿ tᴿ
 suⱽ (tᴿ ∃, tC) .snd .proj = incᴾ (parC (suC tC))
 
-ℤ/ne : ℤParCmpl Γ t₁ (neℤᴿ tᴿ) → NeCmpl Γ ℤ t₂ tᴿ → 𝟘
+ℤ/ne : ℤParPred Γ t₁ (neℤᴿ tᴿ) → NePred Γ ℤ t₂ tᴿ → 𝟘
 ℤ/ne () tC₂
 
 -- Recursive subtraction
@@ -208,14 +208,14 @@ neℤᴿ tᴿ -ᴿ' neℤᴿ uᴿ with tᴿ ≟ uᴿ
 -- Fallthrough
 tᴿ      -ᴿ' uᴿ = neℤᴿ (tᴿ -ᴿ uᴿ)
 
--neᴿ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' neℤᴿ uᴿ ≡ neℤᴿ (tᴿ -ᴿ neℤᴿ uᴿ)
+-neᴿ : ℤParPred Γ t tᴿ → tᴿ -ᴿ' neℤᴿ uᴿ ≡ neℤᴿ (tᴿ -ᴿ neℤᴿ uᴿ)
 -neᴿ zeC         = refl
 -neᴿ (suC tC)    = refl
 
-_ⱽ-ⱽ_ : ℤCmpl Γ t tᴿ → ℤCmpl Γ u uᴿ → ℤCmpl Γ (t - u) (tᴿ -ᴿ' uᴿ)
-_ⱽ-ᴾ_ : ℤCmpl Γ t tᴿ → ℤParCmpl Γ u uᴿ → ℤCmpl Γ (t - u) (tᴿ -ᴿ' uᴿ)
-_ᴾ-ⱽ_ : ℤParCmpl Γ t tᴿ → ℤCmpl Γ u uᴿ → ℤCmpl Γ (t - u) (tᴿ -ᴿ' uᴿ)
-_ᴾ-ᴾ_ : ℤParCmpl Γ t tᴿ → ℤParCmpl Γ u uᴿ → ℤCmpl Γ (t - u) (tᴿ -ᴿ' uᴿ)
+_ⱽ-ⱽ_ : ℤPred Γ t tᴿ → ℤPred Γ u uᴿ → ℤPred Γ (t - u) (tᴿ -ᴿ' uᴿ)
+_ⱽ-ᴾ_ : ℤPred Γ t tᴿ → ℤParPred Γ u uᴿ → ℤPred Γ (t - u) (tᴿ -ᴿ' uᴿ)
+_ᴾ-ⱽ_ : ℤParPred Γ t tᴿ → ℤPred Γ u uᴿ → ℤPred Γ (t - u) (tᴿ -ᴿ' uᴿ)
+_ᴾ-ᴾ_ : ℤParPred Γ t tᴿ → ℤParPred Γ u uᴿ → ℤPred Γ (t - u) (tᴿ -ᴿ' uᴿ)
 
 tC      ⱽ-ⱽ parC uC = tC ⱽ-ᴾ uC
 parC tC ⱽ-ⱽ uC      = tC ᴾ-ⱽ uC
@@ -229,7 +229,7 @@ parC tC ⱽ-ᴾ uC     = tC ᴾ-ᴾ uC
 
 tC ᴾ-ⱽ parC uC = tC ᴾ-ᴾ uC
 tC ᴾ-ⱽ neC uC
-  = transp (ℤCmpl _ _) (sym (-neᴿ tC)) 
+  = transp (ℤPred _ _) (sym (-neᴿ tC)) 
            (neC (-neC (valℤC (parC tC)) uC λ where refl → ℤ/ne tC uC))
 
 tC     ᴾ-ᴾ zeC    = parC tC
@@ -241,8 +241,8 @@ _-ⱽ_ : ℤVal Γ t → ℤVal Γ u → ℤVal Γ (t - u)
 ((tᴿ ∃, tC) -ⱽ (uᴿ ∃, uC)) .snd .proj = incᴾ (tC ⱽ-ⱽ uC)
   -- (tᴿ -ᴿ' uᴿ) ∃, (tC ⱽ-ⱽ uC)
 
--cancelᴿ : ℤCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
--cancelᴾ : ℤParCmpl Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
+-cancelᴿ : ℤPred Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
+-cancelᴾ : ℤParPred Γ t tᴿ → tᴿ -ᴿ' tᴿ ≡ zeᴿ
 
 -cancelᴾ zeC          = refl
 -cancelᴾ (suC tC)     = -cancelᴿ tC
@@ -262,11 +262,11 @@ IF-ZEᴿ' (zeᴿ -ᴿ uᴿ) A B = IF-ZEᴿ' uᴿ A B
 -- Fallthrough
 IF-ZEᴿ' tᴿ          A B = IF-ZEᴿ tᴿ A B
 
-IF-ZEC' : ℤCmpl Γ t tᴿ → TyCmpl Γ A Aᴿ → TyCmpl Γ B Bᴿ
-        → TyCmpl Γ (IF-ZE t A B) (IF-ZEᴿ' tᴿ Aᴿ Bᴿ)
+IF-ZEC' : ℤPred Γ t tᴿ → TyPred Γ A Aᴿ → TyPred Γ B Bᴿ
+        → TyPred Γ (IF-ZE t A B) (IF-ZEᴿ' tᴿ Aᴿ Bᴿ)
 
-IF-ZECᴾ : ℤParCmpl Γ t tᴿ → TyCmpl Γ A Aᴿ → TyCmpl Γ B Bᴿ
-        → TyCmpl Γ (IF-ZE t A B) (IF-ZEᴿ' tᴿ Aᴿ Bᴿ)
+IF-ZECᴾ : ℤParPred Γ t tᴿ → TyPred Γ A Aᴿ → TyPred Γ B Bᴿ
+        → TyPred Γ (IF-ZE t A B) (IF-ZEᴿ' tᴿ Aᴿ Bᴿ)
 
 IF-ZECᴾ zeC          AC BC = AC
 IF-ZECᴾ (suC tC)     AC BC = BC

@@ -22,7 +22,6 @@ eval𝕄 .Tmᴹ  Γᴹ Aᴹ t = eval Γᴹ Aᴹ t
 eval𝕄 .Tmsᴹ Δᴹ Γᴹ δ = eval* Δᴹ Γᴹ δ
 
 postulate
-  todo  : ∀ {A : Set ℓ} → A
   cheat : ∀ {A : Set ℓ} → A
 
 {-# NON_COVERING #-}
@@ -165,7 +164,7 @@ eval𝕞 ._-ᴹ_ tᴹ uᴹ .act ρ = tᴹ .act ρ -ⱽ uᴹ .act ρ
 
 -- eval𝕞 .IF-ZEᴹ = {!   !}
 
-eval𝕞 .ℤ[]ᴹ  = val≡' refl todo
+eval𝕞 .ℤ[]ᴹ  = val≡' refl cheat
 eval𝕞 .ze[]ᴹ = eval≡[]' refl[]-K
 -- eval𝕞 .su[]ᴹ    = {!!}
 -- eval𝕞 .-[]ᴹ     = {!   !}
