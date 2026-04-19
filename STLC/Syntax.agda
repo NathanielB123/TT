@@ -139,10 +139,17 @@ record Methods (Tmᴹ : Motive) : Set where
 module _ (Tmᴹ : Motive) (𝕞 : Methods Tmᴹ) where
   open Methods 𝕞
   postulate
-    elimTm : ∀ t → Tmᴹ Γ A t
+    elimTm  : ∀ t → Tmᴹ Γ A t
+
+  elimSub : ∀ (δ : Sub Δ Γ) → Subᴹ Δ Γ δ
+  elimSub δ i = elimTm (δ i)
+  
+  postulate
     elimTm-var : elimTm (var i) ≡ varᴹ i
     {-# REWRITE elimTm-var #-}
     elimTm-app : elimTm (app t u) ≡ appᴹ (elimTm t) (elimTm u)
     {-# REWRITE elimTm-app #-}
     elimTm-lam : elimTm (lam t) ≡ lamᴹ (elimTm t)
     {-# REWRITE elimTm-lam #-}
+    elimTm-[]  : elimTm (t [ δ ]) ≡ elimTm t [ elimSub δ ]ᴹ
+    {-# REWRITE elimTm-[] #-}
