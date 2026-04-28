@@ -1,6 +1,6 @@
 {-# OPTIONS --rewriting -WnoRewriteVariablesBoundInSingleton #-}
 
-open import Agda.Builtin.Equality.Rewrite
+open import Agda.Builtin.Equality.Rewrite renaming (primRewriteNoMatch to ⟨_⟩)
 
 open import Utils renaming (_,_ to _Σ,_)
 
