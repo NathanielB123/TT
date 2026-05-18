@@ -22,6 +22,7 @@ module UtilVars where variable
   x y z x₁ x₂ x₃ y₁ y₂ y₃ z₁ z₂ w₁ w₂ : A
   p q r : x ≡ y
   x₁₂ x₂₃ x₁₃ x₂₁ : x₁ ≡ x₂
+  f g h : A → B
 open UtilVars
 
 ap : (f : A → B) → x ≡ y → f x ≡ f y
@@ -56,13 +57,13 @@ absurd ()
 coe : A ≡ B → A → B
 coe refl x = x
 
--- We ensure |transp| is defeq to |coe ap| to make |_≡[_]≡_| nicer
+-- We ensure |tr| is defeq to |coe ap| to make |_≡[_]≡_| nicer
 -- The downside is that we have to redefine all utilities from the stdlib 
--- that refer to |transp|/|subst|
-transp : (P : A → Set ℓ) (p : x ≡ y) → P x → P y
-transp P p d = coe (ap P p) d
+-- that refer to |tr|/|subst|
+tr : (P : A → Set ℓ) (p : x ≡ y) → P x → P y
+tr P p d = coe (ap P p) d
 
-{-# DISPLAY coe (ap P p) = transp P p #-}
+{-# DISPLAY coe (ap P p) = tr P p #-}
 
 happly : {B : A → Set ℓ} {f g : ∀ x → B x} → f ≡ g → f x ≡ g x
 happly refl = refl
@@ -80,24 +81,27 @@ open _≡[_]≡_ public
 
 pattern refl[] = coe[] refl
 
-transp-sym : {P : A → Set ℓ} {y : P x₁} (p : x₂ ≡ x₁)
-           → transp P p (transp P (sym p) y) ≡ y
-transp-sym refl = refl
+tr-sym : {P : A → Set ℓ} {y : P x₁} (p : x₂ ≡ x₁)
+           → tr P p (tr P (sym p) y) ≡ y
+tr-sym refl = refl
 
-sym-transp : {P : A → Set ℓ} {y : P x₁} (p : x₁ ≡ x₂)
-           → transp P (sym p) (transp P p y) ≡ y
-sym-transp refl = refl
+sym-tr : {P : A → Set ℓ} {y : P x₁} (p : x₁ ≡ x₂)
+           → tr P (sym p) (tr P p y) ≡ y
+sym-tr refl = refl
 
-transp-sym[] : {P : A → Set ℓ} {y : P x}
-             → transp P (sym p) y ≡[ ap P p ]≡ y
-transp-sym[] {p = p} = coe[] (transp-sym p)
+tr-sym[] : {P : A → Set ℓ} {y : P x}
+             → tr P (sym p) y ≡[ ap P p ]≡ y
+tr-sym[] {p = p} = coe[] (tr-sym p)
 
-sym-transp[] : {P : A → Set ℓ} {y : P x}
-             → transp P p y ≡[ ap P (sym p) ]≡ y
-sym-transp[] {p = p} = coe[] (sym-transp p)
+sym-tr[] : {P : A → Set ℓ} {y : P x}
+             → tr P p y ≡[ ap P (sym p) ]≡ y
+sym-tr[] {p = p} = coe[] (sym-tr p)
 
 coe-coe : coe p (coe q x) ≡ coe (q ∙ p) x
 coe-coe {q = refl} = refl
+
+ap-ap : ap f p ≡ q → ap (λ □ → h (f □)) p ≡ ap h q
+ap-ap {p = refl} refl = refl
 
 ap₂ : (f : A → B → C) → x₁ ≡ x₂ → y₁ ≡ y₂ → f x₁ y₁ ≡ f x₂ y₂
 ap₂ f refl refl = refl
@@ -125,12 +129,12 @@ apd₂ f refl refl[] = refl
 -- function
 apdd₂ : ∀ (B : A → Set ℓ₁) {C : A → Set ℓ₂} {y : B x₁}
           (f : ∀ x → B x → C x) (eq : x₁ ≡ x₂) 
-       → f x₁ y ≡[ ap C eq ]≡ f x₂ (transp B eq y)
+       → f x₁ y ≡[ ap C eq ]≡ f x₂ (tr B eq y)
 apdd₂ B f refl = refl[]
 
 extTransp : ∀ (x₁₂ : x₁ ≡ x₂) {B : A → Set ℓ} {y₁ y₂}
           → y₁ ≡[ ap B x₁₂ ]≡ y₂
-          → y₁ ≡[ ap B (x₁₂ ∙ x₂₃) ]≡ transp B x₂₃ y₂
+          → y₁ ≡[ ap B (x₁₂ ∙ x₂₃) ]≡ tr B x₂₃ y₂
 extTransp {x₂₃ = refl} refl y₁₂ = y₁₂
 
 sym[] : ∀ {B : A → Set ℓ} {y₁ y₂}
