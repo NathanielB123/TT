@@ -18,6 +18,6 @@
   - Relies on https://github.com/agda/agda/pull/8463
 - A minimal type theory for describing semi-simplicial types: [SemiSimpl](SemiSimpl/)
   - Based on the WTT substitutions-as-a-relation idea.
-  - The specific type theory I am trying to implement is due to @AndrasKovacs.
+  - The specific type theory I am trying to implement is due to [@AndrasKovacs].
   - Proving that the syntax is a set is trivial (there are no path constructors). Howevever, defining the type model is still quite difficult for similar reasons to WTT.
   - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax, though I think this approach might implicitly rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip.
