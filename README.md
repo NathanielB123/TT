@@ -6,7 +6,7 @@
   - The inductive-inductive syntax is defined in [Syntax](WTT/Syntax.agda).
   - We then go on to show that substitution can be computed recursively in [Comp<>](WTT/Comp<>.agda).
   - We also construct the standard model in [Model](WTT/Model.agda).
-  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax should still be coherent `--without-K` and interpreting this syntax into arbitry n-types (rather than just hSets) should be possible, though I have not yet gone through the details `--without-K` to check this actually works.
+  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax should still be coherent `--without-K` and interpreting this syntax into arbitry n-types (rather than just hSets) might be possible. Unfortunately, defining such a model is still non-trivial (we need extra coherences).
 
 ### WIP:
 
@@ -16,3 +16,8 @@
   - This is still very-much WIP. I will write more here after I make more progress.
   - I have now posted a small summary of the idea on Mastodon though: https://types.pl/deck/@NathanielB/116256378457107811
   - Relies on https://github.com/agda/agda/pull/8463
+- A minimal type theory for describing semi-simplicial types: [SemiSimpl](SemiSimpl/)
+  - Based on the WTT substitutions-as-a-relation idea.
+  - The specific type theory I am trying to implement is due to @AndrasKovacs.
+  - Proving that the syntax is a set is trivial (there are no path constructors). Howevever, defining the type model is still quite difficult for similar reasons to WTT.
+  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax, though I think this approach might implicitly rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip.
