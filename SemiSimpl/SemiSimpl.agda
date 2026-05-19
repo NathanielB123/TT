@@ -174,7 +174,6 @@ variable
      → ⟦⨾⟧ ⟦δ⟧ (⟦π₁⟧ ⟦x⟧ ⟦σ⟧) ≡ ⟦γ⟧
 ⟦⁺⨾⟧ refl = refl
 
-
 ⟦wkLoc⟧ : ⟦Loc⟧ ⟦Γ⟧ → ⟦Loc⟧ (⟦▷⟧ ⟦Γ⟧ ⟦Ψ⟧)
 ⟦wkLoc⟧ ⟦Ξ⟧ (ρ , τ) = ⟦Ξ⟧ ρ
 
@@ -183,8 +182,8 @@ variable
 ⟦wkEmb⟧ ⟦δ⟧ refl refl (ρ , τ) ξ = ⟦δ⟧ ρ ξ
 
 -- I am not sure the zero variable case here is actually what we want. I should
--- spend some time working out how to actually write down semi-simplicial with
--- this syntax at some point...
+-- spend some time working out how to actually write down semi-simplicial types 
+-- with this syntax at some point...
 ⟦vz⟧ : ⟦wkLoc⟧ ⟦Ξ⟧ ≡ ⟦Ξ'⟧ → ⟦Var⟧ (⟦▷⟧ ⟦Γ⟧ ⟦Ξ⟧) ⟦Ξ'⟧
 ⟦vz⟧ refl (ρ , ξ) ξ' = ξ ≡ ξ'
 
@@ -253,11 +252,11 @@ coh₁ : (δ𝒢  : φ ⨾ δ ≔ φ')
       ≡ ⟦π₁⟧ ⟦x⟧ (⟦⁺⟧ ⟦δ⟧ ⟦y⟧ ⟦ψ⟧)
 ⟦π₁⁺⟧ refl = refl
 
-⟦π₁⟧≡ {δ = δ ⁺ y ∣ ψ} = 
-  {!!}
-  -- ⟦π₁⁺⟧ {⟦x⟧ = ⟦ y ⟧Var} {⟦φ⟧ = {!!}} {⟦ψ⟧ = ⟦ ψ ⟧Emb} (⟦π₁⟧≡ {δ = δ})
-⟦π₁⟧≡ {δ = _^_ {φ = φ} {x = x} δ δ𝒢} = 
-  ⟦π₁^⟧ {⟦φ⟧ = ⟦ φ ⟧Emb} {⟦x⟧ = ⟦ x ⟧Var} ⟦ δ𝒢 ⟧⨾
+⟦π₁⟧≡ {x = x} {δ = δ ⁺ y ∣ ψ} 
+  = ⟦π₁⁺⟧ {⟦x⟧ = ⟦ x ⟧Var} {⟦δ⟧ = ⟦ δ ⟧Emb} {⟦y⟧ = ⟦ y ⟧Var} {⟦ψ⟧ = ⟦ ψ ⟧Emb} 
+          (⟦π₁⟧≡ {δ = δ})
+⟦π₁⟧≡ {δ = _^_ {φ = φ} {x = x} δ δ𝒢} 
+  = ⟦π₁^⟧ {⟦φ⟧ = ⟦ φ ⟧Emb} {⟦x⟧ = ⟦ x ⟧Var} ⟦ δ𝒢 ⟧⨾
 
 ⟦⁺⨾⟧≡ (⨾⁺ δ𝒢)     = {!   !}
 ⟦⁺⨾⟧≡ (⁺⨾^ σ𝒢 γ𝒢) = {!   !}
@@ -316,7 +315,7 @@ coh₁ {φ = φ} (⨾⁺ {σ = δ} {γ = φ'} {x = y} {φ = ψ} δ𝒢)
              (⨾⁺ {σ = σ} {x = x} {φ = ψ'} σ𝒢) 
              (⨾⁺ {σ = γ} {γ = φ''} γ𝒢) 
              (⨾⁺ δσ𝒢) 
-  = 
+  using hyp ← coh₁ δ𝒢 (⁺⨾ σ𝒢) γ𝒢 (⁺⨾ δσ𝒢) = 
   _
   ≡⟨ {!!} ⟩ -- Ugh, some implicit arguments are still not equal
   _
@@ -325,7 +324,6 @@ coh₁ {φ = φ} (⨾⁺ {σ = δ} {γ = φ'} {x = y} {φ = ψ} δ𝒢)
                    ⟦ δ𝒢 ⟧⨾ ⟦ σ𝒢 ⟧⨾ ⟦ ⁺⨾ σ𝒢 ⟧⨾ ⟦ δσ𝒢 ⟧⨾ ⟦ ⁺⨾ δσ𝒢 ⟧⨾ 
                    (⟦π₁⟧≡ {δ = σ}) (⟦⁺⨾⟧≡ σ𝒢) (⟦⁺⨾⟧≡ δσ𝒢) ∙ hyp) ⟩
   ⟦⨾⁺⟧ ⟦ γ𝒢 ⟧⨾ ∎
-  where hyp = coh₁ δ𝒢 (⁺⨾ σ𝒢) γ𝒢 (⁺⨾ δσ𝒢)
 
 coh₁ (⨾⁺ δ𝒢) (⁺⨾^ σ𝒢₀ σ𝒢₁) (⨾⁺ γ𝒢) (⁺⨾^ δσ𝒢₀ δσ𝒢₁) = {!  !}
   where hyp = coh₁ δ𝒢 σ𝒢₁ γ𝒢 δσ𝒢₁
