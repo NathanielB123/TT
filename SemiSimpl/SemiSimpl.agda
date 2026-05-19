@@ -7,8 +7,11 @@ open import Utils
 -- Originally due to András Kovács 
 -- (I translated into graph-of-the-function-style)
 
--- Defining the model is not easy (transport and coherence hell), but I still 
--- think it might be do-able
+-- Defining the model is not easy (transport hell), but I still think it might 
+-- be do-able. In an effort to avoid dealing with a bunch of path algebra, I am 
+-- trying to stick only to pattern-matching on identity proofs (writing
+-- helper functions to manually abstract over stuff when necessary).
+
 module SemiSimpl.SemiSimpl where
 
 data Top : Set
@@ -17,8 +20,8 @@ data Var : ∀ Γ → Loc Γ → Set
 data Emb : ∀ {Γ} → Loc Γ → Loc Γ → Set 
 
 variable
-  Γ Δ Θ : Top
-  Ξ Ψ Φ Ξ' Ψ' Φ' : Loc _
+  Γ Δ Θ Γ' : Top
+  Ξ Ψ Φ Ω Ξ' Ψ' Φ' Ω' : Loc _
   x y z : Var _ _
   δ σ γ θ φ ψ δ' σ' γ' θ' φ' ψ' φ'' : Emb _ _
 
@@ -33,7 +36,8 @@ data Top where
 
 data wkLoc_≔_ {Γ} {Ξ} : Loc Γ → Loc (Γ ▷ Ξ) → Set
 
-data wkEmb_⟨_⟩⟨_⟩≔_ : Emb Ξ Ψ → wkLoc Ξ ≔ Ξ' → wkLoc Ψ ≔ Ψ' → Emb Ξ' Ψ' → Set
+data wkEmb_⟨_⟩⟨_⟩≔_ : Emb Ψ Ξ → wkLoc Ψ ≔ Ψ' → wkLoc Ξ ≔ Ξ' 
+                    → Emb {Γ = Γ ▷ Φ} Ψ' Ξ' → Set
 
 variable
   Ξ𝒢 Ψ𝒢 Φ𝒢 : wkLoc _ ≔ _
@@ -81,8 +85,11 @@ data wkEmb_⟨_⟩⟨_⟩≔_ where
 π₁ (δ ⁺ y ∣ ψ) = π₁ δ ⁺ y ∣ ψ
 π₁ (δ ^ δ𝒢)    = δ ⁺ _ ∣ _
 
--- I am not actually sure the below utilities are so useful, but they are kinda
--- fun...
+⁺⨾ : (δ ⁺ x ∣ φ) ⨾ σ ≔ γ → δ ⨾ π₁ σ ≔ γ
+⁺⨾ (⨾⁺ δ𝒢)     = ⨾⁺ (⁺⨾ δ𝒢)
+⁺⨾ (⁺⨾^ σ𝒢 γ𝒢) = ⨾⁺ γ𝒢
+
+-- I am not convinced the below utilities are useful, but they are kinda fun...
 _⨾π₁_ : (φ : Emb Ξ Φ) → Emb Ψ (Ξ -, x ∣ φ) → Emb Ψ Φ
 φ ⨾π₁ (δ ⁺ y ∣ ψ)        = (φ ⨾π₁ δ) ⁺ _ ∣ _
 φ ⨾π₁ (_^_ {γ = γ} δ δ𝒢) = γ ⁺ _ ∣ _
@@ -90,10 +97,6 @@ _⨾π₁_ : (φ : Emb Ξ Φ) → Emb Ψ (Ξ -, x ∣ φ) → Emb Ψ Φ
 π₁≔ : (δ : Emb Ψ (Ξ -, x ∣ φ)) → φ ⨾ π₁ δ ≔ (φ ⨾π₁ δ)
 π₁≔ (δ ⁺ y ∣ ψ) = ⨾⁺ (π₁≔ δ)
 π₁≔ (δ ^ δ𝒢)    = ⨾⁺ δ𝒢
-
-⁺⨾ : (δ ⁺ x ∣ φ) ⨾ σ ≔ γ → δ ⨾ π₁ σ ≔ γ
-⁺⨾ (⨾⁺ δ𝒢)     = ⨾⁺ (⁺⨾ δ𝒢)
-⁺⨾ (⁺⨾^ σ𝒢 γ𝒢) = ⨾⁺ γ𝒢
 
 ⟦Top⟧ : Set₁
 ⟦Top⟧ = Set
@@ -115,7 +118,6 @@ variable
 variable
   ⟦δ⟧ ⟦σ⟧ ⟦γ⟧ ⟦φ⟧ ⟦ψ⟧ ⟦δ'⟧ ⟦σ'⟧ ⟦γ'⟧ ⟦φ'⟧ ⟦φ''⟧ ⟦ψ'⟧ : ⟦Emb⟧ _ _
   δ≡ σ≡ γ≡ δσ≡ : _≡_ {A = ⟦Emb⟧ _ _} _ _
-
 
 ⟦⨾⟧ : ⟦Emb⟧ ⟦Ψ⟧ ⟦Ξ⟧ → ⟦Emb⟧ ⟦Φ⟧ ⟦Ψ⟧ → ⟦Emb⟧ ⟦Φ⟧ ⟦Ξ⟧
 ⟦⨾⟧ ⟦δ⟧ ⟦σ⟧ ρ ξ = ⟦δ⟧ ρ (⟦σ⟧ ρ ξ)
@@ -143,8 +145,8 @@ variable
     → ⟦Emb⟧ (⟦-,⟧ ⟦Ξ⟧ ⟦x⟧ ⟦γ⟧) (⟦-,⟧ ⟦Ψ⟧ ⟦x⟧ ⟦φ⟧)
 ⟦^⟧ ⟦δ⟧ refl ρ (ξ , τ) = ⟦δ⟧ ρ ξ , τ
 
-⟦π₁⟧ : ⟦Emb⟧ ⟦Ψ⟧ (⟦-,⟧ ⟦Ξ⟧ ⟦x⟧ ⟦φ⟧) → ⟦Emb⟧ ⟦Ψ⟧ ⟦Ξ⟧
-⟦π₁⟧ ⟦δ⟧ ρ ξ = ⟦δ⟧ ρ ξ .fst
+⟦π₁⟧ : ∀ ⟦x⟧ → ⟦Emb⟧ ⟦Ψ⟧ (⟦-,⟧ ⟦Ξ⟧ ⟦x⟧ ⟦φ⟧) → ⟦Emb⟧ ⟦Ψ⟧ ⟦Ξ⟧
+⟦π₁⟧ ⟦x⟧ ⟦δ⟧ ρ ξ = ⟦δ⟧ ρ ξ .fst
 
 ⟦⨾ε⟧ : ⟦⨾⟧ ⟦δ⟧ ⟦ε⟧ ≡ ⟦δ⟧
 ⟦⨾ε⟧ = refl
@@ -169,8 +171,25 @@ variable
 ⟦^⨾^⟧ refl refl refl refl refl = refl
 
 ⟦⁺⨾⟧ : ⟦⨾⟧ (⟦⁺⟧ ⟦δ⟧ ⟦x⟧ ⟦φ⟧) ⟦σ⟧ ≡ ⟦γ⟧ 
-     → ⟦⨾⟧ ⟦δ⟧ (⟦π₁⟧ {⟦x⟧ = ⟦x⟧} ⟦σ⟧) ≡ ⟦γ⟧
+     → ⟦⨾⟧ ⟦δ⟧ (⟦π₁⟧ ⟦x⟧ ⟦σ⟧) ≡ ⟦γ⟧
 ⟦⁺⨾⟧ refl = refl
+
+
+⟦wkLoc⟧ : ⟦Loc⟧ ⟦Γ⟧ → ⟦Loc⟧ (⟦▷⟧ ⟦Γ⟧ ⟦Ψ⟧)
+⟦wkLoc⟧ ⟦Ξ⟧ (ρ , τ) = ⟦Ξ⟧ ρ
+
+⟦wkEmb⟧ : ⟦Emb⟧ ⟦Ψ⟧ ⟦Ξ⟧ → ⟦wkLoc⟧ ⟦Ψ⟧ ≡ ⟦Ψ'⟧ → ⟦wkLoc⟧ ⟦Ξ⟧ ≡ ⟦Ξ'⟧
+        → ⟦Emb⟧ {⟦Γ⟧ = ⟦▷⟧ ⟦Γ⟧ ⟦Φ⟧} ⟦Ψ'⟧ ⟦Ξ'⟧
+⟦wkEmb⟧ ⟦δ⟧ refl refl (ρ , τ) ξ = ⟦δ⟧ ρ ξ
+
+-- I am not sure the zero variable case here is actually what we want. I should
+-- spend some time working out how to actually write down semi-simplicial with
+-- this syntax at some point...
+⟦vz⟧ : ⟦wkLoc⟧ ⟦Ξ⟧ ≡ ⟦Ξ'⟧ → ⟦Var⟧ (⟦▷⟧ ⟦Γ⟧ ⟦Ξ⟧) ⟦Ξ'⟧
+⟦vz⟧ refl (ρ , ξ) ξ' = ξ ≡ ξ'
+
+⟦vs⟧ : ⟦Var⟧ ⟦Γ⟧ ⟦Ξ⟧ → ⟦wkLoc⟧ ⟦Ξ⟧ ≡ ⟦Ξ'⟧ → ⟦Var⟧ (⟦▷⟧ ⟦Γ⟧ ⟦Ψ⟧) ⟦Ξ'⟧
+⟦vs⟧ ⟦x⟧ refl (ρ , τ) ξ = ⟦x⟧ ρ ξ
 
 ⟦_⟧Top : Top → ⟦Top⟧
 ⟦_⟧Loc : Loc Γ → ⟦Loc⟧ ⟦ Γ ⟧Top
@@ -179,6 +198,7 @@ variable
 
 ⟦_⟧⨾ : δ ⨾ σ ≔ γ → ⟦⨾⟧ ⟦ δ ⟧Emb ⟦ σ ⟧Emb ≡ ⟦ γ ⟧Emb
 
+-- Coherence required for ⟦^⨾^⟧
 coh₁ : (δ𝒢  : φ ⨾ δ ≔ φ')
        (σ𝒢  : φ' ⨾ σ ≔ φ'')
        (γ𝒢  : φ ⨾ γ ≔ φ'')
@@ -194,9 +214,6 @@ coh₁ : (δ𝒢  : φ ⨾ δ ≔ φ')
 ⟦ []         ⟧Loc = ⟦[]⟧
 ⟦ Ξ -, x ∣ φ ⟧Loc = ⟦-,⟧ ⟦ Ξ ⟧Loc ⟦ x ⟧Var ⟦ φ ⟧Emb
 
-⟦ vz Ξ𝒢   ⟧Var (ρ , ξ') ξ = {!   !}
-⟦ vs x Ξ𝒢 ⟧Var (ρ , ψ)  ξ = ⟦ x ⟧Var ρ {! ξ  !}
-
 ⟦ ε                ⟧Emb = ⟦ε⟧
 ⟦ δ ⁺ x ∣ φ        ⟧Emb = ⟦⁺⟧ ⟦ δ ⟧Emb ⟦ x ⟧Var ⟦ φ ⟧Emb 
 ⟦ _^_ {x = x} δ φ𝒢 ⟧Emb = ⟦^⟧ {⟦x⟧ = ⟦ x ⟧Var} ⟦ δ ⟧Emb ⟦ φ𝒢 ⟧⨾
@@ -208,37 +225,43 @@ coh₁ : (δ𝒢  : φ ⨾ δ ≔ φ')
 ⟦ ^⨾^ δ𝒢 σ𝒢 γ𝒢 δσ𝒢          ⟧⨾ 
   = ⟦^⨾^⟧ ⟦ δ𝒢 ⟧⨾ ⟦ σ𝒢 ⟧⨾ ⟦ γ𝒢 ⟧⨾ ⟦ δσ𝒢 ⟧⨾ (coh₁ δ𝒢 σ𝒢 γ𝒢 δσ𝒢)
 
-⟦π₁⟧≡ : {x : Var Γ Φ} {δ : Emb Ψ (Ξ -, x ∣ φ)} 
-      → ⟦ π₁ δ ⟧Emb ≡ ⟦π₁⟧ {⟦x⟧ = ⟦ x ⟧Var} ⟦ δ ⟧Emb
+⟦_⟧wkLoc : wkLoc Ξ ≔ Ξ' → ⟦wkLoc⟧ ⟦ Ξ ⟧Loc ≡ ⟦ Ξ' ⟧Loc
 
-⟦⁺⨾⟧≡ : ∀ {x : Var Γ Φ} {δ : Emb Ψ (Ξ -, x ∣ φ)} 
-          {σ : Emb Φ (Ψ -, x ∣ (φ ⨾π₁ δ))} {γ} 
-      → (δ𝒢 : (δ ⁺ x ∣ (φ ⨾π₁ δ)) ⨾ σ ≔ γ) 
+⟦_⟧wkEmb : wkEmb δ ⟨ Ψ𝒢 ⟩⟨ Ξ𝒢 ⟩≔ δ' 
+         → ⟦wkEmb⟧ ⟦ δ ⟧Emb ⟦ Ψ𝒢 ⟧wkLoc ⟦ Ξ𝒢 ⟧wkLoc ≡ ⟦ δ' ⟧Emb
+
+⟦ vz Ξ𝒢   ⟧Var = ⟦vz⟧ ⟦ Ξ𝒢 ⟧wkLoc
+⟦ vs x Ξ𝒢 ⟧Var = ⟦vs⟧ ⟦ x ⟧Var ⟦ Ξ𝒢 ⟧wkLoc
+
+⟦π₁⟧≡ : {x : Var Γ Φ} {δ : Emb Ψ (Ξ -, x ∣ φ)} 
+      → ⟦ π₁ δ ⟧Emb ≡ ⟦π₁⟧ ⟦ x ⟧Var ⟦ δ ⟧Emb
+
+⟦⁺⨾⟧≡ : ∀ {x : Var Γ Ξ'} {δ : Emb Ψ Ξ} 
+          {σ : Emb Φ (Ψ -, x ∣ φ)} {γ} 
+      → (δ𝒢 : (δ ⁺ x ∣ φ) ⨾ σ ≔ γ) 
       → ⟦ ⁺⨾ δ𝒢 ⟧⨾ 
       ≡ ap (⟦⨾⟧ ⟦ δ ⟧Emb) (⟦π₁⟧≡ {δ = σ}) 
       ∙ ⟦⁺⨾⟧ {⟦δ⟧ = ⟦ δ ⟧Emb} {⟦x⟧ = ⟦ x ⟧Var} {⟦σ⟧ = ⟦ σ ⟧Emb} ⟦ δ𝒢 ⟧⨾
 
-
-
 ⟦π₁^⟧ : (δ≡ : ⟦⨾⟧ ⟦φ⟧ ⟦δ⟧ ≡ ⟦φ'⟧) 
       → ⟦⁺⟧ ⟦δ⟧ ⟦x⟧ ⟦φ'⟧ 
-      ≡ ⟦π₁⟧ {⟦x⟧ = ⟦x⟧} {⟦φ⟧ = ⟦φ⟧} (⟦^⟧ {⟦x⟧ = ⟦x⟧} ⟦δ⟧ δ≡)
+      ≡ ⟦π₁⟧ {⟦φ⟧ = ⟦φ⟧} ⟦x⟧ (⟦^⟧ {⟦x⟧ = ⟦x⟧} ⟦δ⟧ δ≡)
 ⟦π₁^⟧ refl = refl
 
-⟦π₁⁺⟧ : ⟦δ'⟧ ≡ ⟦π₁⟧ {⟦x⟧ = ⟦x⟧} {⟦φ⟧ = ⟦φ⟧} ⟦δ⟧
+⟦π₁⁺⟧ : ⟦δ'⟧ ≡ ⟦π₁⟧ {⟦φ⟧ = ⟦φ⟧} ⟦x⟧ ⟦δ⟧
       → ⟦⁺⟧ ⟦δ'⟧ ⟦y⟧ ⟦ψ⟧ 
-      ≡ ⟦π₁⟧ {⟦x⟧ = ⟦x⟧} (⟦⁺⟧ ⟦δ⟧ ⟦y⟧ ⟦ψ⟧)
+      ≡ ⟦π₁⟧ ⟦x⟧ (⟦⁺⟧ ⟦δ⟧ ⟦y⟧ ⟦ψ⟧)
 ⟦π₁⁺⟧ refl = refl
 
 ⟦π₁⟧≡ {δ = δ ⁺ y ∣ ψ} = 
   {!!}
   -- ⟦π₁⁺⟧ {⟦x⟧ = ⟦ y ⟧Var} {⟦φ⟧ = {!!}} {⟦ψ⟧ = ⟦ ψ ⟧Emb} (⟦π₁⟧≡ {δ = δ})
-⟦π₁⟧≡ {δ = _^_ {φ = φ} {x = x} δ δ𝒢} = ⟦π₁^⟧ 
-  {⟦φ⟧ = ⟦ φ ⟧Emb} {⟦x⟧ = ⟦ x ⟧Var} ⟦ δ𝒢 ⟧⨾
+⟦π₁⟧≡ {δ = _^_ {φ = φ} {x = x} δ δ𝒢} = 
+  ⟦π₁^⟧ {⟦φ⟧ = ⟦ φ ⟧Emb} {⟦x⟧ = ⟦ x ⟧Var} ⟦ δ𝒢 ⟧⨾
 
-
-⟦⁺⨾⟧≡ (⨾⁺ δ𝒢) = {!  ⟦⁺⨾⟧≡ δ𝒢 !}
-
+⟦⁺⨾⟧≡ (⨾⁺ δ𝒢)     = {!   !}
+⟦⁺⨾⟧≡ (⁺⨾^ σ𝒢 γ𝒢) = {!   !}
+ 
 coh₁₁ : {⟦φ⟧ : ⟦Emb⟧ ⟦[]⟧ ⟦Ξ⟧}
         (σ≡ : ⟦⨾⟧ ⟦φ⟧ ⟦σ⟧ ≡ ⟦γ⟧)
         (σ≡' : ⟦⨾⟧ ⟦φ⟧ ⟦σ'⟧ ≡ ⟦γ⟧)
@@ -257,51 +280,73 @@ coh₁₂ : {⟦x⟧ : ⟦Var⟧ ⟦Γ⟧ ⟦Φ'⟧}
         (σ≡ : ⟦⨾⟧ (⟦⁺⟧ ⟦φ'⟧ ⟦y⟧ ⟦ψ⟧) ⟦σ⟧ ≡ ⟦φ''⟧)
         (γ≡ : ⟦⨾⟧ ⟦φ⟧ ⟦γ⟧ ≡ ⟦φ''⟧)
         (δσ≡ : ⟦⨾⟧ (⟦⁺⟧ ⟦δ⟧ ⟦y⟧ ⟦ψ⟧) ⟦σ⟧ ≡ ⟦γ⟧)
-      → ap (⟦⨾⟧ ⟦φ⟧) (sym δσ≡) ∙ ap (λ □ → ⟦⨾⟧ □ (⟦π₁⟧ {⟦x⟧ = ⟦y⟧} ⟦σ⟧)) δ≡ ∙ σ≡
+      → ap (⟦⨾⟧ ⟦φ⟧) (sym δσ≡) ∙ ap (λ □ → ⟦⨾⟧ □ (⟦π₁⟧ ⟦y⟧ ⟦σ⟧)) δ≡ ∙ σ≡
       ≡ γ≡
-      → ap (⟦⨾⟧ ⟦φ⟧) (sym (⟦⨾⁺⟧ {⟦δ⟧ = ⟦⁺⟧ ⟦δ⟧ ⟦y⟧ ⟦ψ⟧} {⟦σ⟧ = ⟦σ⟧} {⟦x⟧ = ⟦x⟧} δσ≡)) 
+      → ap (⟦⨾⟧ ⟦φ⟧) 
+           (sym (⟦⨾⁺⟧ {⟦δ⟧ = ⟦⁺⟧ ⟦δ⟧ ⟦y⟧ ⟦ψ⟧} {⟦σ⟧ = ⟦σ⟧} {⟦x⟧ = ⟦x⟧} δσ≡)) 
       ∙ ap (λ □ → ⟦⨾⟧ □ (⟦⁺⟧ ⟦σ⟧ ⟦x⟧ ⟦ψ'⟧)) (⟦⨾⁺⟧ {⟦δ⟧ = ⟦φ⟧} {⟦x⟧ = ⟦y⟧} δ≡) 
       ∙ ⟦⨾⁺⟧ {⟦δ⟧ = ⟦φ'⟧} {⟦x⟧ = ⟦x⟧} σ≡
       ≡ ⟦⨾⁺⟧ {⟦δ⟧ = ⟦φ⟧} {⟦x⟧ = ⟦x⟧} γ≡
 coh₁₂ refl refl refl refl refl = refl
 
--- coh₁₂-helper : 
+coh₁₂-helper 
+  : ∀ {⟦y⟧ : ⟦Var⟧ ⟦Γ⟧ ⟦Ξ'⟧} {⟦δ⟧ : ⟦Emb⟧ ⟦Ψ⟧ ⟦Ξ⟧} {⟦σ⟧}
+      (δ≡ : ⟦⨾⟧ ⟦φ⟧ ⟦δ⟧ ≡ ⟦φ'⟧)
+      (σ≡ : ⟦⨾⟧ (⟦⁺⟧ ⟦φ'⟧ ⟦y⟧ ⟦ψ⟧) ⟦σ⟧ ≡ ⟦φ''⟧)
+      (σ≡' : ⟦⨾⟧ ⟦φ'⟧ ⟦σ'⟧ ≡ ⟦φ''⟧)
+      (δσ≡ : ⟦⨾⟧ (⟦⁺⟧ ⟦δ⟧ ⟦y⟧ ⟦ψ⟧) ⟦σ⟧ ≡ ⟦γ⟧)
+      (δσ≡' : ⟦⨾⟧ ⟦δ⟧ ⟦σ'⟧ ≡ ⟦γ⟧)
+  → (πσ : ⟦σ'⟧ ≡ ⟦π₁⟧ ⟦y⟧ ⟦σ⟧) 
+  → σ≡' ≡ ap (⟦⨾⟧ ⟦φ'⟧) πσ ∙ ⟦⁺⨾⟧ {⟦δ⟧ = ⟦φ'⟧} {⟦x⟧ = ⟦y⟧} {⟦σ⟧ = ⟦σ⟧} σ≡
+  → δσ≡' ≡ ap (⟦⨾⟧ ⟦δ⟧) πσ ∙ ⟦⁺⨾⟧ {⟦δ⟧ = ⟦δ⟧} {⟦x⟧ = ⟦y⟧} {⟦σ⟧ = ⟦σ⟧} δσ≡
+  → ap (⟦⨾⟧ ⟦φ⟧) (sym δσ≡) 
+  ∙ ap (λ □ → ⟦⨾⟧ □ (⟦π₁⟧ ⟦y⟧ ⟦σ⟧)) δ≡ ∙ σ≡
+  ≡ ap (⟦⨾⟧ ⟦φ⟧) (sym δσ≡') 
+  ∙ ap (λ □ → ⟦⨾⟧ □ ⟦σ'⟧) δ≡ ∙ σ≡'
+coh₁₂-helper refl refl refl refl refl refl refl refl = refl
 
-
--- The syntax is a set so we know 'γ𝒢' is '⨾ε' here
+-- The syntax is an hSet so we should be able to get that 'γ𝒢' is '⨾ε' here
 coh₁ ⨾ε ⨾ε γ𝒢 ⨾ε = {!   !}
+
 coh₁ {φ = φ} ⨾ε (⨾⁺ σ𝒢) (⨾⁺ γ𝒢) (⨾⁺ δσ𝒢) 
   = coh₁₁ {⟦φ⟧ = ⟦ φ ⟧Emb} ⟦ σ𝒢 ⟧⨾ ⟦ γ𝒢 ⟧⨾ ⟦ δσ𝒢 ⟧⨾ hyp
   where hyp = coh₁ ⨾ε σ𝒢 γ𝒢 δσ𝒢
-coh₁ {φ = φ} (⨾⁺ {σ = δ} {γ = φ'} {x = y} {φ = ψ} δ𝒢) (⨾⁺ {σ = σ} {x = x} {φ = ψ'} σ𝒢) (⨾⁺ {σ = γ} {γ = φ''} γ𝒢) (⨾⁺ δσ𝒢) = 
-  -- (ap (⟦⨾⟧ ⟦ φ ⟧Emb) (sym (⟦⨾⁺⟧ ⟦ δσ𝒢 ⟧⨾)) 
-  --   ∙ ap (λ □ → ⟦⨾⟧ □ (⟦⁺⟧ ⟦ σ ⟧Emb ⟦ x ⟧Var ⟦ ψ' ⟧Emb)) (⟦⨾⁺⟧ ⟦ δ𝒢 ⟧⨾) 
-  --   ∙ ⟦⨾⁺⟧ ⟦ σ𝒢 ⟧⨾)
-  
-  {!!}
-  
-  -- _
-  -- ≡⟨ {!!} ⟩
-  -- {!!}
-  -- ≡⟨ coh₁₂ ⟦ δ𝒢 ⟧⨾ ⟦ σ𝒢 ⟧⨾ ⟦ γ𝒢 ⟧⨾ ⟦ δσ𝒢 ⟧⨾ ({!   !} ∙ hyp) ⟩
-  -- ⟦⨾⁺⟧ ⟦ γ𝒢 ⟧⨾ ∎
 
-    -- {!!} ∙ coh₁₂ ⟦ δ𝒢 ⟧⨾ ⟦ σ𝒢 ⟧⨾ ⟦ γ𝒢 ⟧⨾ ⟦ δσ𝒢 ⟧⨾ hyp
+coh₁ {φ = φ} (⨾⁺ {σ = δ} {γ = φ'} {x = y} {φ = ψ} δ𝒢) 
+             (⨾⁺ {σ = σ} {x = x} {φ = ψ'} σ𝒢) 
+             (⨾⁺ {σ = γ} {γ = φ''} γ𝒢) 
+             (⨾⁺ δσ𝒢) 
+  = 
+  _
+  ≡⟨ {!!} ⟩ -- Ugh, some implicit arguments are still not equal
+  _
+  ≡⟨ coh₁₂ {⟦y⟧ = ⟦ y ⟧Var} {⟦σ⟧ = ⟦ σ ⟧Emb} ⟦ δ𝒢 ⟧⨾ ⟦ σ𝒢 ⟧⨾ ⟦ γ𝒢 ⟧⨾ ⟦ δσ𝒢 ⟧⨾ 
+     (coh₁₂-helper {⟦φ⟧ = ⟦ φ ⟧Emb} 
+                   ⟦ δ𝒢 ⟧⨾ ⟦ σ𝒢 ⟧⨾ ⟦ ⁺⨾ σ𝒢 ⟧⨾ ⟦ δσ𝒢 ⟧⨾ ⟦ ⁺⨾ δσ𝒢 ⟧⨾ 
+                   (⟦π₁⟧≡ {δ = σ}) (⟦⁺⨾⟧≡ σ𝒢) (⟦⁺⨾⟧≡ δσ𝒢) ∙ hyp) ⟩
+  ⟦⨾⁺⟧ ⟦ γ𝒢 ⟧⨾ ∎
   where hyp = coh₁ δ𝒢 (⁺⨾ σ𝒢) γ𝒢 (⁺⨾ δσ𝒢)
-        -- wah = coh₁₂ {⟦φ⟧ = ⟦ φ ⟧Emb} {⟦φ'⟧ = ⟦ φ' ⟧Emb} {⟦y⟧ = ⟦ y ⟧Var} 
-        --             {⟦ψ⟧ = ⟦ ψ ⟧Emb} {⟦x⟧ = {!⟦ x ⟧Var!}} {⟦δ⟧ = ⟦ δ ⟧Emb} {⟦σ⟧ = {!⟦ σ ⟧Emb!}}
-        --             ⟦ δ𝒢 ⟧⨾ {!⟦ σ𝒢 ⟧⨾!} {!⟦ γ𝒢 ⟧⨾!} {!⟦ δσ𝒢 ⟧⨾!} {!!}
-       
-        -- wah = coh₁₂ {⟦ψ⟧ = {!⟦ ψ ⟧Emb!}} {⟦y⟧ = {!⟦ y ⟧Var!}} {⟦x⟧ = ⟦ x ⟧Var} {⟦δ⟧ = {!⟦ δ ⟧Emb!}} {⟦σ⟧ = {!⟦ σ ⟧Emb!}} {!⟦ δ𝒢 ⟧⨾!} {!!} {!!} {!!} {!!} -- ⟦ δ𝒢 ⟧⨾ ⟦ σ𝒢 ⟧⨾ ⟦ γ𝒢 ⟧⨾ ⟦ δσ𝒢 ⟧⨾ hyp
+
 coh₁ (⨾⁺ δ𝒢) (⁺⨾^ σ𝒢₀ σ𝒢₁) (⨾⁺ γ𝒢) (⁺⨾^ δσ𝒢₀ δσ𝒢₁) = {!  !}
   where hyp = coh₁ δ𝒢 σ𝒢₁ γ𝒢 δσ𝒢₁
+
 coh₁ (⁺⨾^ δ𝒢₀ δ𝒢₁) (⨾⁺ σ𝒢) (⨾⁺ γ𝒢) (⨾⁺ δσ𝒢) = {!   !}
   where hyp = coh₁ (⁺⨾^ δ𝒢₀ δ𝒢₁) σ𝒢 γ𝒢 δσ𝒢
+
 coh₁ (⁺⨾^ δ𝒢₀ δ𝒢₁) (⁺⨾^ σ𝒢₀ σ𝒢₁) (⁺⨾^ γ𝒢₀ γ𝒢₁) (^⨾^ δσ𝒢₀ δσ𝒢₁ δσ𝒢₂ δσ𝒢₃) 
   = {!   !}
   where hyp = coh₁ δ𝒢₁ σ𝒢₁ γ𝒢₁ δσ𝒢₃
+
 coh₁ (^⨾^ δ𝒢₀ δ𝒢₁ δ𝒢₂ δ𝒢₃) (⨾⁺ σ𝒢) (⨾⁺ γ𝒢) (⨾⁺ δσ𝒢) 
   = {!   !}
   where hyp = coh₁ (^⨾^ δ𝒢₀ δ𝒢₁ δ𝒢₂ δ𝒢₃) σ𝒢 γ𝒢 δσ𝒢
+
 coh₁ (^⨾^ δ𝒢₀ δ𝒢₁ δ𝒢₂ δ𝒢₃) (^⨾^ σ𝒢₀ σ𝒢₁ σ𝒢₂ σ𝒢₃) γ𝒢 (^⨾^ δσ𝒢₀ δσ𝒢₁ δσ𝒢₂ δσ𝒢₃) 
   = {!  γ𝒢 !} -- Stuck pattern matching... probably need to ford
+
+⟦ wk[]    ⟧wkLoc = refl
+⟦ wk-, δ𝒢 ⟧wkLoc = {!   !}
+
+⟦ wkε                      ⟧wkEmb = refl
+⟦ wk⁺ δ𝒢₀ δ𝒢₁              ⟧wkEmb = {!   !}
+⟦ wk^ δ𝒢₀ δ𝒢₁ δ𝒢₂ ⨾δ𝒢 ⨾δ𝒢' ⟧wkEmb = {!   !}
