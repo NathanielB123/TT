@@ -6,7 +6,7 @@
   - The inductive-inductive syntax is defined in [Syntax](WTT/Syntax.agda).
   - We then go on to show that substitution can be computed recursively in [Comp<>](WTT/Comp<>.agda).
   - We also construct the standard model in [Model](WTT/Model.agda).
-  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax should still be coherent `--without-K` and interpreting this syntax into arbitry n-types (rather than just hSets) might be possible. Unfortunately, defining such a model is still non-trivial (we need extra coherences).
+  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax is coherent (i.e. provably an `hSet`) `--without-K` and it therefore might be possible to construct a model in arbitry n-types. Unfortunately, defining such a model is still non-trivial (we need extra coherences).
 
 ### WIP:
 
@@ -18,6 +18,6 @@
   - Relies on https://github.com/agda/agda/pull/8463
 - A minimal type theory for describing semi-simplicial types: [SemiSimpl](SemiSimpl/)
   - Based on the WTT substitutions-as-a-relation idea.
-  - The particular minimal minimal type theory is due to András Kovács.
+  - The particular minimal type theory is due to András Kovács.
   - Proving that the syntax is a set is trivial (there are no path constructors). Howevever, defining the type model is still quite difficult for similar reasons to WTT.
-  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax, though I think this approach might implicitly rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip.
+  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax, though I think this approach might implicitly rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip. Also, there is a termination error currently...
