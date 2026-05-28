@@ -1,3 +1,5 @@
+{-# OPTIONS --without-K #-}
+
 open import Utils hiding (Dec; yes; no)
 
 open import Agda.Primitive

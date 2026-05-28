@@ -20,7 +20,7 @@ apdd₂-K B f refl {refl} {refl} = refl[]
 -- TODO: Is this useful?
 apdd₂-K' : ∀ (B : A → Set ℓ) {y : B x₁}
              (f : ∀ x → B x → C) (eq₁ : x₁ ≡ x₂)
-         → f x₁ y ≡ f x₂ (transp B eq₁ y)
+         → f x₁ y ≡ f x₂ (tr B eq₁ y)
 apdd₂-K' B f p = apd₂ f p refl[]
 
 refl[]-K : _≡[_]≡_ {A = A} x p x
@@ -40,6 +40,9 @@ coe-K {p = refl} = refl
 
 coe≡-K : y₁ ≡ y₂ → coe p y₁ ≡ coe q y₂
 coe≡-K {p = refl} {q = refl} refl = refl
+
+coe-coe≡-K : x₁ ≡ x₂ → coe p₂ (coe p₁ x₁) ≡ coe q₂ (coe q₁ x₂)
+coe-coe≡-K {p₂ = refl} {p₁ = refl} {q₂ = refl} {q₁ = refl} refl = refl
 
 -- TODO: Move to utils
 happlyi : {B : A → Set ℓ} {f g : ∀ {x} → B x} → _≡_ {A = ∀ {x} → B x} f g 

@@ -11,7 +11,8 @@
 ### WIP:
 
 - The groupoid model: [GrpdModel](Models/GrpdModel.agda)
-  - I mostly just wanted to understand the computational content of `J` in the groupoid model. I believe finishing the rest of the mechanisation would be extremely painful.
+  - I think this is a really nice demonstration of the power of `--smart-with` (https://github.com/NathanielB123/agda/pull/15).
+  - Working with displayed groupoids specifically hits a ton of transport hell, but smart `rewrite` (i.e. local equality reflection) can kill most of it.
 - NbE (including trying out an idea I have to deal with non-linear reductions): [NonLinNbE](NonLinNbE/)
   - This is still very-much WIP. I will write more here after I make more progress.
   - I have now posted a small summary of the idea on Mastodon though: https://types.pl/deck/@NathanielB/116256378457107811

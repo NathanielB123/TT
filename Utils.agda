@@ -20,7 +20,7 @@ variable
 module UtilVars where variable
   A B C D E A₁ A₂ : Set ℓ
   x y z x₁ x₂ x₃ y₁ y₂ y₃ z₁ z₂ w₁ w₂ : A
-  p q r : x ≡ y
+  p q r p₁ p₂ q₁ q₂ : x ≡ y
   x₁₂ x₂₃ x₁₃ x₂₁ : x₁ ≡ x₂
   f g h : A → B
 open UtilVars
@@ -132,10 +132,10 @@ apdd₂ : ∀ (B : A → Set ℓ₁) {C : A → Set ℓ₂} {y : B x₁}
        → f x₁ y ≡[ ap C eq ]≡ f x₂ (tr B eq y)
 apdd₂ B f refl = refl[]
 
-extTransp : ∀ (x₁₂ : x₁ ≡ x₂) {B : A → Set ℓ} {y₁ y₂}
+exttr : ∀ (x₁₂ : x₁ ≡ x₂) {B : A → Set ℓ} {y₁ y₂}
           → y₁ ≡[ ap B x₁₂ ]≡ y₂
           → y₁ ≡[ ap B (x₁₂ ∙ x₂₃) ]≡ tr B x₂₃ y₂
-extTransp {x₂₃ = refl} refl y₁₂ = y₁₂
+exttr {x₂₃ = refl} refl y₁₂ = y₁₂
 
 sym[] : ∀ {B : A → Set ℓ} {y₁ y₂}
       → y₁ ≡[ ap B x₁₂ ]≡ y₂
@@ -146,6 +146,9 @@ sym[] {x₁₂ = refl} y₁₂ .[]coe = sym (y₁₂ .[]coe)
       → y₁ ≡[ ap B (sym x₂₁) ]≡ y₂
       → y₂ ≡[ ap B x₂₁ ]≡ y₁
 []sym {x₂₁ = refl} y₁₂ .[]coe = sym (y₁₂ .[]coe)
+
+[]coe-sym : x ≡[ p ]≡ y → x ≡ coe (sym p) y
+[]coe-sym {p = refl} q = q .[]coe
 
 -- We keep |D| and |f| separate here because |ap-ap| does not reduce
 ap[] : ∀ {C : A → Set ℓ₁} (D : B → Set ℓ₂) {y₁ y₂} 
