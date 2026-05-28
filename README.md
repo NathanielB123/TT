@@ -6,7 +6,7 @@
   - The inductive-inductive syntax is defined in [Syntax](WTT/Syntax.agda).
   - We then go on to show that substitution can be computed recursively in [Comp<>](WTT/Comp<>.agda).
   - We also construct the standard model in [Model](WTT/Model.agda).
-  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax is coherent (i.e. provably an `hSet`) `--without-K` and it therefore might be possible to construct a model in arbitry n-types. Unfortunately, defining such a model is still non-trivial (we need extra coherences).
+  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax is coherent (i.e. provably an `hSet` without truncation) and it therefore might be possible to construct a model in arbitry n-types (`--without-K`). Unfortunately, defining such a model is still non-trivial (we need extra coherences).
 
 ### WIP:
 
