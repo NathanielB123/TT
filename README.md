@@ -19,5 +19,5 @@
 - A minimal type theory for describing semi-simplicial types: [SemiSimpl](SemiSimpl/)
   - Based on the WTT substitutions-as-a-relation idea.
   - The particular minimal type theory is due to András Kovács.
-  - Proving that the syntax is a set is trivial (there are no path constructors). Howevever, defining the type model is still quite difficult for similar reasons to WTT.
-  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax, though I think this approach might implicitly rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip. Also, there is a termination error currently...
+  - Proving that the syntax is a set is trivial (there are no path constructors). Howevever, defining the type model is still quite difficult for similar reasons to the WTT example.
+  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax, though I think this approach might implicitly rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip. Also, there is currently a termination error...
