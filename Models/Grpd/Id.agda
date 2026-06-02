@@ -21,7 +21,7 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) (⟦t⟧ ⟦u⟧ : ⟦Tm⟧ ⟦Γ⟧ ⟦A
 
   ⟦Id⟧ : ⟦Ty⟧ ⟦Γ⟧
   ⟦Id⟧ .fst .Carᴰ ρ 
-    = Relᴰ (⟦A⟧ .fst) (⟦t⟧.act ρ) (⟦u⟧.act ρ) (⟦Γ⟧.id ρ)
+    = ⟦A⟧ .fst .Relᴰ (⟦t⟧.act ρ) (⟦u⟧.act ρ) (⟦Γ⟧.id ρ)
   ⟦Id⟧ .fst .Relᴰ τ₁ τ₂ ρ₁₂ 
     = tr (⟦A⟧ .fst .Relᴰ _ _) (⟦Γ⟧.⁻¹∘id∘ ρ₁₂) 
          ((⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (τ₁ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₁₂)) ≡ τ₂
@@ -147,34 +147,65 @@ postulate
   ⟦vz,⟧  : ⟦[]⟧ ⟦vz⟧ (⟦,⟧ ⟦δ⟧ ⟦u⟧) ≡ ⟦u⟧
 {-# REWRITE ⟦[id]⟧ ⟦[][]⟧ ⟦vz,⟧ #-}
 
--- ⟦J⟧ : (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) 
---                        (⟦Id⟧ (⟦[]T⟧ ⟦A⟧ ⟦wk⟧) (⟦[]⟧ ⟦t⟧ ⟦wk⟧) ⟦vz⟧)))
---     → ⟦Tm⟧ ⟦Γ⟧ (⟦[]T⟧ ⟦P⟧ (⟦,⟧ (⟦,⟧ ⟦id⟧ ⟦t⟧) ⟦refl⟧))
---     → (⟦p⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧))
---     → ⟦Tm⟧ ⟦Γ⟧ (⟦[]T⟧ ⟦P⟧ (⟦,⟧ (⟦,⟧ ⟦id⟧ ⟦u⟧) ⟦p⟧))
--- ⟦J⟧ {⟦Γ⟧ = ⟦Γ⟧} {⟦A⟧ = ⟦A⟧} {⟦t⟧ = ⟦t⟧} {⟦u⟧ = ⟦u⟧} ⟦P⟧ ⟦d⟧ ⟦p⟧ .act ρ 
---   = ⟦P⟧ .snd .coeG ((id (⟦Γ⟧ .snd) _ , ⟦p⟧ .act ρ) , 
---   -- Intuitively, here we are proving that ⟦refl⟧ and ⟦p⟧ are related over ⟦p⟧
---   -- Explicitly, we construct
---   -- ⟦Id⟧ (⟦[]T⟧ ⟦A⟧ ⟦wk⟧) (⟦[]⟧ ⟦t⟧ ⟦wk⟧) ⟦vz⟧ .fst .Relᴰ
---   --      (⟦refl⟧ .act ρ) (⟦p⟧ .act ρ) (⟦Γ⟧ .snd .id , ⟦p⟧ .act ρ)
---   (coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ ⌜ ⟦t⟧ .pres (id (⟦Γ⟧ .snd) _) ⌝)
---          (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ _) (⟦p⟧ .act ρ)))
---   ≡⟨ ap! (⟦t⟧ .id _) ⟩
---   coe ⌜ _ ⌝ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦A⟧ .snd .idᴰ _))
---             (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ _) (⟦p⟧ .act ρ)))
---   ≡⟨ ap! uip ⟩
---   coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦A⟧ .snd .idᴰ _))
---         (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ _) (⟦p⟧ .act ρ)))
---   ≡⟨ exttr (id⁻¹∘ (⟦Γ⟧ .snd)) (id⁻¹∘ᴰ (⟦A⟧ .snd)) .[]coe ⟩
---   coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ _) (⟦p⟧ .act ρ))
---   ≡⟨ exttr (⟦Γ⟧ .snd .id∘ _) (⟦A⟧ .snd .id∘ᴰ _) .[]coe ⟩
---   coe refl (⟦p⟧ .act ρ)
---   ≡⟨⟩
---   ⟦p⟧ .act ρ ∎)) {!⟦d⟧ .act ρ!}
--- ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .pres ρ₁₂ = {!!}
---   -- tr (⟦P⟧ .fst .Relᴰ _ _) (apd₂ _,_ (apd₂ _,_ {!!} {!!}) {!!}) 
---   --        {!coeG~′ (⟦P⟧ .snd) (⟦d⟧ .pres ρ₁₂)!}
--- ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ .id   = {!   !}
--- ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ ._⁻¹  = {!   !}
--- ⟦J⟧ ⟦P⟧ ⟦d⟧ ⟦p⟧ ._∘_  = {!   !}
+-- The J rule
+module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) 
+                     (⟦Id⟧ (⟦[]T⟧ ⟦A⟧ ⟦wk⟧) (⟦[]⟧ ⟦t⟧ ⟦wk⟧) ⟦vz⟧)))
+         (⟦d⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦[]T⟧ ⟦P⟧ (⟦,⟧ (⟦,⟧ ⟦id⟧ ⟦t⟧) ⟦refl⟧)))
+         (⟦p⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧))
+         where
+  private
+    module ⟦Γ⟧ = Grpd.Data (⟦Γ⟧ .snd)
+    module ⟦A⟧ = Grpdᴰ.Data (⟦A⟧ .snd)
+    module ⟦P⟧ = Grpdᴰ.Data (⟦P⟧ .snd)
+    module ⟦t⟧ = _⇒ᴰ_ ⟦t⟧
+    module ⟦u⟧ = _⇒ᴰ_ ⟦u⟧
+    module ⟦d⟧ = _⇒ᴰ_ ⟦d⟧
+    module ⟦p⟧ = _⇒ᴰ_ ⟦p⟧
+
+  ⟦J⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦[]T⟧ ⟦P⟧ (⟦,⟧ (⟦,⟧ ⟦id⟧ ⟦u⟧) ⟦p⟧))
+  ⟦J⟧ .act ρ 
+    rewrite ⟦Γ⟧.id⁻¹ ρ
+    rewrite ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ)
+    -- Reflexive rewrites
+    rewrite ⟦Γ⟧.⁻¹∘ (⟦Γ⟧.id ρ)
+    -- Back to non-reflexive
+    rewrite ⟦A⟧.id∘ᴰ (⟦p⟧.act ρ) .[]coe
+    rewrite ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ) .[]coe
+    = ⟦P⟧.coeG ((⟦Γ⟧.id ρ , ⟦p⟧.act ρ) , 
+      ((⌜ ⟦t⟧.pres (⟦Γ⟧.id ρ) ⌝ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ ⟦p⟧.act ρ 
+      ≡⟨ ap! (⟦t⟧.id ρ) ⟩
+      ⌜ ⟦A⟧.idᴰ (⟦t⟧.act ρ) ⟦A⟧.⁻¹ᴰ ⌝ ⟦A⟧.∘ᴰ ⟦p⟧.act ρ 
+      ≡⟨ ap! (⟦A⟧.id⁻¹ᴰ (⟦t⟧.act ρ) .[]coe) ⟩ 
+      ⟦p⟧.act ρ ∎)) 
+      (⟦d⟧.act ρ)
+  ⟦J⟧ .pres {x₁ = ρ₁} {x₂ = ρ₂} ρ₁₂ 
+    rewrite ⟦Γ⟧.id⁻¹ ρ₁ 
+    rewrite ⟦Γ⟧.id⁻¹ ρ₂
+    rewrite ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ₁)
+    rewrite ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ₂)
+    rewrite ⟦Γ⟧.∘id ρ₁₂
+    rewrite ⟦Γ⟧.id∘ ρ₁₂
+    rewrite ⟦Γ⟧.⁻¹∘ ρ₁₂
+    -- Reflexive rewrites
+    rewrite ⟦Γ⟧.⁻¹∘ (⟦Γ⟧.id ρ₁)
+    rewrite ⟦Γ⟧.⁻¹∘ (⟦Γ⟧.id ρ₂)
+    -- Back to non-reflexive
+    rewrite ⟦A⟧.id∘ᴰ (⟦p⟧.act ρ₁) .[]coe
+    rewrite ⟦A⟧.id∘ᴰ (⟦p⟧.act ρ₂) .[]coe
+    rewrite ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ₁) .[]coe
+    rewrite ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ₂) .[]coe
+    rewrite ⟦A⟧.id⁻¹ᴰ (⟦t⟧.act ρ₁) .[]coe
+    rewrite ⟦A⟧.id⁻¹ᴰ (⟦t⟧.act ρ₂) .[]coe
+    rewrite ⟦t⟧.id ρ₁
+    rewrite ⟦t⟧.id ρ₂
+    using tmp ← (⟦P⟧.cohG ((⟦Γ⟧.id ρ₁ , ⟦p⟧.act ρ₁) , refl) (⟦d⟧.act ρ₁) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ ⟦P⟧.cohG ((⟦Γ⟧.id ρ₂ , ⟦p⟧.act ρ₂) , refl) (⟦d⟧.act ρ₂))
+    = tr (⟦P⟧ .fst .Relᴰ 
+         (⟦P⟧.coeG ((⟦Γ⟧.id ρ₁ , ⟦p⟧.act ρ₁) , refl) (⟦d⟧.act ρ₁)) 
+         (⟦P⟧.coeG ((⟦Γ⟧.id ρ₂ , ⟦p⟧.act ρ₂) , refl) (⟦d⟧.act ρ₂))) 
+         (apd₂ _,_ (apd₂ _,_ refl 
+         {!⟦p⟧.pres ρ₁₂!}) 
+         {!!}) 
+         tmp
+  ⟦J⟧ .id   = {!   !}
+  ⟦J⟧ ._⁻¹  = {!   !}
+  ⟦J⟧ ._∘_  = {!   !}
