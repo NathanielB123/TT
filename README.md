@@ -6,19 +6,19 @@
   - The inductive-inductive syntax is defined in [Syntax](WTT/Syntax.agda).
   - We then go on to show that substitution can be computed recursively in [Comp<>](WTT/Comp<>.agda).
   - We also construct the standard model in [Model](WTT/Model.agda).
-  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax is coherent (i.e. provably an `hSet` without truncation) and it therefore might be possible to construct a model in arbitry n-types (`--without-K`). Unfortunately, defining such a model is still non-trivial (we need extra coherences).
+  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax is coherent (i.e. provably an `hSet`) and it therefore might be possible to construct a model in arbitrary n-types (`--without-K`). Unfortunately, defining such a model is still non-trivial (we need extra coherences).
 
 ### WIP:
 
-- The groupoid model: [GrpdModel](Models/GrpdModel.agda)
+- The groupoid model: [GrpdModel](Models/Grpd/)
   - I think this is a really nice demonstration of the power of `--smart-with` (https://github.com/NathanielB123/agda/pull/15).
-  - Working with displayed groupoids specifically hits a ton of transport hell, but smart `rewrite` (i.e. local equality reflection) can kill most of it.
+  - Working with displayed groupoids usually hits a ton of transport hell, but smart `rewrite` (i.e. local equality reflection) can kill most of it.
 - NbE (including trying out an idea I have to deal with non-linear reductions): [NonLinNbE](NonLinNbE/)
   - This is still very-much WIP. I will write more here after I make more progress.
   - I have now posted a small summary of the idea on Mastodon though: https://types.pl/deck/@NathanielB/116256378457107811
   - Relies on https://github.com/agda/agda/pull/8463
 - A minimal type theory for describing semi-simplicial types: [SemiSimpl](SemiSimpl/)
-  - Based on the WTT substitutions-as-a-relation idea.
+  - Based on the WTT substitution-as-a-relation idea.
   - The particular minimal type theory is due to András Kovács.
   - Proving that the syntax is a set is trivial (there are no path constructors). Howevever, defining the type model is still quite difficult for similar reasons to the WTT example.
   - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax, though I think this approach might implicitly rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip. Also, there is currently a termination error...
