@@ -1,4 +1,4 @@
-{-# OPTIONS --smart-with --allow-unsolved-metas #-}
+{-# OPTIONS --smart-with #-}
 
 import Agda.Builtin.Equality.Rewrite
 
@@ -116,8 +116,9 @@ module Grpd where
         x₁₂ ∎
 
       opaque
-        ⟨∘⟩⁻¹ : (x₁₂ ∘ x₂₃) ⁻¹ ≡ (x₂₃ ⁻¹) ∘ (x₁₂ ⁻¹)
-        ⟨∘⟩⁻¹ {x₁₂ = x₁₂} {x₂₃ = x₂₃} = 
+        ⟨∘⟩⁻¹ : (x₁₂ : Rel x₁ x₂) (x₂₃ : Rel x₂ x₃)
+              → (x₁₂ ∘ x₂₃) ⁻¹ ≡ (x₂₃ ⁻¹) ∘ (x₁₂ ⁻¹)
+        ⟨∘⟩⁻¹ x₁₂ x₂₃ = 
           (x₁₂ ∘ x₂₃) ⁻¹
           ≡⟨ sym (∘∘⁻¹ _ _) ⟩
           ((x₁₂ ∘ x₂₃) ⁻¹) ∘ (⌜ x₁₂ ⌝ ∘ (x₁₂ ⁻¹))
@@ -191,10 +192,52 @@ module Grpdᴰ (G : Grpd) where
                ≡[ ap (λ □ → Relᴰ xᴰ □ (x₁₂ ∘ x₂₃)) (coe-∘ x₁₂ x₂₃ xᴰ)
                ]≡ cohG x₁₂ xᴰ ∘ᴰ cohG x₂₃ (coeG x₁₂ xᴰ)
 
+      ∘⟨⁻¹∘⟩ᴰ : (x₁₂ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂) (x₃₂ᴰ : Relᴰ x₃ᴰ x₂ᴰ x₃₂) 
+              →  x₁₂ᴰ ∘ᴰ ((x₃₂ᴰ ⁻¹ᴰ) ∘ᴰ x₃₂ᴰ) 
+              ≡[ ap (Relᴰ x₁ᴰ x₂ᴰ) (∘⟨⁻¹∘⟩ x₁₂ x₃₂) 
+              ]≡ x₁₂ᴰ
+      ∘⟨⁻¹∘⟩ᴰ {x₁₂ = x₁₂} {x₃₂ = x₃₂} x₁₂ᴰ x₃₂ᴰ 
+        rewrite ∘id x₁₂
+        rewrite ⁻¹∘ x₃₂
+        = coe[]
+        (x₁₂ᴰ ∘ᴰ ⌜ (x₃₂ᴰ ⁻¹ᴰ) ∘ᴰ x₃₂ᴰ ⌝ 
+        ≡⟨ ap! (⁻¹∘ᴰ x₃₂ᴰ .[]coe) ⟩
+        x₁₂ᴰ ∘ᴰ idᴰ _
+        ≡⟨ ∘idᴰ _ .[]coe ⟩
+        x₁₂ᴰ ∎)
+
+      ⁻¹∘∘ᴰ : (x₁₂ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂) (x₂₃ᴰ : Relᴰ x₂ᴰ x₃ᴰ x₂₃) 
+            → ((x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ) ∘ᴰ x₂₃ᴰ ≡[ ap (Relᴰ _ _) (⁻¹∘∘ _ _) ]≡ x₂₃ᴰ 
+      ⁻¹∘∘ᴰ {x₁₂ = x₁₂} {x₂₃ = x₂₃} x₁₂ᴰ x₂₃ᴰ
+        rewrite ⁻¹∘ x₁₂
+        rewrite id∘ x₂₃
+        = coe[]
+        (⌜ (x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ ⌝ ∘ᴰ x₂₃ᴰ
+        ≡⟨ ap! (⁻¹∘ᴰ x₁₂ᴰ .[]coe) ⟩
+        idᴰ _ ∘ᴰ x₂₃ᴰ
+        ≡⟨ id∘ᴰ x₂₃ᴰ .[]coe ⟩
+        x₂₃ᴰ ∎)
+
       opaque
         ⁻¹⁻¹ᴰ : (x₁₂ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂) 
               → x₁₂ᴰ ⁻¹ᴰ ⁻¹ᴰ ≡[ ap (Relᴰ _ _) (⁻¹⁻¹ x₁₂) ]≡ x₁₂ᴰ
-        ⁻¹⁻¹ᴰ = {!!}
+        ⁻¹⁻¹ᴰ {x₁₂ = x₁₂} x₁₂ᴰ 
+          rewrite ⁻¹⁻¹ x₁₂
+          rewrite id∘ x₁₂
+          rewrite ∘id x₁₂
+          rewrite ∘⁻¹ x₁₂
+          rewrite ⁻¹∘ x₁₂
+          -- Reflexive rewrites
+          rewrite ∘∘ x₁₂ (x₁₂ ⁻¹) x₁₂
+          rewrite ⁻¹∘ (x₁₂ ⁻¹)
+          = coe[] 
+          (x₁₂ᴰ ⁻¹ᴰ ⁻¹ᴰ
+          ≡⟨ sym (∘⟨⁻¹∘⟩ᴰ ((x₁₂ᴰ ⁻¹ᴰ) ⁻¹ᴰ) x₁₂ᴰ .[]coe) ⟩
+          (x₁₂ᴰ ⁻¹ᴰ ⁻¹ᴰ) ∘ᴰ ((x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ)
+          ≡⟨ sym (∘∘ᴰ (x₁₂ᴰ ⁻¹ᴰ ⁻¹ᴰ) (x₁₂ᴰ ⁻¹ᴰ) x₁₂ᴰ .[]coe) ⟩
+          ((x₁₂ᴰ ⁻¹ᴰ ⁻¹ᴰ) ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ)) ∘ᴰ x₁₂ᴰ
+          ≡⟨ ⁻¹∘∘ᴰ (x₁₂ᴰ ⁻¹ᴰ) x₁₂ᴰ .[]coe ⟩
+          x₁₂ᴰ ∎)
 
       opaque
         id⁻¹ᴰ : (xᴰ : Carᴰ x) → idᴰ xᴰ ⁻¹ᴰ ≡[ ap (Relᴰ _ _) (id⁻¹ x) ]≡ idᴰ xᴰ
@@ -222,18 +265,6 @@ module Grpdᴰ (G : Grpd) where
         ≡⟨ ∘idᴰ x₁₂ᴰ .[]coe ⟩
         x₁₂ᴰ ∎)
 
-      ⁻¹∘∘ᴰ : (x₁₂ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂) (x₂₃ᴰ : Relᴰ x₂ᴰ x₃ᴰ x₂₃) 
-           → ((x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ) ∘ᴰ x₂₃ᴰ ≡[ ap (Relᴰ _ _) (⁻¹∘∘ _ _) ]≡ x₂₃ᴰ 
-      ⁻¹∘∘ᴰ {x₁₂ = x₁₂} {x₂₃ = x₂₃} x₁₂ᴰ x₂₃ᴰ
-        rewrite ⁻¹∘ x₁₂
-        rewrite id∘ x₂₃
-        = coe[]
-        (⌜ (x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ ⌝ ∘ᴰ x₂₃ᴰ
-        ≡⟨ ap! (⁻¹∘ᴰ x₁₂ᴰ .[]coe) ⟩
-        idᴰ _ ∘ᴰ x₂₃ᴰ
-        ≡⟨ id∘ᴰ x₂₃ᴰ .[]coe ⟩
-        x₂₃ᴰ ∎)
-
       ⟨∘⁻¹⟩∘ᴰ : (x₂₁ᴰ : Relᴰ x₂ᴰ x₁ᴰ x₂₁) (x₂₃ᴰ : Relᴰ x₂ᴰ x₃ᴰ x₂₃) 
               →  (x₂₁ᴰ ∘ᴰ (x₂₁ᴰ ⁻¹ᴰ)) ∘ᴰ x₂₃ᴰ 
               ≡[ ap (Relᴰ _ _) (⟨∘⁻¹⟩∘ _ _) 
@@ -250,16 +281,75 @@ module Grpdᴰ (G : Grpd) where
 
       id∘idᴰ : (x₁₂ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂)
              → idᴰ x₁ᴰ ∘ᴰ x₁₂ᴰ ≡[ ap (Relᴰ _ _) (id∘id _) ]≡ x₁₂ᴰ ∘ᴰ idᴰ x₂ᴰ
-      id∘idᴰ = {!!}
+      id∘idᴰ {x₁ᴰ = x₁ᴰ} {x₂ᴰ = x₂ᴰ} {x₁₂ = x₁₂} x₁₂ᴰ 
+        rewrite id∘ x₁₂
+        rewrite ∘id x₁₂
+        = coe[]
+        (idᴰ x₁ᴰ ∘ᴰ x₁₂ᴰ
+        ≡⟨ id∘ᴰ x₁₂ᴰ .[]coe ⟩
+        x₁₂ᴰ
+        ≡⟨ sym (∘idᴰ x₁₂ᴰ .[]coe) ⟩
+        x₁₂ᴰ ∘ᴰ idᴰ x₂ᴰ ∎)
 
-      id⁻¹∘ᴰ : (idᴰ _ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ ≡[ ap (Relᴰ _ _) id⁻¹∘ ]≡ x₁₂ᴰ
-      id⁻¹∘ᴰ = {!!}
+      id⁻¹∘ᴰ : (x₁₂ᴰ : Relᴰ {x₁ = x₁} x₁ᴰ x₂ᴰ x₁₂) 
+             → (idᴰ _ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ ≡[ ap (Relᴰ _ _) id⁻¹∘ ]≡ x₁₂ᴰ
+      id⁻¹∘ᴰ {x₁ = x₁} {x₁₂ = x₁₂} x₁₂ᴰ 
+        rewrite id⁻¹ x₁ 
+        rewrite id∘ x₁₂ 
+        = coe[]
+        (⌜ idᴰ _ ⁻¹ᴰ ⌝ ∘ᴰ x₁₂ᴰ
+        ≡⟨ ap! (id⁻¹ᴰ _ .[]coe) ⟩
+        idᴰ _ ∘ᴰ x₁₂ᴰ
+        ≡⟨ id∘ᴰ _ .[]coe ⟩
+        x₁₂ᴰ ∎)
 
       ⁻¹∘id∘ᴰ : (x₁₂ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂)
-              →  (x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ (idᴰ x₁ᴰ ∘ᴰ x₁₂ᴰ)
+              → (x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ (idᴰ x₁ᴰ ∘ᴰ x₁₂ᴰ)
               ≡[ ap (Relᴰ _ _) (⁻¹∘id∘ x₁₂) 
               ]≡ idᴰ x₂ᴰ
-      ⁻¹∘id∘ᴰ = {!!}
+      ⁻¹∘id∘ᴰ {x₁ᴰ = x₁ᴰ} {x₂ᴰ = x₂ᴰ} {x₁₂ = x₁₂} x₁₂ᴰ 
+        rewrite id∘ x₁₂
+        rewrite ⁻¹∘ x₁₂ 
+        = coe[] 
+        ((x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ ⌜ idᴰ x₁ᴰ ∘ᴰ x₁₂ᴰ ⌝
+        ≡⟨ ap! (id∘ᴰ x₁₂ᴰ .[]coe) ⟩
+        (x₁₂ᴰ ⁻¹ᴰ) ∘ᴰ x₁₂ᴰ
+        ≡⟨ ⁻¹∘ᴰ x₁₂ᴰ .[]coe ⟩ 
+        idᴰ x₂ᴰ ∎)
+
+      opaque
+        ⟨∘⟩⁻¹ᴰ : (x₁₂ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂) (x₂₃ᴰ : Relᴰ x₂ᴰ x₃ᴰ x₂₃)
+               → (x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ ≡[ ap (Relᴰ _ _) (⟨∘⟩⁻¹ _ _) ]≡ (x₂₃ᴰ ⁻¹ᴰ) ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ)
+        ⟨∘⟩⁻¹ᴰ {x₁₂ = x₁₂} {x₂₃ = x₂₃} x₁₂ᴰ x₂₃ᴰ 
+          rewrite ⟨∘⟩⁻¹ x₁₂ x₂₃
+          rewrite ∘id ((x₁₂ ∘ x₂₃) ⁻¹)
+          rewrite ∘⁻¹ x₁₂
+          rewrite ∘id x₁₂
+          rewrite ∘⁻¹ x₂₃
+          rewrite ∘⁻¹ (x₁₂ ∘ x₂₃)
+          rewrite id∘ ((x₁₂ ∘ x₂₃) ⁻¹)
+          rewrite ⁻¹∘ (x₁₂ ∘ x₂₃)
+          rewrite ∘∘ x₁₂ x₂₃ (x₂₃ ⁻¹)
+          -- Reflexive rewrites
+          rewrite ∘∘ (x₁₂ ∘ x₂₃) (x₂₃ ⁻¹) (x₁₂ ⁻¹)
+          rewrite ∘∘ ((x₂₃ ⁻¹) ∘ (x₁₂ ⁻¹)) (x₁₂ ∘ x₂₃) ((x₂₃ ⁻¹) ∘ (x₁₂ ⁻¹))
+          = coe[] 
+          ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ
+          ≡⟨ sym (∘∘⁻¹ᴰ ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ) x₁₂ᴰ .[]coe) ⟩
+          ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ) ∘ᴰ (⌜ x₁₂ᴰ ⌝ ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ))
+          ≡⟨ ap! (sym (∘∘⁻¹ᴰ x₁₂ᴰ x₂₃ᴰ .[]coe)) ⟩
+          ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ) ∘ᴰ 
+          (⌜ x₁₂ᴰ ∘ᴰ (x₂₃ᴰ ∘ᴰ (x₂₃ᴰ ⁻¹ᴰ)) ⌝ ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ))
+          ≡⟨ ap! (sym (∘∘ᴰ _ _ _ .[]coe))  ⟩
+          ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ) ∘ᴰ 
+          ⌜ ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ∘ᴰ (x₂₃ᴰ ⁻¹ᴰ)) ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ) ⌝
+          ≡⟨ ap! (∘∘ᴰ (x₁₂ᴰ ∘ᴰ x₂₃ᴰ) (x₂₃ᴰ ⁻¹ᴰ) (x₁₂ᴰ ⁻¹ᴰ) .[]coe) ⟩
+          ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ) ∘ᴰ ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ∘ᴰ ((x₂₃ᴰ ⁻¹ᴰ) ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ)))
+          ≡⟨ sym (∘∘ᴰ ((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ) (x₁₂ᴰ ∘ᴰ x₂₃ᴰ) 
+                      ((x₂₃ᴰ ⁻¹ᴰ) ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ)) .[]coe) ⟩
+          (((x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ⁻¹ᴰ) ∘ᴰ (x₁₂ᴰ ∘ᴰ x₂₃ᴰ)) ∘ᴰ ((x₂₃ᴰ ⁻¹ᴰ) ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ))
+          ≡⟨ ⁻¹∘∘ᴰ (x₁₂ᴰ ∘ᴰ x₂₃ᴰ) ((x₂₃ᴰ ⁻¹ᴰ) ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ)) .[]coe ⟩
+          (x₂₃ᴰ ⁻¹ᴰ) ∘ᴰ (x₁₂ᴰ ⁻¹ᴰ) ∎)
 
       coeG⁻¹  : Rel x₁ x₂ → Carᴰ x₂ → Carᴰ x₁
       coeG⁻¹ x₁₂ = coeG (x₁₂ ⁻¹)

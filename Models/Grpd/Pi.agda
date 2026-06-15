@@ -58,8 +58,9 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) (⟦B⟧ : ⟦Ty⟧ (⟦▷⟧ ⟦Γ⟧ �
       rewrite τ.coeG (⟦Γ⟧.id ρ) υ 
       = coe[] (τ.id υ)
 
-  -- Relating preservations involves a lot of transport hell, so we forward
-  -- declare the type of that field (in order to use "smart rewrite")
+  -- Stating the appropriate coherence condition involves a lot of transport 
+  -- hell, so we forward declare the type of that field (in order to use "smart 
+  -- rewrite")
   module ΠRelHelper {ρ₁ ρ₂} (τ₁ : ΠCar ρ₁) (τ₂ : ΠCar ρ₂) 
                     (ρ₁₂ : ⟦Γ⟧ .fst .Rel ρ₁ ρ₂) 
          where

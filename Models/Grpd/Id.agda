@@ -37,10 +37,8 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) (⟦t⟧ ⟦u⟧ : ⟦Tm⟧ ⟦Γ⟧ ⟦A
     ≡⟨ ap! (⟦A⟧.∘idᴰ τ .[]coe) ⟩
     (⌜ ⟦t⟧.pres (⟦Γ⟧.id ρ) ⌝ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ τ
     ≡⟨ ap! (⟦t⟧.id ρ) ⟩
-    ⌜ ⟦A⟧.idᴰ (⟦t⟧ .act ρ) ⟦A⟧.⁻¹ᴰ ⌝ ⟦A⟧.∘ᴰ τ
-    ≡⟨ ap! (⟦A⟧.id⁻¹ᴰ (⟦t⟧.act ρ) .[]coe) ⟩
-    ⟦A⟧.idᴰ (⟦t⟧ .act ρ) ⟦A⟧.∘ᴰ τ
-    ≡⟨ ⟦A⟧.id∘ᴰ τ .[]coe ⟩
+    (⟦A⟧.idᴰ (⟦t⟧ .act ρ) ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ τ
+    ≡⟨ ⟦A⟧.id⁻¹∘ᴰ τ .[]coe ⟩
     τ ∎
   ⟦Id⟧ .snd ._⁻¹ᴰ {x₁ = ρ₁} {x₂ = ρ₂} {x₁₂ = ρ₁₂} {x₁ᴰ = τ} refl
     rewrite ⟦Γ⟧.⁻¹⁻¹ ρ₁₂
@@ -78,7 +76,7 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) (⟦t⟧ ⟦u⟧ : ⟦Tm⟧ ⟦Γ⟧ ⟦A
     ((⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ)) ⟦A⟧.∘ᴰ τ
     ≡⟨ ⟦A⟧.⁻¹∘∘ᴰ (⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) τ .[]coe ⟩
     τ ∎
-  ⟦Id⟧ .snd ._∘ᴰ_ = {!   !}
+  ⟦Id⟧ .snd ._∘ᴰ_ refl refl = {!   !}
   ⟦Id⟧ .snd .coeG   ρ₁₂ τ
     = tr (⟦A⟧ .fst .Relᴰ _ _) (⟦Γ⟧.⁻¹∘id∘ ρ₁₂)
       ((⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (τ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₁₂))
@@ -101,34 +99,65 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) (⟦t⟧ ⟦u⟧ : ⟦Tm⟧ ⟦Γ⟧ ⟦A
     ≡⟨ ap! (⟦A⟧.∘idᴰ τ .[]coe) ⟩
     (⌜ ⟦t⟧.pres (⟦Γ⟧.id ρ) ⌝ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ τ
     ≡⟨ ap! (⟦t⟧.id ρ) ⟩
-    ⌜ ⟦A⟧.idᴰ (⟦t⟧ .act ρ) ⟦A⟧.⁻¹ᴰ ⌝ ⟦A⟧.∘ᴰ τ
-    ≡⟨ ap! (⟦A⟧.id⁻¹ᴰ (⟦t⟧.act ρ) .[]coe) ⟩
-    ⟦A⟧.idᴰ (⟦t⟧ .act ρ) ⟦A⟧.∘ᴰ τ
-    ≡⟨ ⟦A⟧.id∘ᴰ τ .[]coe ⟩
+    (⟦A⟧.idᴰ (⟦t⟧ .act ρ) ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ τ
+    ≡⟨ ⟦A⟧.id⁻¹∘ᴰ τ .[]coe ⟩
     τ ∎
-  ⟦Id⟧ .snd .coe-∘     = {!   !}
+  ⟦Id⟧ .snd .coe-∘ ρ₁₂ ρ₂₃ τ 
+    rewrite ⟦Γ⟧.id∘ ρ₁₂
+    rewrite ⟦Γ⟧.id∘ ρ₂₃
+    rewrite ⟦Γ⟧.⁻¹∘ ρ₁₂
+    rewrite ⟦Γ⟧.⁻¹∘ ρ₂₃
+    rewrite ⟦Γ⟧.id∘ (ρ₁₂ ⟦Γ⟧.∘ ρ₂₃)
+    rewrite ⟦Γ⟧.⟨∘⟩⁻¹ ρ₁₂ ρ₂₃
+    -- Reflexive rewrites
+    rewrite ⟦Γ⟧.⁻¹∘ (ρ₁₂ ⟦Γ⟧.∘ ρ₂₃) 
+    = 
+    (⟦t⟧.pres (ρ₁₂ ⟦Γ⟧.∘ ρ₂₃) ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ
+    (τ ⟦A⟧.∘ᴰ ⌜ ⟦u⟧.pres (ρ₁₂ ⟦Γ⟧.∘ ρ₂₃) ⌝)
+    ≡⟨ ap! (ρ₁₂ ⟦u⟧.∘ ρ₂₃) ⟩
+    ⌜ ⟦t⟧.pres (ρ₁₂ ⟦Γ⟧.∘ ρ₂₃) ⟦A⟧.⁻¹ᴰ ⌝ ⟦A⟧.∘ᴰ
+    (τ ⟦A⟧.∘ᴰ (⟦u⟧.pres ρ₁₂ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₂₃))
+    ≡⟨ ap! {!!} ⟩
+    ((⟦t⟧.pres ρ₂₃ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ)) ⟦A⟧.∘ᴰ
+    (τ ⟦A⟧.∘ᴰ (⟦u⟧.pres ρ₁₂ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₂₃))
+    ≡⟨ {!!} ⟩
+    (⟦t⟧.pres ρ₂₃ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (((⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ 
+    (τ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₁₂)) ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₂₃) ∎
   ⟦Id⟧ .snd .coh-id  τ = coe[] uip
   ⟦Id⟧ .snd .coh-∘ _ _ _ = coe[] uip
 
-⟦refl⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦t⟧)
-⟦refl⟧ {⟦A⟧ = ⟦A⟧} .act ρ = ⟦A⟧ .snd .idᴰ _
-⟦refl⟧ {⟦Γ⟧ = ⟦Γ⟧} {⟦A⟧ = ⟦A⟧} {⟦t⟧ = ⟦t⟧} .pres ρ₁₂
-  = {!!}
-  -- = coe _ ((⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂)))
-  --                          (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ _) (⟦t⟧ .pres ρ₁₂)))
-  --   ≡⟨ sym (exttr (⟦Γ⟧ .snd .∘∘ _ _ _) (⟦A⟧ .snd .∘∘ᴰ _ _ _) .[]coe) ⟩
-  --   coe ⌜ _ ⌝ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂))
-  --                                             (⟦A⟧ .snd .idᴰ _))
-  --                             (⟦t⟧ .pres ρ₁₂))
-  --   ≡⟨ ap! uip ⟩
-  --   coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂))
-  --                                         (⟦A⟧ .snd .idᴰ _))
-  --                         (⟦t⟧ .pres ρ₁₂))
-  --   ≡⟨ ⁻¹∘id∘ᴰ (⟦A⟧ .snd) _ .[]coe ⟩
-  --   ⟦A⟧ .snd .idᴰ _ ∎
-⟦refl⟧ .id  _   = uip
-⟦refl⟧ ._⁻¹ _   = uip
-⟦refl⟧ ._∘_ _ _ = uip
+module _ {⟦t⟧ : ⟦Tm⟧ ⟦Γ⟧ ⟦A⟧} where
+  private
+    module ⟦Γ⟧ = Grpd.Data (⟦Γ⟧ .snd)
+    module ⟦A⟧ = Grpdᴰ.Data (⟦A⟧ .snd)
+    module ⟦t⟧ = _⇒ᴰ_ ⟦t⟧
+
+  ⟦refl⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦t⟧)
+  ⟦refl⟧ .act ρ = ⟦A⟧.idᴰ (⟦t⟧.act ρ)
+  ⟦refl⟧ .pres {x₁ = ρ₁} {x₂ = ρ₂} ρ₁₂
+    rewrite ⟦Γ⟧.id∘ ρ₁₂
+    rewrite ⟦Γ⟧.⁻¹∘ ρ₁₂ = 
+    (⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ
+    ⌜ ⟦A⟧.idᴰ (⟦t⟧.act ρ₁) ⟦A⟧.∘ᴰ ⟦t⟧.pres ρ₁₂ ⌝
+    ≡⟨ ap! (⟦A⟧.id∘ᴰ (⟦t⟧.pres ρ₁₂) .[]coe) ⟩
+    (⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ ⟦t⟧.pres ρ₁₂
+    ≡⟨ ⟦A⟧.⁻¹∘ᴰ (⟦t⟧.pres ρ₁₂) .[]coe ⟩
+    ⟦A⟧.idᴰ (⟦t⟧.act ρ₂) ∎
+    -- = coe _ ((⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂)))
+    --                          (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd .idᴰ _) (⟦t⟧ .pres ρ₁₂)))
+    --   ≡⟨ sym (exttr (⟦Γ⟧ .snd .∘∘ _ _ _) (⟦A⟧ .snd .∘∘ᴰ _ _ _) .[]coe) ⟩
+    --   coe ⌜ _ ⌝ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂))
+    --                                             (⟦A⟧ .snd .idᴰ _))
+    --                             (⟦t⟧ .pres ρ₁₂))
+    --   ≡⟨ ap! uip ⟩
+    --   coe _ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._∘ᴰ_ (⟦A⟧ .snd ._⁻¹ᴰ (⟦t⟧ .pres ρ₁₂))
+    --                                         (⟦A⟧ .snd .idᴰ _))
+    --                         (⟦t⟧ .pres ρ₁₂))
+    --   ≡⟨ ⁻¹∘id∘ᴰ (⟦A⟧ .snd) _ .[]coe ⟩
+    --   ⟦A⟧ .snd .idᴰ _ ∎
+  ⟦refl⟧ .id  _   = uip
+  ⟦refl⟧ ._⁻¹ _   = uip
+  ⟦refl⟧ ._∘_ _ _ = uip
 
 -- We have a few options for how we want to deal with substitution laws
 -- I think using global rewrite rules is reasonable?
@@ -186,10 +215,12 @@ module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧)
     rewrite ⟦Γ⟧.∘id ρ₁₂
     rewrite ⟦Γ⟧.id∘ ρ₁₂
     rewrite ⟦Γ⟧.⁻¹∘ ρ₁₂
+    rewrite ⟦Γ⟧.∘⁻¹ ρ₁₂
     -- Reflexive rewrites
     rewrite ⟦Γ⟧.⁻¹∘ (⟦Γ⟧.id ρ₁)
     rewrite ⟦Γ⟧.⁻¹∘ (⟦Γ⟧.id ρ₂)
     -- Back to non-reflexive
+    -- rewrite sym (⟦p⟧.pres ρ₁₂)
     rewrite ⟦A⟧.id∘ᴰ (⟦p⟧.act ρ₁) .[]coe
     rewrite ⟦A⟧.id∘ᴰ (⟦p⟧.act ρ₂) .[]coe
     rewrite ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ₁) .[]coe
@@ -198,12 +229,29 @@ module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧)
     rewrite ⟦A⟧.id⁻¹ᴰ (⟦t⟧.act ρ₂) .[]coe
     rewrite ⟦t⟧.id ρ₁
     rewrite ⟦t⟧.id ρ₂
+    -- Reflexive rewrites
+    rewrite ⟦Γ⟧.∘∘ (⟦Γ⟧.id ρ₁) (⟦Γ⟧.id ρ₁) ρ₁₂
     using tmp ← (⟦P⟧.cohG ((⟦Γ⟧.id ρ₁ , ⟦p⟧.act ρ₁) , refl) (⟦d⟧.act ρ₁) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ ⟦P⟧.cohG ((⟦Γ⟧.id ρ₂ , ⟦p⟧.act ρ₂) , refl) (⟦d⟧.act ρ₂))
     = tr (⟦P⟧ .fst .Relᴰ 
          (⟦P⟧.coeG ((⟦Γ⟧.id ρ₁ , ⟦p⟧.act ρ₁) , refl) (⟦d⟧.act ρ₁)) 
          (⟦P⟧.coeG ((⟦Γ⟧.id ρ₂ , ⟦p⟧.act ρ₂) , refl) (⟦d⟧.act ρ₂))) 
          (apd₂ _,_ (apd₂ _,_ refl 
-         {!⟦p⟧.pres ρ₁₂!}) 
+         (coe[]
+         ((⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (⟦t⟧.pres ρ₁₂ ⟦A⟧.∘ᴰ ⌜ ⟦p⟧.act ρ₂ ⌝)
+         ≡⟨ ap! (sym (⟦p⟧.pres ρ₁₂)) ⟩ 
+         (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ ⌜ ⟦t⟧.pres ρ₁₂ ⟦A⟧.∘ᴰ 
+         ((⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (⟦p⟧.act ρ₁ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₁₂)) ⌝
+         ≡⟨ {!!} ⟩ 
+         (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ 
+         ⌜ (⟦t⟧.pres ρ₁₂ ⟦A⟧.∘ᴰ (⟦t⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ)) ⟦A⟧.∘ᴰ 
+         (⟦p⟧.act ρ₁ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₁₂) ⌝
+         ≡⟨ {!⟦A⟧.⟨∘⁻¹⟩∘ᴰ (⟦t⟧.pres ρ₁₂) (⟦p⟧.act ρ₁ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₁₂) !} ⟩
+         (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (⟦p⟧.act ρ₁ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₁₂)
+         ≡⟨ sym (⟦A⟧.∘∘ᴰ (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) (⟦p⟧.act ρ₁) 
+                         (⟦u⟧.pres ρ₁₂) .[]coe) ⟩
+         ((⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ ⟦p⟧.act ρ₁) ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₁₂
+         ≡⟨ ⟦A⟧.⁻¹∘∘ᴰ (⟦p⟧.act ρ₁) (⟦u⟧.pres ρ₁₂) .[]coe ⟩
+         ⟦u⟧.pres ρ₁₂ ∎))) 
          {!!}) 
          tmp
   ⟦J⟧ .id   = {!   !}
