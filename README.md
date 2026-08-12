@@ -10,9 +10,10 @@
 
 ### WIP:
 
-- The groupoid model: [GrpdModel](Models/Grpd/)
+- The groupoid model: [Grpd](Models/Grpd/) and [GrpdProp](Models/GrpdProp/)
   - I think this is a really nice demonstration of the power of `--smart-with` (https://github.com/NathanielB123/agda/pull/15).
   - Working with displayed groupoids usually hits a ton of transport hell, but smart `rewrite` (i.e. local equality reflection) can kill most of it.
+  - Using strict `Prop` turns out to be very convenient (some of the substitution laws hold judgementally). Especially when it comes to defining the J rule, this is really useful.
 - NbE (including trying out an idea I have to deal with non-linear reductions): [NonLinNbE](NonLinNbE/)
   - This is still very-much WIP. I will write more here after I make more progress.
   - I have now posted a small summary of the idea on Mastodon though: https://types.pl/deck/@NathanielB/116256378457107811
