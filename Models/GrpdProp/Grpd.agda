@@ -1,4 +1,4 @@
-{-# OPTIONS --smart-with --prop --rewriting #-}
+{-# OPTIONS --smart-with --prop --rewriting --show-irrelevant #-}
 
 open import Utils.Prop
 open import Utils.MacroProp
@@ -56,6 +56,16 @@ module Grpd where
         (x₁₂ ⁻¹) ∘ x₁₂
         ≡⟨ ⁻¹∘ x₁₂ ⟩ 
         id x₂ ∎
+
+      id⁻¹∘∘id : (x₁₂ : Rel x₁ x₂) → (id x₁ ⁻¹) ∘ (x₁₂ ∘ id x₂) ≡ x₁₂
+      id⁻¹∘∘id {x₁ = x₁} {x₂ = x₂} x₁₂ = 
+        (id x₁ ⁻¹) ∘ ⌜ x₁₂ ∘ id x₂ ⌝
+        ≡⟨ ap! (∘id x₁₂) ⟩
+        ⌜ id x₁ ⁻¹ ⌝ ∘ x₁₂
+        ≡⟨ ap! (id⁻¹ x₁) ⟩
+        id x₁ ∘ x₁₂
+        ≡⟨ id∘ x₁₂ ⟩
+        x₁₂ ∎
 
       ⁻¹∘∘ : (x₁₂ : Rel x₁ x₂) (x₂₃ : Rel x₂ x₃) 
            → ((x₁₂ ⁻¹) ∘ x₁₂) ∘ x₂₃ ≡ x₂₃ 
@@ -129,6 +139,21 @@ module Grpd where
           (((x₁₂ ∘ x₂₃) ⁻¹) ∘ (x₁₂ ∘ x₂₃)) ∘ ((x₂₃ ⁻¹) ∘ (x₁₂ ⁻¹))
           ≡⟨ ⁻¹∘∘ _ _ ⟩
           (x₂₃ ⁻¹) ∘ (x₁₂ ⁻¹) ∎
+
+      ∘-inj₁ : {x₁₂ x₁₂' : Rel x₁ x₂} (x₂₃ : Rel x₂ x₃) 
+             → x₁₂ ∘ x₂₃ ≡ x₁₂' ∘ x₂₃ → x₁₂ ≡ x₁₂'
+      ∘-inj₁ {x₁₂ = x₁₂} {x₁₂' = x₁₂'} x₂₃ p =
+        x₁₂
+        ≡⟨ sym (∘∘⁻¹ x₁₂ x₂₃) ⟩
+        x₁₂ ∘ (x₂₃ ∘ (x₂₃ ⁻¹))
+        ≡⟨ sym (∘∘ x₁₂ x₂₃ (x₂₃ ⁻¹)) ⟩
+        ⌜ x₁₂ ∘ x₂₃ ⌝ ∘ (x₂₃ ⁻¹)
+        ≡⟨ ap! p ⟩
+        (x₁₂' ∘ x₂₃) ∘ (x₂₃ ⁻¹)
+        ≡⟨ ∘∘ x₁₂' x₂₃ (x₂₃ ⁻¹) ⟩
+        x₁₂' ∘ (x₂₃ ∘ (x₂₃ ⁻¹))
+        ≡⟨ ∘∘⁻¹ x₁₂' x₂₃ ⟩
+        x₁₂' ∎
 
   open Sorts public
   open Data  public
@@ -387,6 +412,24 @@ module Grpdᴰ (G : Grpd) where
         idᴰ (coeG (x₂₁ ⁻¹) x₁ᴰ) ∘ᴰ (cohG (x₂₁ ⁻¹) x₁ᴰ ⁻¹ᴰ)
         ≡⟨ id∘ᴰ (cohG (x₂₁ ⁻¹) x₁ᴰ ⁻¹ᴰ) .[]coe ⟩
         cohG (x₂₁ ⁻¹) x₁ᴰ ⁻¹ᴰ ∎)
+
+      ∘-inj₁ᴰ : {x₁₂ᴰ x₁₂'ᴰ : Relᴰ x₁ᴰ x₂ᴰ x₁₂} (x₂₃ᴰ : Relᴰ x₂ᴰ x₃ᴰ x₂₃) 
+             → x₁₂ᴰ ∘ᴰ x₂₃ᴰ ≡ x₁₂'ᴰ ∘ᴰ x₂₃ᴰ → x₁₂ᴰ ≡ x₁₂'ᴰ
+      ∘-inj₁ᴰ {x₁₂ = x₁₂} {x₂₃ = x₂₃} {x₁₂ᴰ = x₁₂ᴰ} {x₁₂'ᴰ = x₁₂'ᴰ} x₂₃ᴰ p 
+        rewrite ↑≡ ∘⁻¹ x₂₃
+        rewrite ↑≡ ∘id x₁₂
+        rewrite ↑≡ ∘∘ x₁₂ x₂₃ (x₂₃ ⁻¹) =
+        x₁₂ᴰ
+        ≡⟨ sym (∘∘⁻¹ᴰ x₁₂ᴰ x₂₃ᴰ .[]coe) ⟩
+        x₁₂ᴰ ∘ᴰ (x₂₃ᴰ ∘ᴰ (x₂₃ᴰ ⁻¹ᴰ))
+        ≡⟨ sym (∘∘ᴰ x₁₂ᴰ x₂₃ᴰ (x₂₃ᴰ ⁻¹ᴰ) .[]coe) ⟩
+        ⌜ x₁₂ᴰ ∘ᴰ x₂₃ᴰ ⌝ ∘ᴰ (x₂₃ᴰ ⁻¹ᴰ)
+        ≡⟨ ap! p ⟩
+        ((x₁₂'ᴰ ∘ᴰ x₂₃ᴰ) ∘ᴰ (x₂₃ᴰ ⁻¹ᴰ))
+        ≡⟨ ∘∘ᴰ x₁₂'ᴰ x₂₃ᴰ (x₂₃ᴰ ⁻¹ᴰ) .[]coe ⟩
+        x₁₂'ᴰ ∘ᴰ (x₂₃ᴰ ∘ᴰ (x₂₃ᴰ ⁻¹ᴰ))
+        ≡⟨ ∘∘⁻¹ᴰ x₁₂'ᴰ x₂₃ᴰ .[]coe ⟩
+        x₁₂'ᴰ ∎
   open Sorts public
   open Data  public
 

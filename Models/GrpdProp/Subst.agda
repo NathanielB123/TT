@@ -154,6 +154,20 @@ module _ (⟦t⟧ : ⟦Tm⟧ ⟦Γ⟧ ⟦A⟧) (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ �
     rewrite ↑≡ ρ₁₂ ⟦δ⟧.∘ ρ₂₃
     = ⟦δ⟧.pres ρ₁₂ ⟦t⟧.∘ ⟦δ⟧.pres ρ₂₃
 
+⟦•⟧ : ⟦Ctx⟧
+⟦•⟧ .fst .Car       = 𝟙
+⟦•⟧ .fst .Rel ⟨⟩ ⟨⟩ = 𝟙
+
+⟦•⟧ .snd .id  ⟨⟩    = ⟨⟩
+⟦•⟧ .snd ._⁻¹ ⟨⟩    = ⟨⟩
+⟦•⟧ .snd ._∘_ ⟨⟩ ⟨⟩ = ⟨⟩
+
+⟦•⟧ .snd .id∘ ⟨⟩       = refl
+⟦•⟧ .snd .∘id ⟨⟩       = refl
+⟦•⟧ .snd .∘∘  ⟨⟩ ⟨⟩ ⟨⟩ = refl
+⟦•⟧ .snd .∘⁻¹ ⟨⟩       = refl
+⟦•⟧ .snd .⁻¹∘ ⟨⟩       = refl
+
 -- Context extension
 module _ ⟦Γ⟧ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) where
   private
@@ -203,9 +217,9 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) where
 ⟦id⟧ : ⟦Sub⟧ ⟦Γ⟧ ⟦Γ⟧
 ⟦id⟧ .act  ρ   = ρ
 ⟦id⟧ .pres ρ₁₂ = ρ₁₂
-⟦id⟧ .id  _   = refl
-⟦id⟧ ._⁻¹ _   = refl
-⟦id⟧ ._∘_ _ _ = refl
+⟦id⟧ .id  _    = refl
+⟦id⟧ ._⁻¹ _    = refl
+⟦id⟧ ._∘_ _ _  = refl
 
 -- Substitution extension
 module _ ⟦A⟧ (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) (⟦t⟧ : ⟦Tm⟧ ⟦Δ⟧ (⟦[]T⟧ ⟦A⟧ ⟦δ⟧)) where
