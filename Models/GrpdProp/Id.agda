@@ -226,18 +226,15 @@ module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧))
     rewrite ↑≡ ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ) .[]coe
     rewrite ↑≡ ⟦u⟧.id ρ
     rewrite ↑≡ ⟦t⟧.id ρ =  
-    (⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ
-    (⌜ ⟦d⟧.pres (⟦Γ⟧.id ρ) ⌝ ⟦P⟧.∘ᴰ 
-    ⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ))
+    (PcohG ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⌜ ⟦d⟧.pres (⟦Γ⟧.id ρ) ⌝ ⟦P⟧.∘ᴰ PcohG)
     ≡⟨ ap! (⟦d⟧.id ρ) ⟩
-    (⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ
-    ⌜ ⟦P⟧.idᴰ (⟦d⟧.act ρ) ⟦P⟧.∘ᴰ 
-    ⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ) ⌝
-    ≡⟨ ap! (⟦P⟧.id∘ᴰ (⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ)) .[]coe) ⟩
-    (⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ
-    ⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ)
-    ≡⟨ ⟦P⟧.⁻¹∘ᴰ (⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ)) .[]coe ⟩
+    (PcohG ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ ⌜ ⟦P⟧.idᴰ (⟦d⟧.act ρ) ⟦P⟧.∘ᴰ PcohG ⌝
+    ≡⟨ ap! (⟦P⟧.id∘ᴰ PcohG .[]coe) ⟩
+    (PcohG ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ PcohG
+    ≡⟨ ⟦P⟧.⁻¹∘ᴰ PcohG .[]coe ⟩
     ⟦P⟧.idᴰ (⟦P⟧.coeG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ)) ∎
+    where
+      PcohG = ⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ)
   ⟦tr⟧ ._⁻¹ {x₁ = ρ₁} {x₂ = ρ₂}  ρ₁₂ 
     rewrite ↑≡ ⟦Γ⟧.∘id ρ₁₂
     rewrite ↑≡ ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ₁)
@@ -393,14 +390,32 @@ module _
     rewrite ↑≡ ⟦t⟧.id ρ₂
     rewrite ↑≡ sym (⟦p⟧.pres ρ₁₂ .lower .[]coe)
     rewrite ↑≡ sym (⟦A⟧.∘∘ᴰ (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) (⟦p⟧.act ρ₁) 
-                            (⟦u⟧.pres ρ₁₂) .[]coe)
-    = 
+                            (⟦u⟧.pres ρ₁₂) .[]coe) = 
     (⟦P⟧.cohG ((⟦Γ⟧.id ρ₁ , ⟦p⟧.act ρ₁) , lift refl[]) (⟦d⟧.act ρ₁) ⟦P⟧.⁻¹ᴰ)
     ⟦P⟧.∘ᴰ (⟦d⟧.pres ρ₁₂ 
     ⟦P⟧.∘ᴰ ⟦P⟧.cohG ((⟦Γ⟧.id ρ₂ , ⟦p⟧.act ρ₂) , lift refl[]) (⟦d⟧.act ρ₂))
 
-  ⟦J⟧ .id   = {!   !}
-  ⟦J⟧ ._⁻¹  = {!   !}
+  -- For unclear reasons, 'ap!' behaves weirdly (including possibly looping?!)
+  -- in the below code, so we give up on equational reasoning syntax and just
+  -- complete the proofs with 'rewrite'
+  ⟦J⟧ .id   ρ 
+    rewrite ↑≡ ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ)
+    rewrite ↑≡ ⟦Γ⟧.id⁻¹ ρ
+    rewrite ↑≡ ⟦A⟧.id∘ᴰ (⟦A⟧.idᴰ (⟦u⟧.act ρ)) .[]coe
+    rewrite ↑≡ ⟦A⟧.id∘ᴰ (⟦p⟧.act ρ) .[]coe
+    rewrite ↑≡ ⟦A⟧.∘idᴰ (⟦p⟧.act ρ) .[]coe
+    rewrite ↑≡ ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ) .[]coe
+    rewrite ↑≡ ⟦u⟧.id ρ
+    rewrite ↑≡ ⟦t⟧.id ρ
+    -- Actual proof
+    using PcohG ← ⟦P⟧.cohG {x₂ = (ρ , ⟦u⟧.act ρ) , ⟦p⟧.act ρ}
+                           ((⟦Γ⟧.id ρ , ⟦p⟧.act ρ) , lift refl[]) 
+                           (⟦d⟧.act ρ)
+    rewrite ↑≡ ⟦d⟧.id ρ
+    rewrite ↑≡ ⟦P⟧.id∘ᴰ PcohG .[]coe
+    rewrite ↑≡ (⟦P⟧.⁻¹∘ᴰ PcohG .[]coe)
+    = refl
+  ⟦J⟧ ._⁻¹ {x₁ = ρ₁} {x₂ = ρ₂}  ρ₁₂ = {!!}    
   ⟦J⟧ ._∘_  = {!   !}
 
 -- UIP is false in the groupoid model
