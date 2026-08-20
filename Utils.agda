@@ -2,9 +2,9 @@
 
 module Utils where
 
+open import Agda.Builtin.Equality public
 open import Agda.Primitive renaming (_⊔_ to _⊔l_) public
 open import Agda.Builtin.Sigma public
-open import Agda.Builtin.Equality public
 open import Agda.Builtin.Unit renaming (⊤ to 𝟙; tt to ⟨⟩) public
 open import Agda.Builtin.Bool renaming (true to tt; false to ff) public
 open import Agda.Builtin.Nat using (Nat; zero; suc) public
@@ -62,6 +62,9 @@ coe refl x = x
 -- that refer to |tr|/|subst|
 tr : (P : A → Set ℓ) (p : x ≡ y) → P x → P y
 tr P p d = coe (ap P p) d
+
+tr⁻¹ : (P : A → Set ℓ) (p : x ≡ y) → P y → P x
+tr⁻¹ P p d = tr P (sym p) d
 
 {-# DISPLAY coe (ap P p) = tr P p #-}
 
@@ -123,6 +126,13 @@ apd₂ : ∀ {B : A → Set ℓ}
      → (p : x₁ ≡ x₂) → y₁ ≡[ ap B p ]≡ y₂
      → f x₁ y₁ ≡ f x₂ y₂
 apd₂ f refl refl[] = refl
+
+apd₃ : ∀ {B C : A → Set ℓ}
+         (f : (x : A) → B x → C x → D) {x₁ x₂ y₁ y₂ z₁ z₂}
+     → (p : x₁ ≡ x₂) → y₁ ≡[ ap B p ]≡ y₂
+     → z₁ ≡[ ap C p ]≡ z₂
+     → f x₁ y₁ z₁ ≡ f x₂ y₂ z₂
+apd₃ f refl refl[] refl[] = refl
 
 -- |subst-application′| in the stdlib
 -- Intuitively, this is just composition of a path with a binary dependent 
@@ -190,6 +200,15 @@ data _＋_ (A : Set ℓ₁) (B : Set ℓ₂) : Set (ℓ₁ ⊔l ℓ₂) where
 _×_ : Set ℓ₁ → Set ℓ₂ → Set (ℓ₁ ⊔l ℓ₂)
 A × B = Σ A λ _ → B
 
+infixr 4 _×_
+
 data Dec (A : Set ℓ) : Set ℓ where
   yes : A       → Dec A
   no  : (A → 𝟘) → Dec A
+
+≡[]refl : {p : x ≡ y} → p ≡[ ap (_≡ _) p ]≡ refl
+≡[]refl {p = refl} = refl[]
+
+≡[]refl[] : ∀ {A B : Set ℓ} {x y} {p : A ≡ B} {q : x ≡[ p ]≡ y} 
+          → q ≡[ ap (_ ≡[ _ ]≡_) (sym (q .[]coe)) ]≡ refl[]
+≡[]refl[] {p = refl} {q = refl[]} = refl[]

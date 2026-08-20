@@ -430,11 +430,54 @@ module Grpdᴰ (G : Grpd) where
         x₁₂'ᴰ ∘ᴰ (x₂₃ᴰ ∘ᴰ (x₂₃ᴰ ⁻¹ᴰ))
         ≡⟨ ∘∘⁻¹ᴰ x₁₂'ᴰ x₂₃ᴰ .[]coe ⟩
         x₁₂'ᴰ ∎
+
+  -- Congruence
+  module _ (𝒮₁ 𝒮₂ : Sorts) where
+    private
+      module 𝒮₁ = Sorts 𝒮₁
+      module 𝒮₂ = Sorts 𝒮₂
+
+    GrpdSorts≡ : (Carᴰ≡ : ∀ x → 𝒮₁.Carᴰ x ≡ 𝒮₂.Carᴰ x)
+               → (∀ {x y} x₁ᴰ y₁ᴰ x₂ᴰ y₂ᴰ (xy : Rel x y)
+                    (x₁₂ᴰ : x₁ᴰ ≡[ Carᴰ≡ x ]≡ x₂ᴰ)
+                    (y₁₂ᴰ : y₁ᴰ ≡[ Carᴰ≡ y ]≡ y₂ᴰ)
+               → 𝒮₁.Relᴰ x₁ᴰ y₁ᴰ xy ≡ 𝒮₂.Relᴰ x₂ᴰ y₂ᴰ xy)
+    GrpdSorts≡ = {!!}
+
+  module _ {𝒮} (𝒟₁ 𝒟₂ : Data 𝒮) where
+    open Sorts 𝒮
+    private
+      module 𝒟₁ = Data 𝒟₁
+      module 𝒟₂ = Data 𝒟₂
+
+    GrpdData≡ : (idᴰ≡ : ∀ {x} (xᴰ : Carᴰ x) → 𝒟₁.idᴰ xᴰ ≡ 𝒟₂.idᴰ xᴰ)
+              → {!!} -- ...
+              → 𝒟₁ ≡ 𝒟₂
+    GrpdData≡ = {!!}
+
+  Grpdᴰ : Set₁
+  Grpdᴰ = Σ Sorts Data
+
+  module _ (𝒢₁ 𝒢₂ : Grpdᴰ) where
+    private
+      module 𝒮₁ = Sorts (𝒢₁ .fst)
+      module 𝒮₂ = Sorts (𝒢₁ .fst)
+      module 𝒟₁ = Data (𝒢₁ .snd)
+      module 𝒟₂ = Data (𝒢₁ .snd)
+
+    -- Idea: Use GrpdSort≡ first to force the sorts to be equal and then use 
+    -- GrpdData≡
+    -- I think the equations between fields of the Data parts are going to be 
+    -- really ugly...
+    Grpdᴰ≡ : (Carᴰ≡ : ∀ x → 𝒮₁.Carᴰ x ≡ 𝒮₂.Carᴰ x)
+          → {!!} -- ...
+          → 𝒢₁ ≡ 𝒢₂
+    Grpdᴰ≡ = {!!}
+
   open Sorts public
   open Data  public
 
-Grpdᴰ : Grpd → Set₁
-Grpdᴰ 𝒢 = Σ (Grpdᴰ.Sorts 𝒢) (Grpdᴰ.Data 𝒢)
+open Grpdᴰ using (Grpdᴰ) public
 
 open Grpd.Sorts public
 open Grpd.Data public
@@ -460,21 +503,38 @@ module _ (𝒢₁ : Grpd) (𝒢₂ : Grpd) where
       _∘_  : (x₁₂ : 𝒮₁.Rel x₁ x₂) (x₂₃ : 𝒮₁.Rel x₂ x₃) 
           → pres (x₁₂ 𝒟₁.∘ x₂₃) ≡ pres x₁₂ 𝒟₂.∘ pres x₂₃
 
+  -- Congruence
   module _ (F G : _⇒_) where
     private
       module F = _⇒_ F
       module G = _⇒_ G
 
-    ⇒≡ : (act≡ : F.act ≡ G.act) 
-          →  (λ {x} {y} → F.pres {x} {y}) 
-          ≡[ (piexti λ {x} → piexti λ {y} → piext λ x₁₂ 
+    ⇒≡'' : (act≡ : F.act ≡ G.act) 
+          →  (λ {x₁} {x₂} → F.pres {x₁} {x₂}) 
+          ≡[ (piexti λ {x₁} → piexti λ {x₂} → piext λ x₁₂ 
            → ap₂ 𝒮₂.Rel (happly act≡) (happly act≡)) 
           ]≡ G.pres → F ≡ G
-    ⇒≡ refl refl[] = refl
+    ⇒≡'' refl refl[] = refl
+
+    ⇒≡' : (act≡ : F.act ≡ G.act)
+        → (∀ {x₁ x₂} (x₁₂ : 𝒮₁.Rel x₁ x₂) 
+          →  F.pres x₁₂ 
+          ≡[ ap₂ 𝒮₂.Rel (happly act≡) (happly act≡) 
+          ]≡ G.pres x₁₂)
+        → F ≡ G
+    ⇒≡' refl pres≡ 
+      = ⇒≡'' refl 
+      (coe[] (funexti λ {x₁} → funexti λ {x₂} → funext λ x₁₂ 
+             → pres≡ x₁₂ .[]coe))
+
+    ⇒≡ : (act≡ : ∀ x → F.act x ≡ G.act x)
+         → (∀ {x₁ x₂} (x₁₂ : 𝒮₁.Rel x₁ x₂) 
+           → F.pres x₁₂ ≡[ ap₂ 𝒮₂.Rel (act≡ x₁) (act≡ x₂) ]≡ G.pres x₁₂)
+         → F ≡ G
+    ⇒≡ act≡ pres≡ = ⇒≡' (funext λ x → act≡ x) pres≡
 open _⇒_ public
 
-
--- Displayed groupoid homomorphisms
+-- Dependent groupoid homomorphisms (sections)
 module _ (𝒢 : Grpd) (𝒢ᴰ : Grpdᴰ 𝒢) where
   open Grpd.Vars (𝒢 .fst)
   private

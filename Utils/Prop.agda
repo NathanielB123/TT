@@ -7,7 +7,7 @@ import Agda.Builtin.Equality.Rewrite
 
 open import Utils 
   using (ℓ; ℓ₁; ℓ₂; refl; Σ; fst; snd; _,_; 𝟙; ⟨⟩
-        ; Bool; tt; ff) 
+        ; Bool; tt; ff; 𝟘) 
   renaming (_≡_ to _≡S_; coe to coeS)
   public
 
