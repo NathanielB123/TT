@@ -1,4 +1,4 @@
-{-# OPTIONS --smart-with --prop --rewriting --show-irrelevant #-}
+{-# OPTIONS --smart-with --prop --rewriting --show-irrelevant --allow-unsolved-metas #-}
 
 open import Utils.Prop
 open import Utils.MacroProp
@@ -485,7 +485,7 @@ open Grpd.Data public
 open Grpdᴰ.Sorts public
 open Grpdᴰ.Data public
 
--- Groupoid homomorphisms 
+-- Groupoid homomorphisms (functors)
 module _ (𝒢₁ : Grpd) (𝒢₂ : Grpd) where
   open Grpd.Vars (𝒢₁ .fst)
   private
@@ -498,10 +498,41 @@ module _ (𝒢₁ : Grpd) (𝒢₂ : Grpd) where
     field
       act  : 𝒮₁.Car → 𝒮₂.Car
       pres : 𝒮₁.Rel x y → 𝒮₂.Rel (act x) (act y)
-      id   : (x : 𝒮₁.Car) → pres (𝒟₁.id x) ≡ 𝒟₂.id _
-      _⁻¹  : (x₁₂ : 𝒮₁.Rel x₁ x₂) → pres (x₁₂ 𝒟₁.⁻¹) ≡ pres x₁₂ 𝒟₂.⁻¹
-      _∘_  : (x₁₂ : 𝒮₁.Rel x₁ x₂) (x₂₃ : 𝒮₁.Rel x₂ x₃) 
+      pres-∘  : (x₁₂ : 𝒮₁.Rel x₁ x₂) (x₂₃ : 𝒮₁.Rel x₂ x₃) 
           → pres (x₁₂ 𝒟₁.∘ x₂₃) ≡ pres x₁₂ 𝒟₂.∘ pres x₂₃
+
+    -- Preservation of identity and inverse is derivable
+
+    pres-id : (x : 𝒮₁.Car) → pres (𝒟₁.id x) ≡ 𝒟₂.id (act x)
+    pres-id x =
+      pres (𝒟₁.id x) 
+      ≡⟨ sym (𝒟₂.∘∘⁻¹ (pres (𝒟₁.id x)) (pres (𝒟₁.id x))) ⟩
+      pres (𝒟₁.id x) 𝒟₂.∘ (pres (𝒟₁.id x) 𝒟₂.∘ (pres (𝒟₁.id x) 𝒟₂.⁻¹))
+      ≡⟨ sym (𝒟₂.∘∘ (pres (𝒟₁.id x)) (pres (𝒟₁.id x)) 
+                    (pres (𝒟₁.id x) 𝒟₂.⁻¹)) ⟩
+      ⌜ pres (𝒟₁.id x) 𝒟₂.∘ pres (𝒟₁.id x) ⌝ 𝒟₂.∘ (pres (𝒟₁.id x) 𝒟₂.⁻¹)
+      ≡⟨ ap! (sym (pres-∘ (𝒟₁.id x) (𝒟₁.id x))) ⟩
+      (pres ⌜ 𝒟₁.id x 𝒟₁.∘ 𝒟₁.id x ⌝) 𝒟₂.∘ (pres (𝒟₁.id x) 𝒟₂.⁻¹)
+      ≡⟨ ap! (𝒟₁.id∘ (𝒟₁.id x)) ⟩
+      pres (𝒟₁.id x) 𝒟₂.∘ (pres (𝒟₁.id x) 𝒟₂.⁻¹)
+      ≡⟨ 𝒟₂.∘⁻¹ (pres (𝒟₁.id x)) ⟩
+      𝒟₂.id (act x) ∎
+
+    pres-⁻¹ : (x₁₂ : 𝒮₁.Rel x₁ x₂) → pres (x₁₂ 𝒟₁.⁻¹) ≡ pres x₁₂ 𝒟₂.⁻¹
+    pres-⁻¹ {x₁ = x₁} {x₂ = x₂} x₁₂ = 
+      pres (x₁₂ 𝒟₁.⁻¹)
+      ≡⟨ sym (𝒟₂.∘∘⁻¹ (pres (x₁₂ 𝒟₁.⁻¹)) (pres x₁₂)) ⟩
+      pres (x₁₂ 𝒟₁.⁻¹) 𝒟₂.∘ (pres x₁₂ 𝒟₂.∘ (pres x₁₂ 𝒟₂.⁻¹))
+      ≡⟨ sym (𝒟₂.∘∘ (pres (x₁₂ 𝒟₁.⁻¹)) (pres x₁₂) (pres x₁₂ 𝒟₂.⁻¹)) ⟩
+      ⌜ pres (x₁₂ 𝒟₁.⁻¹) 𝒟₂.∘ pres x₁₂ ⌝ 𝒟₂.∘ (pres x₁₂ 𝒟₂.⁻¹)
+      ≡⟨ ap! (sym (pres-∘ (x₁₂ 𝒟₁.⁻¹) x₁₂)) ⟩
+      pres ⌜ (x₁₂ 𝒟₁.⁻¹) 𝒟₁.∘ x₁₂ ⌝ 𝒟₂.∘ (pres x₁₂ 𝒟₂.⁻¹)
+      ≡⟨ ap! (𝒟₁.⁻¹∘ x₁₂) ⟩
+      ⌜ pres (𝒟₁.id x₂) ⌝ 𝒟₂.∘ (pres x₁₂ 𝒟₂.⁻¹)
+      ≡⟨ ap! (pres-id x₂) ⟩
+      𝒟₂.id (act x₂) 𝒟₂.∘ (pres x₁₂ 𝒟₂.⁻¹)
+      ≡⟨ 𝒟₂.id∘ (pres x₁₂ 𝒟₂.⁻¹)  ⟩
+      pres x₁₂ 𝒟₂.⁻¹ ∎
 
   -- Congruence
   module _ (F G : _⇒_) where
@@ -532,9 +563,9 @@ module _ (𝒢₁ : Grpd) (𝒢₂ : Grpd) where
            → F.pres x₁₂ ≡[ ap₂ 𝒮₂.Rel (act≡ x₁) (act≡ x₂) ]≡ G.pres x₁₂)
          → F ≡ G
     ⇒≡ act≡ pres≡ = ⇒≡' (funext λ x → act≡ x) pres≡
-open _⇒_ public
 
--- Dependent groupoid homomorphisms (sections)
+
+-- Displayed groupoid homomorphisms (sections)
 module _ (𝒢 : Grpd) (𝒢ᴰ : Grpdᴰ 𝒢) where
   open Grpd.Vars (𝒢 .fst)
   private
@@ -545,10 +576,48 @@ module _ (𝒢 : Grpd) (𝒢ᴰ : Grpdᴰ 𝒢) where
   record _⇒ᴰ_ : Set where 
     eta-equality
     field
-      act  : ∀ (x : 𝒮.Car) → 𝒮ᴰ.Carᴰ x
-      pres : ∀ (x₁₂ : 𝒮.Rel x₁ x₂) → 𝒮ᴰ.Relᴰ (act x₁) (act x₂) x₁₂
-      id   : (x : 𝒮.Car) → pres (𝒟.id x) ≡ 𝒟ᴰ.idᴰ _
-      _⁻¹  : (x₁₂ : 𝒮.Rel x₁ x₂) → pres (x₁₂ 𝒟.⁻¹) ≡ pres x₁₂ 𝒟ᴰ.⁻¹ᴰ
-      _∘_  : (x₁₂ : 𝒮.Rel x₁ x₂) (x₂₃ : 𝒮.Rel x₂ x₃) 
-          → pres (x₁₂ 𝒟.∘ x₂₃) ≡ pres x₁₂ 𝒟ᴰ.∘ᴰ pres x₂₃
+      act     : ∀ (x : 𝒮.Car) → 𝒮ᴰ.Carᴰ x
+      pres    : ∀ (x₁₂ : 𝒮.Rel x₁ x₂) → 𝒮ᴰ.Relᴰ (act x₁) (act x₂) x₁₂
+      pres-∘ᴰ : (x₁₂ : 𝒮.Rel x₁ x₂) (x₂₃ : 𝒮.Rel x₂ x₃) 
+              → pres (x₁₂ 𝒟.∘ x₂₃) ≡ pres x₁₂ 𝒟ᴰ.∘ᴰ pres x₂₃
+   
+    pres-idᴰ  : (x : 𝒮.Car) → pres (𝒟.id x) ≡ 𝒟ᴰ.idᴰ (act x)
+    pres-idᴰ x 
+      rewrite ↑≡ 𝒟.id∘ (𝒟.id x)
+      rewrite ↑≡ 𝒟.id⁻¹ x =
+      pres (𝒟.id x)
+      ≡⟨ sym (𝒟ᴰ.∘∘⁻¹ᴰ (pres (𝒟.id x)) (pres (𝒟.id x)) .[]coe) ⟩
+      pres (𝒟.id x) 𝒟ᴰ.∘ᴰ (pres (𝒟.id x) 𝒟ᴰ.∘ᴰ (pres (𝒟.id x) 𝒟ᴰ.⁻¹ᴰ))
+      ≡⟨ sym (𝒟ᴰ.∘∘ᴰ (pres (𝒟.id x)) (pres (𝒟.id x)) 
+                     (pres (𝒟.id x) 𝒟ᴰ.⁻¹ᴰ) .[]coe) ⟩
+      ⌜ pres (𝒟.id x) 𝒟ᴰ.∘ᴰ pres (𝒟.id x) ⌝ 𝒟ᴰ.∘ᴰ (pres (𝒟.id x) 𝒟ᴰ.⁻¹ᴰ)
+      ≡⟨ ap! (sym (pres-∘ᴰ (𝒟.id x) (𝒟.id x))) ⟩
+      (pres ⌜ 𝒟.id x 𝒟.∘ 𝒟.id x ⌝ 𝒟ᴰ.∘ᴰ (pres (𝒟.id x) 𝒟ᴰ.⁻¹ᴰ))
+      ≡⟨⟩
+      pres (𝒟.id x) 𝒟ᴰ.∘ᴰ (pres (𝒟.id x) 𝒟ᴰ.⁻¹ᴰ)
+      ≡⟨ 𝒟ᴰ.∘⁻¹ᴰ (pres (𝒟.id x)) .[]coe ⟩
+      𝒟ᴰ.idᴰ (act x) ∎
+
+    pres-⁻¹ᴰ  : (x₁₂ : 𝒮.Rel x₁ x₂) → pres (x₁₂ 𝒟.⁻¹) ≡ pres x₁₂ 𝒟ᴰ.⁻¹ᴰ
+    pres-⁻¹ᴰ {x₁ = x₁} {x₂ = x₂} x₁₂
+      rewrite ↑≡ 𝒟.∘⁻¹ x₁₂
+      rewrite ↑≡ 𝒟.⁻¹∘ x₁₂
+      rewrite ↑≡ 𝒟.∘id (x₁₂ 𝒟.⁻¹)
+      rewrite ↑≡ 𝒟.id∘ (x₁₂ 𝒟.⁻¹)
+      = 
+      pres (x₁₂ 𝒟.⁻¹)
+      ≡⟨ sym (𝒟ᴰ.∘∘⁻¹ᴰ (pres (x₁₂ 𝒟.⁻¹)) (pres x₁₂) .[]coe) ⟩
+      pres (x₁₂ 𝒟.⁻¹) 𝒟ᴰ.∘ᴰ (pres x₁₂ 𝒟ᴰ.∘ᴰ (pres x₁₂ 𝒟ᴰ.⁻¹ᴰ))
+      ≡⟨ sym (𝒟ᴰ.∘∘ᴰ (pres (x₁₂ 𝒟.⁻¹)) (pres x₁₂) (pres x₁₂ 𝒟ᴰ.⁻¹ᴰ) .[]coe) ⟩
+      ⌜ pres (x₁₂ 𝒟.⁻¹) 𝒟ᴰ.∘ᴰ pres x₁₂ ⌝ 𝒟ᴰ.∘ᴰ (pres x₁₂ 𝒟ᴰ.⁻¹ᴰ)
+      ≡⟨ ap! (sym (pres-∘ᴰ (x₁₂ 𝒟.⁻¹) x₁₂)) ⟩
+      (pres ⌜ (x₁₂ 𝒟.⁻¹) 𝒟.∘ x₁₂ ⌝ 𝒟ᴰ.∘ᴰ (pres x₁₂ 𝒟ᴰ.⁻¹ᴰ))
+      ≡⟨⟩
+      ⌜ pres (𝒟.id x₂) ⌝ 𝒟ᴰ.∘ᴰ (pres x₁₂ 𝒟ᴰ.⁻¹ᴰ)
+      ≡⟨ ap! (pres-idᴰ x₂) ⟩
+      𝒟ᴰ.idᴰ (act x₂) 𝒟ᴰ.∘ᴰ (pres x₁₂ 𝒟ᴰ.⁻¹ᴰ)
+      ≡⟨ 𝒟ᴰ.id∘ᴰ (pres x₁₂ 𝒟ᴰ.⁻¹ᴰ) .[]coe ⟩
+      pres x₁₂ 𝒟ᴰ.⁻¹ᴰ ∎
+
+open _⇒_ public
 open _⇒ᴰ_ public

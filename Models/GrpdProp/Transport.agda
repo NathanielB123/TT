@@ -49,67 +49,7 @@ module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧))
       = tr (λ □ → ⟦P⟧ .fst .Relᴰ _ _ (ρ₁₂ , □)) (tu-pres ρ₁₂ .[]coe)
       ((⟦P⟧.cohG (⟦Γ⟧.id ρ₁ , ⟦p⟧.act ρ₁) (⟦d⟧.act ρ₁) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ 
       (⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ ⟦P⟧.cohG (⟦Γ⟧.id ρ₂ , ⟦p⟧.act ρ₂) (⟦d⟧.act ρ₂)))
-  ⟦tr⟧ .id   ρ 
-    rewrite ↑≡ ⟦Γ⟧.∘id (⟦Γ⟧.id ρ)
-    rewrite ↑≡ ⟦Γ⟧.id⁻¹ ρ
-    rewrite ↑≡ ⟦A⟧.id∘ᴰ (⟦p⟧.act ρ) .[]coe
-    rewrite ↑≡ ⟦A⟧.∘idᴰ (⟦p⟧.act ρ) .[]coe
-    rewrite ↑≡ ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ) .[]coe
-    rewrite ↑≡ ⟦u⟧.id ρ
-    rewrite ↑≡ ⟦t⟧.id ρ =  
-    (PcohG ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⌜ ⟦d⟧.pres (⟦Γ⟧.id ρ) ⌝ ⟦P⟧.∘ᴰ PcohG)
-    ≡⟨ ap! (⟦d⟧.id ρ) ⟩
-    (PcohG ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ ⌜ ⟦P⟧.idᴰ (⟦d⟧.act ρ) ⟦P⟧.∘ᴰ PcohG ⌝
-    ≡⟨ ap! (⟦P⟧.id∘ᴰ PcohG .[]coe) ⟩
-    (PcohG ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ PcohG
-    ≡⟨ ⟦P⟧.⁻¹∘ᴰ PcohG .[]coe ⟩
-    ⟦P⟧.idᴰ (⟦P⟧.coeG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ)) ∎
-    where
-      PcohG = ⟦P⟧.cohG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ)
-  ⟦tr⟧ ._⁻¹ {x₁ = ρ₁} {x₂ = ρ₂}  ρ₁₂ 
-    rewrite ↑≡ ⟦Γ⟧.∘id ρ₁₂
-    rewrite ↑≡ ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ₁)
-    rewrite ↑≡ ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ₂)
-    rewrite ↑≡ ⟦Γ⟧.id∘ ρ₁₂
-    rewrite ↑≡ ⟦Γ⟧.id∘ (ρ₁₂ ⟦Γ⟧.⁻¹)
-    rewrite ↑≡ ⟦Γ⟧.∘id (ρ₁₂ ⟦Γ⟧.⁻¹)
-    rewrite ↑≡ ⟦Γ⟧.id⁻¹ ρ₁
-    rewrite ↑≡ ⟦Γ⟧.id⁻¹ ρ₂
-    rewrite ↑≡ ⟦Γ⟧.⁻¹∘ ρ₁₂
-    rewrite ↑≡ ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ₁) .[]coe
-    rewrite ↑≡ ⟦A⟧.⁻¹∘ᴰ (⟦p⟧.act ρ₂) .[]coe
-    rewrite ↑≡ ρ₁₂ ⟦t⟧.⁻¹
-    rewrite ↑≡ ρ₁₂ ⟦u⟧.⁻¹
-    rewrite ↑≡ ⟦A⟧.id∘ᴰ (⟦u⟧.pres ρ₁₂) .[]coe
-    rewrite ↑≡ ⟦A⟧.id∘ᴰ (⟦u⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) .[]coe
-    rewrite ↑≡ ⟦A⟧.∘idᴰ (⟦u⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) .[]coe
-    rewrite ↑≡ ⟦A⟧.⁻¹⁻¹ᴰ (⟦p⟧.act ρ₁) .[]coe
-    rewrite ↑≡ ⟦A⟧.⟨∘⟩⁻¹ᴰ (⟦p⟧.act ρ₁) (⟦u⟧.pres ρ₁₂) .[]coe
-    rewrite ↑≡ sym (⟦A⟧.∘∘ᴰ (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) (⟦p⟧.act ρ₁) 
-                            (⟦u⟧.pres ρ₁₂) .[]coe)
-    rewrite ↑≡ sym (⟦A⟧.∘∘ᴰ (⟦p⟧.act ρ₂ ⟦A⟧.⁻¹ᴰ) (⟦p⟧.act ρ₂) 
-                            (⟦u⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) .[]coe)
-    rewrite ↑≡ ⟦A⟧.∘∘ᴰ (⟦u⟧.pres ρ₁₂ ⟦A⟧.⁻¹ᴰ) (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) 
-                       (⟦p⟧.act ρ₁) .[]coe
-    rewrite ↑≡ sym (⟦p⟧.pres ρ₁₂ .lower .[]coe)
-    rewrite ↑≡ sym (⟦p⟧.pres (ρ₁₂ ⟦Γ⟧.⁻¹) .lower .[]coe)
-    rewrite ↑≡ sym (⟦A⟧.⟨∘⟩⁻¹ᴰ (⟦t⟧.pres ρ₁₂) (⟦p⟧.act ρ₂) .[]coe)
-    =
-    (cohG₂ ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⌜ ⟦d⟧.pres (ρ₁₂ ⟦Γ⟧.⁻¹) ⌝ ⟦P⟧.∘ᴰ cohG₁)
-    ≡⟨ ap! (ρ₁₂ ⟦d⟧.⁻¹) ⟩
-    (cohG₂ ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ ((⟦d⟧.pres ρ₁₂ ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ cohG₁)
-    ≡⟨ sym (⟦P⟧.∘∘ᴰ (cohG₂ ⟦P⟧.⁻¹ᴰ) (⟦d⟧.pres ρ₁₂ ⟦P⟧.⁻¹ᴰ) cohG₁ .[]coe) ⟩
-    ⌜ (cohG₂ ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⟦d⟧.pres ρ₁₂ ⟦P⟧.⁻¹ᴰ) ⌝ ⟦P⟧.∘ᴰ cohG₁
-    ≡⟨ ap! (sym (⟦P⟧.⟨∘⟩⁻¹ᴰ (⟦d⟧.pres ρ₁₂) cohG₂ .[]coe)) ⟩
-    ((⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ cohG₂) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ ⌜ cohG₁ ⌝
-    ≡⟨ ap! (sym (⟦P⟧.⁻¹⁻¹ᴰ cohG₁ .[]coe)) ⟩
-    ((⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ  cohG₂) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (cohG₁ ⟦P⟧.⁻¹ᴰ ⟦P⟧.⁻¹ᴰ)
-    ≡⟨ sym (⟦P⟧.⟨∘⟩⁻¹ᴰ (cohG₁ ⟦P⟧.⁻¹ᴰ) (⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ cohG₂) .[]coe) ⟩
-    ((cohG₁ ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ cohG₂)) ⟦P⟧.⁻¹ᴰ ∎
-    where
-      cohG₁ = ⟦P⟧.cohG (⟦Γ⟧.id ρ₁ , ⟦p⟧.act ρ₁) (⟦d⟧.act ρ₁)
-      cohG₂ = ⟦P⟧.cohG (⟦Γ⟧.id ρ₂ , ⟦p⟧.act ρ₂) (⟦d⟧.act ρ₂)
-  ⟦tr⟧ ._∘_ {x₁ = ρ₁} {x₂ = ρ₂} {x₃ = ρ₃} ρ₁₂ ρ₂₃ 
+  ⟦tr⟧ .pres-∘ᴰ {x₁ = ρ₁} {x₂ = ρ₂} {x₃ = ρ₃} ρ₁₂ ρ₂₃ 
     rewrite ↑≡ ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ₁)
     rewrite ↑≡ ⟦Γ⟧.id∘ (⟦Γ⟧.id ρ₂)
     rewrite ↑≡ ⟦Γ⟧.id⁻¹ ρ₁
@@ -128,8 +68,8 @@ module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧))
     rewrite ↑≡ ⟦A⟧.id∘ᴰ (⟦p⟧.act ρ₂ ⟦A⟧.∘ᴰ ⟦u⟧.pres ρ₂₃) .[]coe
     rewrite ↑≡ sym (⟦p⟧ .pres ρ₁₂ .lower .[]coe)
     rewrite ↑≡ sym (⟦p⟧ .pres ρ₂₃ .lower .[]coe)
-    rewrite ↑≡ ρ₁₂ ⟦t⟧.∘ ρ₂₃
-    rewrite ↑≡ ρ₁₂ ⟦u⟧.∘ ρ₂₃
+    rewrite ↑≡ ⟦t⟧.pres-∘ᴰ ρ₁₂ ρ₂₃
+    rewrite ↑≡ ⟦u⟧.pres-∘ᴰ ρ₁₂ ρ₂₃
     rewrite ↑≡ sym (⟦A⟧.∘∘ᴰ (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) (⟦p⟧.act ρ₁) 
                             (⟦u⟧.pres ρ₁₂) .[]coe)
     rewrite ↑≡ sym (⟦A⟧.∘∘ᴰ (⟦p⟧.act ρ₂ ⟦A⟧.⁻¹ᴰ) (⟦p⟧.act ρ₂) 
@@ -144,7 +84,7 @@ module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧))
                             (⟦p⟧.act ρ₂) (⟦u⟧.pres ρ₂₃) .[]coe)
     =
     (cohG₁ ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⌜ ⟦d⟧.pres (ρ₁₂ ⟦Γ⟧.∘ ρ₂₃) ⌝ ⟦P⟧.∘ᴰ cohG₃)
-    ≡⟨ ap! (ρ₁₂ ⟦d⟧.∘ ρ₂₃) ⟩
+    ≡⟨ ap! (⟦d⟧.pres-∘ᴰ ρ₁₂ ρ₂₃) ⟩
     (cohG₁ ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ ⌜ (⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ ⟦d⟧.pres ρ₂₃) ⟦P⟧.∘ᴰ cohG₃ ⌝
     ≡⟨ ap! (⟦P⟧.∘∘ᴰ (⟦d⟧.pres ρ₁₂) (⟦d⟧.pres ρ₂₃) cohG₃ .[]coe) ⟩
     (cohG₁ ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ (⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ (⟦d⟧.pres ρ₂₃ ⟦P⟧.∘ᴰ cohG₃))

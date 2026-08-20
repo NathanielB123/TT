@@ -20,42 +20,42 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) 
   ⟦[]T⟧ : ⟦Ty⟧ ⟦Δ⟧
   ⟦[]T⟧ .fst .Carᴰ ρ 
     = ⟦A⟧ .fst .Carᴰ (⟦δ⟧.act ρ)
-  ⟦[]T⟧ .fst .Relᴰ τ₁ τ₂ τ₁₂ 
-    = ⟦A⟧ .fst .Relᴰ τ₁ τ₂ (⟦δ⟧ .pres τ₁₂) 
+  ⟦[]T⟧ .fst .Relᴰ τ₁ τ₂ ρ₁₂ 
+    = ⟦A⟧ .fst .Relᴰ τ₁ τ₂ (⟦δ⟧ .pres ρ₁₂) 
   ⟦[]T⟧ .snd .idᴰ _
-    = tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧.id _)) (⟦A⟧.idᴰ _)
+    = tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧.pres-id _)) (⟦A⟧.idᴰ _)
   ⟦[]T⟧ .snd ._⁻¹ᴰ τ₁₂
-    = tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (_ ⟦δ⟧.⁻¹)) (τ₁₂ ⟦A⟧.⁻¹ᴰ) 
+    = tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧.pres-⁻¹ _)) (τ₁₂ ⟦A⟧.⁻¹ᴰ) 
   ⟦[]T⟧ .snd ._∘ᴰ_ τ₁₂ τ₂₃
-    = tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (_ ⟦δ⟧.∘ _)) (τ₁₂ ⟦A⟧.∘ᴰ τ₂₃)
+    = tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧.pres-∘ _ _)) (τ₁₂ ⟦A⟧.∘ᴰ τ₂₃)
   ⟦[]T⟧ .snd .id∘ᴰ {x₁ = ρ₁} {x₁₂ = ρ₁₂} τ₁₂
     rewrite ↑≡ ⟦Γ⟧.id∘ (⟦δ⟧.pres ρ₁₂)
     rewrite ↑≡ ⟦Δ⟧.id∘ ρ₁₂
-    rewrite ↑≡ ⟦δ⟧.id ρ₁
+    rewrite ↑≡ ⟦δ⟧.pres-id ρ₁
     = ⟦A⟧.id∘ᴰ τ₁₂
   ⟦[]T⟧ .snd .∘idᴰ {x₂ = ρ₂} {x₁₂ = ρ₁₂} τ₁₂ 
     rewrite ↑≡ ⟦Γ⟧.∘id (⟦δ⟧.pres ρ₁₂)
     rewrite ↑≡ ⟦Δ⟧.∘id ρ₁₂
-    rewrite ↑≡ ⟦δ⟧.id ρ₂ 
+    rewrite ↑≡ ⟦δ⟧.pres-id ρ₂ 
     = ⟦A⟧.∘idᴰ τ₁₂
   ⟦[]T⟧ .snd .∘∘ᴰ {x₁₂ = ρ₁₂} {x₂₃ = ρ₂₃} {x₃₄ = ρ₃₄} τ₁₂ τ₂₃ τ₃₄ 
     rewrite ↑≡ ⟦Γ⟧.∘∘ (⟦δ⟧ .pres ρ₁₂) (⟦δ⟧ .pres ρ₂₃) (⟦δ⟧ .pres ρ₃₄)
     rewrite ↑≡ ⟦Δ⟧.∘∘ ρ₁₂ ρ₂₃ ρ₃₄
-    rewrite ↑≡ ρ₁₂ ⟦δ⟧.∘ ρ₂₃
-    rewrite ↑≡ ρ₂₃ ⟦δ⟧.∘ ρ₃₄
-    rewrite ↑≡ (ρ₁₂ ⟦Δ⟧.∘ ρ₂₃) ⟦δ⟧.∘ ρ₃₄
+    rewrite ↑≡ ⟦δ⟧.pres-∘ ρ₁₂ ρ₂₃
+    rewrite ↑≡ ⟦δ⟧.pres-∘ ρ₂₃ ρ₃₄
+    rewrite ↑≡ ⟦δ⟧.pres-∘ (ρ₁₂ ⟦Δ⟧.∘ ρ₂₃) ρ₃₄
     = ⟦A⟧.∘∘ᴰ τ₁₂ τ₂₃ τ₃₄
   ⟦[]T⟧ .snd .∘⁻¹ᴰ {x₁ = ρ₁} {x₁₂ = ρ₁₂} τ₁₂ 
     rewrite ↑≡ ⟦Γ⟧.∘⁻¹ (⟦δ⟧.pres ρ₁₂)
     rewrite ↑≡ ⟦Δ⟧.∘⁻¹ ρ₁₂
-    rewrite ↑≡ ρ₁₂ ⟦δ⟧.⁻¹
-    rewrite ↑≡ ρ₁₂ ⟦δ⟧.∘ (ρ₁₂ ⟦Δ⟧.⁻¹)
+    rewrite ↑≡ ⟦δ⟧.pres-⁻¹ ρ₁₂
+    rewrite ↑≡ ⟦δ⟧.pres-∘ ρ₁₂ (ρ₁₂ ⟦Δ⟧.⁻¹)
     = ⟦A⟧.∘⁻¹ᴰ τ₁₂
   ⟦[]T⟧ .snd .⁻¹∘ᴰ {x₂ = ρ₂} {x₁₂ = ρ₁₂} τ₁₂  
     rewrite ↑≡ ⟦Γ⟧.⁻¹∘ (⟦δ⟧.pres ρ₁₂)
     rewrite ↑≡ ⟦Δ⟧.⁻¹∘ ρ₁₂
-    rewrite ↑≡ ρ₁₂ ⟦δ⟧.⁻¹
-    rewrite ↑≡ (ρ₁₂ ⟦Δ⟧.⁻¹) ⟦δ⟧.∘ ρ₁₂
+    rewrite ↑≡ ⟦δ⟧.pres-⁻¹ ρ₁₂
+    rewrite ↑≡ ⟦δ⟧.pres-∘ (ρ₁₂ ⟦Δ⟧.⁻¹) ρ₁₂
     = ⟦A⟧.⁻¹∘ᴰ τ₁₂
   ⟦[]T⟧ .snd .coeG ρ₁₂ τᴰ   
     = ⟦A⟧.coeG (⟦δ⟧.pres ρ₁₂) τᴰ
@@ -63,19 +63,19 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) 
     = ⟦A⟧.cohG _
   ⟦[]T⟧ .snd .coe-id τ =
     ⟦A⟧.coeG ⌜ ⟦δ⟧.pres (⟦Δ⟧.id _) ⌝ τ
-    ≡⟨ ap! (⟦δ⟧.id _) ⟩
+    ≡⟨ ap! (⟦δ⟧.pres-id _) ⟩
     ⟦A⟧.coeG (⟦Γ⟧.id _) τ
     ≡⟨ ⟦A⟧.coe-id _ ⟩
     τ ∎
   ⟦[]T⟧ .snd .coe-∘ ρ₁₂ ρ₂₃ τ = 
     ⟦A⟧.coeG ⌜ ⟦δ⟧.pres (ρ₁₂ ⟦Δ⟧.∘ ρ₂₃) ⌝ τ
-    ≡⟨ ap! (ρ₁₂ ⟦δ⟧.∘ ρ₂₃) ⟩
+    ≡⟨ ap! (⟦δ⟧.pres-∘ ρ₁₂ ρ₂₃) ⟩
     ⟦A⟧.coeG (⟦δ⟧.pres ρ₁₂ ⟦Γ⟧.∘ ⟦δ⟧.pres ρ₂₃) τ
     ≡⟨ ⟦A⟧.coe-∘ _ _ _ ⟩
     ⟦A⟧.coeG (⟦δ⟧.pres ρ₂₃) (⟦A⟧.coeG (⟦δ⟧.pres ρ₁₂) τ) ∎
-  
+
   ⟦[]T⟧ .snd .coh-id {x = ρ} τ
-    rewrite ↑≡ ⟦δ⟧.id ρ 
+    rewrite ↑≡ ⟦δ⟧.pres-id ρ 
     = ⟦A⟧.coh-id _ 
     -- > = coe[]
     -- > (coe _ (⟦A⟧.cohG (⟦δ⟧.pres ⟦Δ⟧.id))
@@ -98,13 +98,13 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) 
     -- function here to satisfy Agda's termination checker
     = go where
     go : ⟦A⟧.cohG (⟦δ⟧.pres (ρ₁₂ ⟦Δ⟧.∘ ρ₂₃)) _ 
-       ≡[ ap (λ □ → Relᴰ (⟦A⟧ .fst) τ □ (⟦δ⟧.pres (ρ₁₂ ⟦Δ⟧.∘ ρ₂₃)))
-          (ap (λ □ → ⟦A⟧.coeG □ τ) (ρ₁₂ ⟦δ⟧.∘ ρ₂₃) ∙ ⟦A⟧.coe-∘ _ _ _ ∙ refl)
-       ]≡ tr (Relᴰ (fst ⟦A⟧) τ 
-                   (⟦A⟧.coeG (⟦δ⟧.pres ρ₂₃) (⟦A⟧.coeG (⟦δ⟧.pres ρ₁₂) τ)))
-             (sym (ρ₁₂ ⟦δ⟧.∘ ρ₂₃))
-             (⟦A⟧.cohG (⟦δ⟧.pres ρ₁₂) _ ⟦A⟧.∘ᴰ ⟦A⟧.cohG (⟦δ⟧.pres ρ₂₃) _)
-    go rewrite ↑≡ ρ₁₂ ⟦δ⟧.∘ ρ₂₃
+      ≡[ ap (λ □ → Relᴰ (⟦A⟧ .fst) τ □ (⟦δ⟧.pres (ρ₁₂ ⟦Δ⟧.∘ ρ₂₃)))
+          (ap (λ □ → ⟦A⟧.coeG □ τ) (⟦δ⟧.pres-∘ ρ₁₂ ρ₂₃) ∙ ⟦A⟧.coe-∘ _ _ _)
+      ]≡ tr (Relᴰ (fst ⟦A⟧) τ 
+                  (⟦A⟧.coeG (⟦δ⟧.pres ρ₂₃) (⟦A⟧.coeG (⟦δ⟧.pres ρ₁₂) τ)))
+            (sym (⟦δ⟧.pres-∘ ρ₁₂ ρ₂₃))
+            (⟦A⟧.cohG (⟦δ⟧.pres ρ₁₂) _ ⟦A⟧.∘ᴰ ⟦A⟧.cohG (⟦δ⟧.pres ρ₂₃) _)
+    go rewrite ↑≡ ⟦δ⟧.pres-∘ ρ₁₂ ρ₂₃
       = ⟦A⟧.coh-∘ _ _ _
     -- > = coe[]
     -- > (coe _ (⟦A⟧.cohG (⟦δ⟧.pres (ρ₁₂ ⟦Δ⟧.∘ ρ₂₃)))
@@ -138,21 +138,18 @@ module _ (⟦t⟧ : ⟦Tm⟧ ⟦Γ⟧ ⟦A⟧) (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ �
   ⟦[]⟧ : ⟦Tm⟧ ⟦Δ⟧ (⟦[]T⟧ ⟦A⟧ ⟦δ⟧)
   ⟦[]⟧ .act  ρ   = ⟦t⟧.act (⟦δ⟧.act ρ)
   ⟦[]⟧ .pres ρ₁₂ = ⟦t⟧.pres (⟦δ⟧.pres ρ₁₂)
-  ⟦[]⟧ .id ρ
-    rewrite ↑≡ ⟦δ⟧.id ρ 
-    = ⟦t⟧ .id (⟦δ⟧.act ρ)
-    -- =
-    -- ⟦t⟧ .pres (⟦δ⟧ .pres _)
-    -- ≡⟨ sym (apd (⟦t⟧ .pres) (sym (⟦δ⟧ .id _)) .[]coe)  ⟩
-    -- tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧ .id _)) ⌜ ⟦t⟧ .pres _ ⌝ 
-    -- ≡⟨ ap! (⟦t⟧ .id _) ⟩
-    -- tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧ .id _)) (⟦A⟧ .snd .idᴰ) ∎
-  ⟦[]⟧ ._⁻¹ ρ₁₂ 
-    rewrite ↑≡ ρ₁₂ ⟦δ⟧.⁻¹
-    = ⟦δ⟧.pres ρ₁₂ ⟦t⟧.⁻¹
-  ⟦[]⟧ ._∘_ ρ₁₂ ρ₂₃
-    rewrite ↑≡ ρ₁₂ ⟦δ⟧.∘ ρ₂₃
-    = ⟦δ⟧.pres ρ₁₂ ⟦t⟧.∘ ⟦δ⟧.pres ρ₂₃
+  -- ⟦[]⟧ .pres-id ρ
+  --   rewrite ↑≡ ⟦δ⟧.pres-id ρ 
+  --   = ⟦t⟧ .id (⟦δ⟧.act ρ)
+  --   -- =
+  --   -- ⟦t⟧ .pres (⟦δ⟧ .pres _)
+  --   -- ≡⟨ sym (apd (⟦t⟧ .pres) (sym (⟦δ⟧ .id _)) .[]coe)  ⟩
+  --   -- tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧ .id _)) ⌜ ⟦t⟧ .pres _ ⌝ 
+  --   -- ≡⟨ ap! (⟦t⟧ .id _) ⟩
+  --   -- tr (Relᴰ (⟦A⟧ .fst) _ _) (sym (⟦δ⟧ .id _)) (⟦A⟧ .snd .idᴰ) ∎
+  ⟦[]⟧ .pres-∘ᴰ ρ₁₂ ρ₂₃
+    rewrite ↑≡ ⟦δ⟧.pres-∘ ρ₁₂ ρ₂₃
+    = ⟦t⟧.pres-∘ᴰ (⟦δ⟧.pres ρ₁₂) (⟦δ⟧.pres ρ₂₃)
 
 ⟦•⟧ : ⟦Ctx⟧
 ⟦•⟧ .fst .Car       = 𝟙
@@ -200,26 +197,22 @@ module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) where
   ⟦wk⟧ : ⟦Sub⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) ⟦Γ⟧
   ⟦wk⟧ .act  (ρ , τ)     = ρ
   ⟦wk⟧ .pres (ρ₁₂ , τ₁₂) = ρ₁₂
-  ⟦wk⟧ .id  _   = refl
-  ⟦wk⟧ ._⁻¹ _   = refl
-  ⟦wk⟧ ._∘_ _ _ = refl
+  ⟦wk⟧ .pres-∘ _ _ = refl
 
 -- Zero variable
 module _ (⟦A⟧ : ⟦Ty⟧ ⟦Γ⟧) where
   ⟦vz⟧ : ⟦Tm⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) (⟦[]T⟧ ⟦A⟧ (⟦wk⟧ ⟦A⟧))
   ⟦vz⟧ .act  (ρ , τ)     = τ
   ⟦vz⟧ .pres (ρ₁₂ , τ₁₂) = τ₁₂
-  ⟦vz⟧ .id  _   = refl
-  ⟦vz⟧ ._⁻¹ _   = refl
-  ⟦vz⟧ ._∘_ _ _ = refl
+
+  ⟦vz⟧ .pres-∘ᴰ _ _ = refl
 
 -- Identity substitution
 ⟦id⟧ : ⟦Sub⟧ ⟦Γ⟧ ⟦Γ⟧
 ⟦id⟧ .act  ρ   = ρ
 ⟦id⟧ .pres ρ₁₂ = ρ₁₂
-⟦id⟧ .id  _    = refl
-⟦id⟧ ._⁻¹ _    = refl
-⟦id⟧ ._∘_ _ _  = refl
+
+⟦id⟧ .pres-∘ _ _  = refl
 
 -- Substitution extension
 module _ ⟦A⟧ (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) (⟦t⟧ : ⟦Tm⟧ ⟦Δ⟧ (⟦[]T⟧ ⟦A⟧ ⟦δ⟧)) where
@@ -233,15 +226,9 @@ module _ ⟦A⟧ (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) (⟦t⟧ : ⟦Tm⟧ �
   ⟦,⟧ : ⟦Sub⟧ ⟦Δ⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧) 
   ⟦,⟧ .act  ρ   = ⟦δ⟧.act ρ , ⟦t⟧.act ρ
   ⟦,⟧ .pres ρ₁₂ = ⟦δ⟧.pres ρ₁₂ , ⟦t⟧.pres ρ₁₂
-  ⟦,⟧ .id   ρ 
-    rewrite ↑≡ ⟦δ⟧.id ρ
-    = ap (_ ,_) (⟦t⟧ .id ρ)
-  ⟦,⟧ ._⁻¹ ρ₁₂
-    rewrite ↑≡ ρ₁₂ ⟦δ⟧.⁻¹
-    = ap (_ ,_) (ρ₁₂ ⟦t⟧.⁻¹)
-  ⟦,⟧ ._∘_ ρ₁₂ ρ₂₃ 
-    rewrite ↑≡ ρ₁₂ ⟦δ⟧.∘ ρ₂₃
-    = ap (_ ,_) (ρ₁₂ ⟦t⟧.∘ ρ₂₃)
+  ⟦,⟧ .pres-∘ ρ₁₂ ρ₂₃ 
+    rewrite ↑≡ ⟦δ⟧.pres-∘ ρ₁₂ ρ₂₃
+    = ap (_ ,_) (⟦t⟧.pres-∘ᴰ ρ₁₂ ρ₂₃)
 
 -- Composition of substitutions
 module _ (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) (⟦σ⟧ : ⟦Sub⟧ ⟦Θ⟧ ⟦Δ⟧) where
@@ -255,21 +242,9 @@ module _ (⟦δ⟧ : ⟦Sub⟧ ⟦Δ⟧ ⟦Γ⟧) (⟦σ⟧ : ⟦Sub⟧ ⟦Θ⟧
   ⟦⨾⟧ : ⟦Sub⟧ ⟦Θ⟧ ⟦Γ⟧
   ⟦⨾⟧ .act  ρ   = ⟦δ⟧.act (⟦σ⟧.act ρ)
   ⟦⨾⟧ .pres ρ₁₂ = ⟦δ⟧.pres (⟦σ⟧.pres ρ₁₂)
-  ⟦⨾⟧ .id ρ = 
-    ⟦δ⟧.pres ⌜ ⟦σ⟧.pres (⟦Θ⟧.id _) ⌝
-    ≡⟨ ap! (⟦σ⟧.id _) ⟩
-    ⟦δ⟧.pres (⟦Δ⟧.id _)
-    ≡⟨ ⟦δ⟧.id _ ⟩
-    ⟦Γ⟧.id _ ∎
-  ⟦⨾⟧ ._⁻¹ ρ₁₂ = 
-    ⟦δ⟧.pres ⌜ ⟦σ⟧.pres (ρ₁₂ ⟦Θ⟧.⁻¹) ⌝
-    ≡⟨ ap! (ρ₁₂ ⟦σ⟧.⁻¹) ⟩
-    ⟦δ⟧.pres (⟦σ⟧.pres ρ₁₂ ⟦Δ⟧.⁻¹)
-    ≡⟨ (⟦σ⟧.pres ρ₁₂ ⟦δ⟧.⁻¹) ⟩
-    (⟦δ⟧.pres (⟦σ⟧.pres ρ₁₂) ⟦Γ⟧.⁻¹) ∎
-  ⟦⨾⟧ ._∘_ ρ₁₂ ρ₂₃ = 
+  ⟦⨾⟧ .pres-∘ ρ₁₂ ρ₂₃ = 
     ⟦δ⟧.pres ⌜ ⟦σ⟧.pres (ρ₁₂ ⟦Θ⟧.∘ ρ₂₃) ⌝
-    ≡⟨ ap! (ρ₁₂ ⟦σ⟧.∘ ρ₂₃) ⟩
+    ≡⟨ ap! (⟦σ⟧.pres-∘ ρ₁₂ ρ₂₃) ⟩
     ⟦δ⟧.pres (⟦σ⟧.pres ρ₁₂ ⟦Δ⟧.∘ ⟦σ⟧.pres ρ₂₃) 
-    ≡⟨ ⟦σ⟧.pres ρ₁₂ ⟦δ⟧.∘ ⟦σ⟧.pres ρ₂₃ ⟩
+    ≡⟨ ⟦δ⟧.pres-∘ (⟦σ⟧.pres ρ₁₂) (⟦σ⟧.pres ρ₂₃) ⟩
     ⟦δ⟧.pres (⟦σ⟧.pres ρ₁₂) ⟦Γ⟧.∘ ⟦δ⟧.pres (⟦σ⟧.pres ρ₂₃) ∎

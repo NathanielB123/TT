@@ -70,25 +70,19 @@ ff-tt-disj ()
 ⋆ .act  ρ   = ⟨⟩
 ⋆ .pres ρ₁₂ = tt
 
-⋆ .id   ρ       = refl
-⋆ ._⁻¹  ρ₁₂     = refl
-⋆ ._∘_  ρ₁₂ ρ₂₃ = refl
+⋆ .pres-∘ᴰ  ρ₁₂ ρ₂₃ = refl
 
 ⋆⋆₁ : ⟦Γ⟧ ⇒ᴰ ⟦Id⟧ ℤ₂ ⋆ ⋆
 ⋆⋆₁ .act  ρ          = ff
 ⋆⋆₁ .pres ρ₁₂ .lower = refl[]
 
-⋆⋆₁ .id  ρ       = refl
-⋆⋆₁ ._⁻¹ ρ₁₂     = refl
-⋆⋆₁ ._∘_ ρ₁₂ ρ₂₃ = refl
+⋆⋆₁ .pres-∘ᴰ ρ₁₂ ρ₂₃ = refl
 
 ⋆⋆₂ : ⟦Γ⟧ ⇒ᴰ ⟦Id⟧ ℤ₂ ⋆ ⋆
 ⋆⋆₂ .act  ρ          = tt
 ⋆⋆₂ .pres ρ₁₂ .lower = refl[]
 
-⋆⋆₂ .id  ρ       = refl
-⋆⋆₂ ._⁻¹ ρ₁₂     = refl
-⋆⋆₂ ._∘_ ρ₁₂ ρ₂₃ = refl
+⋆⋆₂ .pres-∘ᴰ ρ₁₂ ρ₂₃ = refl
 
 ⟦uip⟧-spec : Set₁
 ⟦uip⟧-spec = ∀ ⟦Γ⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧ (⟦p⟧ ⟦q⟧ : ⟦Tm⟧ ⟦Γ⟧ (⟦Id⟧ ⟦A⟧ ⟦t⟧ ⟦u⟧))
