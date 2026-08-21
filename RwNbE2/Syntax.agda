@@ -7,7 +7,7 @@ open import Utils.WithK
 open import Utils.Macro
 
 -- We postulate a strictified syntax
-module RwNbE2.SyntaxEta where
+module RwNbE2.Syntax where
 
 data Sig           : Set
 data Ctx (Ξ : Sig) : Set
@@ -229,19 +229,19 @@ postulate
   lam[] : lam t [ δ ] ≡ lam (t [ δ ^ A ])
   {-# REWRITE lam[] #-}
 
-  β : app (lam t) ≡ t
-  {-# REWRITE β #-}
-  η : t ≡ lam (app t)
+  Πβ : app (lam t) ≡ t
+  {-# REWRITE Πβ #-}
+  Πη : t ≡ lam (app t)
 
 app[] : {t : Tm Γ (Π A B)}
       → app (t [ δ ]) ≡ app t [ δ ^ A ]
 app[] {A = A} {δ = δ} {t = t} = 
   app (⌜ t ⌝ [ δ ])
-  ≡⟨ ap! (η {t = t}) ⟩
+  ≡⟨ ap! (Πη {t = t}) ⟩
   app (lam (app t) [ δ ])
   ≡⟨⟩
   app (lam (app t [ δ ^ A ]))
-  ≡⟨ β ⟩
+  ≡⟨⟩
   app t [ δ ^ A ] ∎
 
 app[]' : {t : Tm Γ (Π A B)}
@@ -265,7 +265,7 @@ postulate
   -- local equality reflection
 
 variable
-  eq : Tm _ (Id _ _ _)
+  eq eq' eq₁ eq₂ : Tm _ (Id _ _ _)
 
 rflℱ : t₁ ≡ t₂ → Tm Γ (Id A t₁ t₂)
 rflℱ refl = rfl
@@ -277,6 +277,8 @@ rflℱ[] {t₁₂ = refl} = refl
 -- Signatures
 data Sig where
   []                  : Sig
+  -- Paper uses separator 'in' but Agda reserves that identifier
+  -- I think 'begin' is cute
   _def_to_reflect_begin_end 
     : ∀ (Ξ : Sig) (Γ : Ctx Ξ) B {A} {t₁ t₂ : Tm Γ A} (eq : Tm Γ (Id A t₁ t₂)) 
     → Tm ((Γ ▷ t₁ ~ t₂) ▷ eq [ p~ ] ~ rflℱ q~) 
@@ -353,6 +355,12 @@ case[]' : _[_] {A = ⟨ _ ⟩} (case P t u v) δ
 case[]' {P = P} = case[] {P = P} 
 {-# REWRITE case[]' #-}
 
+postulate
+  ⊎β₁ : case P t u (in1 v) ≡ (t [ id , v ])
+  {-# REWRITE ⊎β₁ #-}
+  ⊎β₂ : case P t u (in2 v) ≡ (u [ id , v ])
+  {-# REWRITE ⊎β₂ #-}
+
 -- Natural numbers and induction
 postulate
   ℕ   : Ty Γ
@@ -382,3 +390,9 @@ ind[]' : _[_] {A = ⟨ _ ⟩} (ind P t u v) δ
        ≡ ind (P [ δ ^ ℕ ]T) (t [ δ ]) (u [ (δ ^ ℕ) ^ P ]) (v [ δ ])
 ind[]' {P = P} = ind[] {P = P}
 {-# REWRITE ind[]' #-}
+
+postulate
+  ℕβ₁ : ind P t u ze     ≡ t
+  {-# REWRITE ℕβ₁ #-}
+  ℕβ₂ : ind P t u (su v) ≡ u [ (id , v) , ind P t u v ]
+  {-# REWRITE ℕβ₂ #-}
