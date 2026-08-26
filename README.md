@@ -2,11 +2,11 @@
 
 ### Finished:
 
-- A definition of a weak type theory (WTT) - that is, a dependent type theory without definitional β/η laws - without setoids or quotients. Instead, we define (single) substitution as a *relation*.
+- A definition of a weak type theory (WTT) - that is, a dependent type theory without judgemental β/η laws - without setoids or quotients. Instead, we define (single) substitution as a *relation*.
   - The inductive-inductive syntax is defined in [Syntax](WTT/Syntax.agda).
   - We then go on to show that substitution can be computed recursively in [Comp<>](WTT/Comp<>.agda).
   - We also construct the standard model in [Model](WTT/Model.agda).
-  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax is coherent (i.e. provably an `hSet`) and it therefore might be possible to construct a model in arbitrary n-types (`--without-K`). Unfortunately, defining such a model is still non-trivial (we need extra coherences).
+  - I think the especially interesting aspect here is that, because there is no redundancy in the substitution relation, the syntax is coherent (i.e. provably an `hSet`) and it therefore might be possible to construct a model in arbitrary n-types (`--without-K`). Unfortunately, defining such a model is still non-trivial (we need to mutually prove extra coherences).
 
 ### WIP:
 
@@ -21,5 +21,5 @@
 - A minimal type theory for describing semi-simplicial types: [SemiSimpl](SemiSimpl/)
   - Based on the WTT substitution-as-a-relation idea.
   - The particular minimal type theory is due to András Kovács.
-  - Proving that the syntax is a set is trivial (there are no path constructors). Howevever, defining the type model is still quite difficult for similar reasons to the WTT example.
-  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax, though I think this approach might implicitly rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip. Also, there is currently a termination error...
+  - Proving that the syntax is a set is trivial (there are no path constructors). However, defining the type model is still quite difficult for similar reasons to the WTT example.
+  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax. I am slightly worried this might rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip. Also, there is currently a termination error...
