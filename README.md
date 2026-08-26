@@ -19,7 +19,7 @@
   - I have now posted a small summary of the idea on Mastodon though: https://types.pl/deck/@NathanielB/116256378457107811
   - Relies on https://github.com/agda/agda/pull/8463
 - A minimal type theory for describing semi-simplicial types: [SemiSimpl](SemiSimpl/)
-  - Based on the WTT substitution-as-a-relation idea.
-  - The particular minimal type theory is due to András Kovács.
-  - Proving that the syntax is a set is trivial (there are no path constructors). However, defining the type model is still quite difficult for similar reasons to the WTT example.
-  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax. I am slightly worried this might rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip. Also, there is currently a termination error...
+  - The type theory itself is due to András Kovács.
+  - I translated into graph-of-function-style, based on the WTT substitution-as-a-relation idea.
+  - Proving that the syntax is a set is trivial (there are no path constructors). However, defining the type model is still quite difficult for similar reasons to full WTT.
+  - Still, I am hopeful that we can prove all the necessary coherences in the model by mutual induction on the syntax. Though I am slightly worried this might rely on something like https://stackoverflow.com/questions/79894235/can-we-prove-equal-subcases-have-equal-induction-hypotheses-in-recursion-princip. Also, there is currently a termination error...
