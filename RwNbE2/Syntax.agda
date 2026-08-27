@@ -2,7 +2,7 @@
 
 open import Agda.Builtin.Equality.Rewrite renaming (primRewriteNoMatch to ⟨_⟩)
 
-open import Utils renaming (_,_ to _Σ,_)
+open import Utils hiding (tt; ff) hiding (Σ; fst; snd; _,_)
 open import Utils.WithK
 open import Utils.Macro
 
@@ -18,8 +18,8 @@ variable
 postulate
   SigWk : Sig → Sig → Set
   Sub   : Ctx Φ → Ctx Ψ → Set
-  Ty  : Ctx Ξ → Set
-  Tm  : (Γ : Ctx Ξ) → Ty Γ → Set
+  Ty    : Ctx Ξ → Set
+  Tm    : (Γ : Ctx Ξ) → Ty Γ → Set
 
 variable  
   Γ Δ Θ Λ Γ₁ Γ₂ Δ₁ Δ₂ Θ₁ Θ₂ : Ctx _
@@ -75,6 +75,9 @@ postulate
   ⇑⨾ᵂᵏ : {ψ : SigWk Φ Ψ} {φ : SigWk Ξ Φ}
        → ⇑ᵂᵏ {Γ = Γ} (ψ ⨾ᵂᵏ φ) ≡ ⇑ᵂᵏ ψ ⨾ ⇑ᵂᵏ φ
   {-# REWRITE ⇑⨾ᵂᵏ #-}
+
+_[_]S : Sub Δ Γ → (ψ : SigWk Φ Ψ) → Sub (Δ [ ψ ]C) Γ
+δ [ ψ ]S = δ ⨾ ⇑ᵂᵏ ψ
 
 -- Types and terms are presheaves over substitutions
 
@@ -244,12 +247,6 @@ app[] {A = A} {δ = δ} {t = t} =
   ≡⟨⟩
   app t [ δ ^ A ] ∎
 
-app[]' : {t : Tm Γ (Π A B)}
-       → app {A = ⟨ _ ⟩} {B = ⟨ _ ⟩} (t [ δ ]) ≡ app t [ δ ^ A ]
-app[]' {t = t} = app[] {t = t}
-
-{-# REWRITE app[]' #-}
-
 -- Identity types
 postulate
   Id  : (A : Ty Γ) → Tm Γ A → Tm Γ A → Ty Γ
@@ -305,61 +302,77 @@ postulate
 -- Booleans and large elimination
 postulate
   𝔹     : Ty Γ
-  TT FF : Tm Γ 𝔹
+  tt ff : Tm Γ 𝔹
+  if    : (P : Ty (Γ ▷ 𝔹)) → Tm Γ (P [ id , tt ]T) → Tm Γ (P [ id , ff ]T)
+        → (b : Tm Γ 𝔹) → Tm Γ (P [ id , b ]T)
   IF    : Tm Γ 𝔹 → Ty Γ → Ty Γ → Ty Γ
 
   𝔹[]  : 𝔹 [ δ ]T ≡ 𝔹
   {-# REWRITE 𝔹[] #-}
 
-  TT[] : TT [ δ ] ≡ TT
-  {-# REWRITE TT[] #-}
+  tt[] : tt [ δ ] ≡ tt
+  {-# REWRITE tt[] #-}
 
-  FF[] : FF [ δ ] ≡ FF
-  {-# REWRITE FF[] #-}
+  ff[] : ff [ δ ] ≡ ff
+  {-# REWRITE ff[] #-}
 
+  if[] : if P t u v [ δ ] ≡ if (P [ δ ^ 𝔹 ]T) (t [ δ ]) (u [ δ ]) (v [ δ ])
+
+if[]' : _[_] {A = ⟨ _ ⟩} (if P t u v) δ 
+      ≡ if (P [ δ ^ 𝔹 ]T) (t [ δ ]) (u [ δ ]) (v [ δ ])
+if[]' {P = P} = if[] {P = P}
+{-# REWRITE if[]' #-}
+
+postulate
   IF[] : IF t A B [ δ ]T ≡ IF (t [ δ ]) (A [ δ ]T) (B [ δ ]T)
   {-# REWRITE IF[] #-}
 
-  IF-TT : IF TT A B ≡ A
-  {-# REWRITE IF-TT #-}
+  IF-tt : IF tt A B ≡ A
+  {-# REWRITE IF-tt #-}
 
-  IF-FF : IF FF A B ≡ B
-  {-# REWRITE IF-FF #-}
+  IF-ff : IF ff A B ≡ B
+  {-# REWRITE IF-ff #-}
 
--- Sums and dependent case
+  𝔹β₁ : if P t u tt ≡ t
+  {-# REWRITE 𝔹β₁ #-}
+
+  𝔹β₂ : if P t u ff ≡ u
+  {-# REWRITE 𝔹β₂ #-}
+
+-- Dependent sums
 postulate
-  _⊎_  : Ty Γ → Ty Γ → Ty Γ
-  in1  : Tm Γ A → Tm Γ (A ⊎ B)
-  in2  : Tm Γ B → Tm Γ (A ⊎ B)
+  Σ    : (A : Ty Γ) → Ty (Γ ▷ A) → Ty Γ
+  pair : (B : Ty (Γ ▷ A)) → (t : Tm Γ A) → Tm Γ (B [ id , t ]T) → Tm Γ (Σ A B)
+  fst  : Tm Γ (Σ A B) → Tm Γ A
+  snd  : (t : Tm Γ (Σ A B)) → Tm Γ (B [ id , fst t ]T)
 
-  ⊎[] : (A ⊎ B) [ δ ]T ≡ (A [ δ ]T) ⊎ (B [ δ ]T)
-  {-# REWRITE ⊎[] #-}
+  Σ[]  : Σ A B [ δ ]T ≡ Σ (A [ δ ]T) (B [ δ ^ A ]T)
+  {-# REWRITE Σ[] #-} 
 
-  in1[]  : in1 {B = B} t [ δ ] ≡ in1 (t [ δ ])
-  {-# REWRITE in1[] #-}
+  pair[] : pair B t u [ δ ] ≡ pair (B [ δ ^ A ]T) (t [ δ ]) (u [ δ ])
+  {-# REWRITE pair[] #-}
 
-  in2[] : in2 {A = A} t [ δ ] ≡ in2 (t [ δ ])
-  {-# REWRITE in2[] #-}
+  fst[] : fst t [ δ ] ≡ fst (t [ δ ])
+  {-# REWRITE fst[] #-}
 
-  case : (P : Ty (Γ ▷ (A ⊎ B))) 
-       → Tm (Γ ▷ A) (P [ p , in1 q ]T)
-       → Tm (Γ ▷ B) (P [ p , in2 q ]T)
-       → (t : Tm Γ (A ⊎ B))
-       → Tm Γ (P [ id , t ]T)
+  snd[] : snd t [ δ ] ≡ snd (t [ δ ])
 
-  case[] : case P t u v [ δ ] 
-         ≡ case (P [ δ ^ (A ⊎ B) ]T) (t [ δ ^ A ]) (u [ δ ^ B ]) (v [ δ ])
-
-case[]' : _[_] {A = ⟨ _ ⟩} (case P t u v) δ 
-        ≡ case (P [ δ ^ (A ⊎ B) ]T) (t [ δ ^ A ]) (u [ δ ^ B ]) (v [ δ ])
-case[]' {P = P} = case[] {P = P} 
-{-# REWRITE case[]' #-}
+snd[]' : _[_] {A = ⟨ _ ⟩} (snd t) δ ≡ snd (t [ δ ])
+snd[]' {t = t} = snd[] {t = t}
+{-# REWRITE snd[]' #-}
 
 postulate
-  ⊎β₁ : case P t u (in1 v) ≡ (t [ id , v ])
-  {-# REWRITE ⊎β₁ #-}
-  ⊎β₂ : case P t u (in2 v) ≡ (u [ id , v ])
-  {-# REWRITE ⊎β₂ #-}
+  Σβ₁ : fst (pair B t u) ≡ t
+  {-# REWRITE Σβ₁ #-}
+
+  Σβ₂ : snd (pair B t u) ≡ u
+  {-# REWRITE Σβ₂ #-}
+
+  Ση : t ≡ pair B (fst t) (snd t)
+  
+Ση' : pair B (fst t) (snd t) ≡ t
+Ση' = sym Ση
+{-# REWRITE Ση' #-}
 
 -- Natural numbers and induction
 postulate
@@ -396,3 +409,41 @@ postulate
   {-# REWRITE ℕβ₁ #-}
   ℕβ₂ : ind P t u (su v) ≡ u [ (id , v) , ind P t u v ]
   {-# REWRITE ℕβ₂ #-}
+
+-- Disjoint unions and dependent case
+-- (I am removing these from the paper because they are not so different
+-- from Booleans - in fact, we can essentially get disjoint unions just from
+-- dependent sums and large IF!)
+postulate
+  _⊎_  : Ty Γ → Ty Γ → Ty Γ
+  inL  : Tm Γ A → Tm Γ (A ⊎ B)
+  inR  : Tm Γ B → Tm Γ (A ⊎ B)
+
+  ⊎[] : (A ⊎ B) [ δ ]T ≡ (A [ δ ]T) ⊎ (B [ δ ]T)
+  {-# REWRITE ⊎[] #-}
+
+  inL[]  : inL {B = B} t [ δ ] ≡ inL (t [ δ ])
+  {-# REWRITE inL[] #-}
+
+  inR[] : inR {A = A} t [ δ ] ≡ inR (t [ δ ])
+  {-# REWRITE inR[] #-}
+
+  case : (P : Ty (Γ ▷ (A ⊎ B))) 
+       → Tm (Γ ▷ A) (P [ p , inL q ]T)
+       → Tm (Γ ▷ B) (P [ p , inR q ]T)
+       → (t : Tm Γ (A ⊎ B))
+       → Tm Γ (P [ id , t ]T)
+
+  case[] : case P t u v [ δ ] 
+         ≡ case (P [ δ ^ (A ⊎ B) ]T) (t [ δ ^ A ]) (u [ δ ^ B ]) (v [ δ ])
+
+case[]' : _[_] {A = ⟨ _ ⟩} (case P t u v) δ 
+        ≡ case (P [ δ ^ (A ⊎ B) ]T) (t [ δ ^ A ]) (u [ δ ^ B ]) (v [ δ ])
+case[]' {P = P} = case[] {P = P} 
+{-# REWRITE case[]' #-}
+
+postulate
+  ⊎β₁ : case P t u (inL v) ≡ (t [ id , v ])
+  {-# REWRITE ⊎β₁ #-}
+  ⊎β₂ : case P t u (inR v) ≡ (u [ id , v ])
+  {-# REWRITE ⊎β₂ #-}
