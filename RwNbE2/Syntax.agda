@@ -1,4 +1,7 @@
-{-# OPTIONS --rewriting --local-confluence-check #-}
+{-# OPTIONS --rewriting #-}
+-- Confluence check passes!
+-- But slows down downstream typechecking... (not sure why)
+-- {-# OPTIONS --local-confluence-check #-}
 
 open import Agda.Builtin.Equality.Rewrite renaming (primRewriteNoMatch to ⟨_⟩)
 
@@ -9,6 +12,14 @@ open import Utils.Macro
 -- We postulate a strictified syntax
 module RwNbE2.Syntax where
 
+-- We define signatures and contexts as inductive datatypes in order to get
+-- pattern matching and automatic disjointness/injectivity
+--
+-- Contexts also feature a signature weakening operator |_[_]C| plus equations, 
+-- so it is technically not immediate that all contexts can be formed purely in
+-- terms of |•|, |_▷_| and |_▷_~_| and that these operators are 
+-- disjoint/injective.
+-- We could show this manually by way of a simple context-normalisation model.
 data Sig           : Set
 data Ctx (Ξ : Sig) : Set
 
@@ -111,18 +122,29 @@ refl [ δ ]≡ = refl
 
 {-# REWRITE [id]≡ [][]≡ #-}
 
+-- Context operator are natural w.r.t. signature weakening
+postulate
+  •[] : • [ ψ ]C ≡ •
+  {-# REWRITE •[] #-}
+
+  ▷[] : (Γ ▷ A) [ ψ ]C ≡ (Γ [ ψ ]C) ▷ (A [ ⇑ᵂᵏ ψ ]T)
+  {-# REWRITE ▷[] #-}
+
+  ▷~[] : (Γ ▷ t₁ ~ t₂) [ ψ ]C ≡ (Γ [ ψ ]C) ▷ (t₁ [ ⇑ᵂᵏ ψ ]) ~ (t₂ [ ⇑ᵂᵏ ψ ])
+  {-# REWRITE ▷~[] #-}
+
 -- Context comprehension (for ordinary context extension, and extension
 -- by convertibility assumptions)
--- We use |p|/|q| as opposed to |π₁|/|π₂| style to get a confluent 
+-- We take |wk|/|vz| as primitive as opposed to |π₁|/|π₂| to get a confluent 
 -- rewrite system
 postulate
   _,_  : (δ : Sub Δ Γ) → Tm Δ (A [ δ ]T) → Sub Δ (Γ ▷ A)
   _,~_ : (δ : Sub Δ Γ) → t₁ [ δ ] ≡ t₂ [ δ ]
        → Sub Δ (Γ ▷ t₁ ~ t₂)
-  p   : Sub (Γ ▷ A) Γ
-  q   : Tm (Γ ▷ A) (A [ p ]T)
-  p~  : Sub (_▷_~_ Γ {A = A} t₁ t₂) Γ
-  q~  : t₁ [ p~ {t₁ = t₁} {t₂ = t₂} ] ≡ t₂ [ p~ ]
+  wk   : Sub (Γ ▷ A) Γ
+  vz   : Tm (Γ ▷ A) (A [ wk ]T)
+  wk~  : Sub (_▷_~_ Γ {A = A} t₁ t₂) Γ
+  ez~  : t₁ [ wk~ {t₁ = t₁} {t₂ = t₂} ] ≡ t₂ [ wk~ ]
 
   ,⨾  : (δ , t) ⨾ σ ≡ (δ ⨾ σ) , (t [ σ ])
   {-# REWRITE ,⨾ #-}
@@ -130,40 +152,40 @@ postulate
   ,~⨾ : (δ ,~ t₁₂) ⨾ σ ≡ (δ ⨾ σ) ,~ (t₁₂ [ σ ]≡)
   {-# REWRITE ,~⨾ #-}
 
-  p, : p ⨾ (δ , t) ≡ δ
-  {-# REWRITE p, #-}
-  q, : q [ δ , t ] ≡ t
+  wk, : wk ⨾ (δ , t) ≡ δ
+  {-# REWRITE wk, #-}
+  vz, : vz [ δ , t ] ≡ t
 
-q,' : _[_] {A = ⟨ _ ⟩} q (δ , t) ≡ t
-q,' {δ = δ} = q, {δ = δ}
-{-# REWRITE q,' #-}
-
-postulate
-  p,~ : p~ ⨾ (δ ,~ t₁₂) ≡ δ
-  {-# REWRITE p,~ #-}
-
-q,~ : q~ [ δ ,~ t₁₂ ]≡ ≡ t₁₂
-q,~ = uip
-
-q,~' : _[_]≡ {A = ⟨ _ ⟩} {t₁ = ⟨ _ ⟩} {t₂ = ⟨ _ ⟩} q~ (δ ,~ t₁₂) ≡ t₁₂
-q,~' {δ = δ} = q,~ {δ = δ}
-{-# REWRITE q,~' #-}
+vz,' : _[_] {A = ⟨ _ ⟩} vz (δ , t) ≡ t
+vz,' {δ = δ} = vz, {δ = δ}
+{-# REWRITE vz,' #-}
 
 postulate
-  id▷  : id {Γ = Γ ▷ A} ≡ p , q
-  id▷~ : id {Γ = Γ ▷ t₁ ~ t₂} ≡ p~ ,~ q~ 
+  wk,~ : wk~ ⨾ (δ ,~ t₁₂) ≡ δ
+  {-# REWRITE wk,~ #-}
+
+ez,~ : ez~ [ δ ,~ t₁₂ ]≡ ≡ t₁₂
+ez,~ = uip
+
+ez,~' : _[_]≡ {A = ⟨ _ ⟩} {t₁ = ⟨ _ ⟩} {t₂ = ⟨ _ ⟩} ez~ (δ ,~ t₁₂) ≡ t₁₂
+ez,~' {δ = δ} = ez,~ {δ = δ}
+{-# REWRITE ez,~' #-}
+
+postulate
+  id▷  : id {Γ = Γ ▷ A} ≡ wk , vz
+  id▷~ : id {Γ = Γ ▷ t₁ ~ t₂} ≡ wk~ ,~ ez~ 
 
 π₁ : Sub Δ (Γ ▷ A) → Sub Δ Γ
-π₁ δ = p ⨾ δ
+π₁ δ = wk ⨾ δ
 
 π₂ : (δ : Sub Δ (Γ ▷ A)) → Tm Δ (A [ π₁ δ ]T)
-π₂ δ = q [ δ ]
+π₂ δ = vz [ δ ]
 
 π₁~ : Sub Δ (Γ ▷ t₁ ~ t₂) → Sub Δ Γ
-π₁~ δ = p~ ⨾ δ
+π₁~ δ = wk~ ⨾ δ
 
 π₂~ : (δ : Sub Δ (Γ ▷ t₁ ~ t₂)) → t₁ [ π₁~ δ ] ≡ t₂ [ π₁~ δ ]
-π₂~ δ = q~ [ δ ]≡
+π₂~ δ = ez~ [ δ ]≡
 
 ▷η : δ ≡ (π₁ δ) , (π₂ δ)
 ▷η {δ = δ} =
@@ -171,9 +193,9 @@ postulate
   ≡⟨⟩
   ⌜ id ⌝ ⨾ δ
   ≡⟨ ap! id▷ ⟩
-  (p , q) ⨾ δ
+  (wk , vz) ⨾ δ
   ≡⟨⟩
-  (p ⨾ δ) , (q [ δ ])
+  (wk ⨾ δ) , (vz [ δ ])
   ≡⟨⟩ 
   (π₁ δ) , (π₂ δ) ∎
 
@@ -183,23 +205,23 @@ postulate
   ≡⟨⟩
   ⌜ id ⌝ ⨾ δ
   ≡⟨ ap! id▷~ ⟩
-  (p~ ,~ q~) ⨾ δ
+  (wk~ ,~ ez~) ⨾ δ
   ≡⟨⟩
-  (p~ ⨾ δ) ,~ (q~ [ δ ]≡)
+  (wk~ ⨾ δ) ,~ (ez~ [ δ ]≡)
   ≡⟨⟩ 
   (π₁~ δ) ,~ (π₂~ δ) ∎
 
-id▷' : p , q ≡ id {Γ = Γ ▷ A}
+id▷' : wk , vz ≡ id {Γ = Γ ▷ A}
 id▷' = sym id▷
 
-▷η' : (p ⨾ δ) , (_[_] {A = ⟨ _ ⟩} q δ) ≡ δ
+▷η' : (wk ⨾ δ) , (_[_] {A = ⟨ _ ⟩} vz δ) ≡ δ
 ▷η' = sym ▷η
 {-# REWRITE id▷' ▷η' #-}
 
-id▷~' : p~ ,~ q~ ≡ id {Γ = Γ ▷ t₁ ~ t₂}
+id▷~' : wk~ ,~ ez~ ≡ id {Γ = Γ ▷ t₁ ~ t₂}
 id▷~' = sym id▷~
 
-▷η~' : (p~ ⨾ δ) ,~ (_[_]≡ {A = ⟨ _ ⟩} {t₁ = ⟨ _ ⟩} {t₂ = ⟨ _ ⟩} q~ δ) ≡ δ
+▷η~' : (wk~ ⨾ δ) ,~ (_[_]≡ {A = ⟨ _ ⟩} {t₁ = ⟨ _ ⟩} {t₂ = ⟨ _ ⟩} ez~ δ) ≡ δ
 ▷η~' = sym ▷η~
 {-# REWRITE id▷~' ▷η~' #-}
 
@@ -208,17 +230,17 @@ postulate
   •η : δ ≡ ε ψ
 
 _^_ : ∀ δ A → Sub (Δ ▷ (A [ δ ]T)) (Γ ▷ A)
-δ ^ A = (δ ⨾ p) , q
+δ ^ A = (δ ⨾ wk) , vz
 
 _^_~_ : ∀ δ (t₁ t₂ : Tm Γ A) → Sub (Δ ▷ t₁ [ δ ] ~ (t₂ [ δ ])) (Γ ▷ t₁ ~ t₂)
-δ ^ t₁ ~ t₂ = (δ ⨾ p~) ,~ 
-  (t₁ [ δ ⨾ p~ ]
+δ ^ t₁ ~ t₂ = (δ ⨾ wk~) ,~ 
+  (t₁ [ δ ⨾ wk~ ]
   ≡⟨⟩
-  t₁ [ δ ] [ p~ ]
-  ≡⟨ q~ ⟩
-  t₂ [ δ ] [ p~ ]
+  t₁ [ δ ] [ wk~ ]
+  ≡⟨ ez~ ⟩
+  t₂ [ δ ] [ wk~ ]
   ≡⟨⟩
-  t₂ [ δ ⨾ p~ ] ∎)
+  t₂ [ δ ⨾ wk~ ] ∎)
 
 
 postulate
@@ -278,8 +300,8 @@ data Sig where
   -- I think 'begin' is cute
   _def_to_reflect_begin_end 
     : ∀ (Ξ : Sig) (Γ : Ctx Ξ) B {A} {t₁ t₂ : Tm Γ A} (eq : Tm Γ (Id A t₁ t₂)) 
-    → Tm ((Γ ▷ t₁ ~ t₂) ▷ eq [ p~ ] ~ rflℱ q~) 
-         (B [ p~ ⨾ p~ ]T)
+    → Tm ((Γ ▷ t₁ ~ t₂) ▷ eq [ wk~ ] ~ rflℱ ez~) 
+         (B [ wk~ ⨾ wk~ ]T)
     → Sig
 
 -- Single definition weakening
@@ -292,7 +314,7 @@ postulate
             (Γ [ defᵂᵏ ]C) (B [ ⇑ᵂᵏ defᵂᵏ ]T)
 
   defβ : {eq : Tm Γ (Id A t₁ t₂)}
-         {u : Tm ((Γ ▷ t₁ ~ t₂) ▷ (eq [ p~ ]) ~ rflℱ q~) (B [ p~ ⨾ p~ ]T)} 
+         {u : Tm ((Γ ▷ t₁ ~ t₂) ▷ (eq [ wk~ ]) ~ rflℱ ez~) (B [ wk~ ⨾ wk~ ]T)} 
          {δ : Sub Δ (Γ [ defᵂᵏ {B = B} {u = u} ]C)} 
          (t₁₂ : t₁ [ ⇑ᵂᵏ defᵂᵏ ⨾ δ ] ≡ t₂ [ ⇑ᵂᵏ defᵂᵏ ⨾ δ ])
          (eqrfl : eq [ ⇑ᵂᵏ defᵂᵏ ⨾ δ ] ≡ rflℱ t₁₂)
@@ -392,7 +414,7 @@ postulate
   
   ind : (P : Ty {Ξ} (Γ ▷ ℕ)) 
       → Tm Γ (P [ id , ze ]T) 
-      → Tm ((Γ ▷ ℕ) ▷ P) (P [ (p , su q) ⨾ p ]T)
+      → Tm ((Γ ▷ ℕ) ▷ P) (P [ (wk , su vz) ⨾ wk ]T)
       → (t : Tm Γ ℕ)
       → Tm Γ (P [ id , t ]T)
 
@@ -429,8 +451,8 @@ postulate
   {-# REWRITE inR[] #-}
 
   case : (P : Ty (Γ ▷ (A ⊎ B))) 
-       → Tm (Γ ▷ A) (P [ p , inL q ]T)
-       → Tm (Γ ▷ B) (P [ p , inR q ]T)
+       → Tm (Γ ▷ A) (P [ wk , inL vz ]T)
+       → Tm (Γ ▷ B) (P [ wk , inR vz ]T)
        → (t : Tm Γ (A ⊎ B))
        → Tm Γ (P [ id , t ]T)
 
