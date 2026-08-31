@@ -14,6 +14,8 @@ open import RwNbE2.Nf.Pred
   public
 open import RwNbE2.Nf.Raw
   public
+open import RwNbE2.Nf.PredInj
+  public
 
 record Var (Γ : Ctx Ξ) (A : Ty Γ) (t : Tm Γ A) : Set where
   field

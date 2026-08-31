@@ -7,16 +7,35 @@ import Agda.Builtin.Equality.Rewrite
 
 open import Utils 
   using (ℓ; ℓ₁; ℓ₂; refl; Σ; fst; snd; _,_; 𝟙; ⟨⟩
-        ; Bool; tt; ff; 𝟘) 
+        ; Bool; tt; ff; 𝟘; _×_; _⊔l_; Dec; yes; no; _＋_; inl; inr) 
   renaming (_≡_ to _≡S_; coe to coeS)
   public
 
+infixr 3 Σ-syntax Σᴾ-syntax
 infix 4 _≡_
 infix 4 _≡[_]≡_
 infixr 2 step-≡-⟩  step-≡-∣
 infix 3 _∎
 infix 5 ↑≡_
 infixr 5 _∙_
+
+infixr 4 _∧,_
+
+Σ-syntax = Σ
+syntax Σ-syntax A (λ x → B) = x ∶ A × B
+
+record Σᴾ (P : Prop ℓ₁) (Q : P → Prop ℓ₂) : Prop (ℓ₁ ⊔l ℓ₂) where
+  constructor _∧,_
+  field
+    fstᴾ : P
+    sndᴾ : Q fstᴾ
+
+Σᴾ-syntax = Σᴾ
+syntax Σᴾ-syntax P (λ p → Q) = p ∶ P ∧ Q
+
+infix 4 _∧_
+_∧_ : Prop ℓ₁ → Prop ℓ₂ → Prop (ℓ₁ ⊔l ℓ₂)
+P ∧ Q = p ∶ P ∧ Q
 
 data _≡_ {A : Set ℓ} (x : A) : A → Prop ℓ where
   refl : x ≡ x
@@ -76,11 +95,23 @@ open _≡[_]≡_ public
 
 pattern refl[] = coe[] refl
 
+apd : ∀ {B : A → Set ℓ} (f : (x : A) → B x) {x y}
+    → (p : x ≡ y) → f x ≡[ ap B p ]≡ f y
+apd f refl = refl[]
+
 apd₂ : ∀ {B : A → Set ℓ}
          (f : (x : A) → B x → C) {x₁ x₂ y₁ y₂}
      → (p : x₁ ≡ x₂) → y₁ ≡[ ap B p ]≡ y₂
      → f x₁ y₁ ≡ f x₂ y₂
 apd₂ f refl refl[] = refl
+
+apd₃ : ∀ {B : A → Set ℓ₁} {C : A → Set ℓ₂}
+         (f : (x : A) → B x → C x → D) {x₁ x₂ y₁ y₂ z₁ z₂}
+     → (p : x₁ ≡ x₂) 
+     → y₁ ≡[ ap B p ]≡ y₂
+     → z₁ ≡[ ap C p ]≡ z₂
+     → f x₁ y₁ z₁ ≡ f x₂ y₂ z₂
+apd₃ f refl refl[] refl[] = refl
 
 []sym : ∀ {B : A → Set ℓ} {y₁ y₂}
       → y₁ ≡[ ap B (sym x₂₁) ]≡ y₂
@@ -125,49 +156,6 @@ record Lift (P : Prop ℓ) : Set ℓ where
     lower : P
 open Lift public
 
--- private variable
---   p : _ ≡ _
-
--- -- Some more Prop utils (unused)
--- {-
-
--- private variable 
---   P Q : Prop _
-
--- record ∃ (A : Set ℓ₁) (P : A → Prop ℓ₂) : Set (ℓ₁ ⊔l ℓ₂) where
---   constructor _∃,_
---   field
---     fst : A
---     snd : P fst
--- open ∃ public
-
--- record Σ (P : Prop ℓ₁) (Q : P → Prop ℓ₂) : Prop (ℓ₁ ⊔l ℓ₂) where
---   constructor _Σ,_
---   field
---     fst : P
---     snd : Q fst
--- open Σ public
-
--- data ⊥ : Prop where
-
--- absurd⊥ : ⊥ → A
--- absurd⊥ ()
-
--- absurd : ⊥ → P
--- absurd ()
-
--- ∃≡ : {P : A → Prop ℓ} {x y : ∃ A P} → x .fst ≡ y .fst → x ≡ y
--- ∃≡ refl = refl
-
--- record ⊤ : Prop where
-
--- data Dec (A : Set ℓ) : Set ℓ where
---   yes : A       → Dec A
---   no  : (A → ⊥) → Dec A
-
--- record _≡[_]≡_ {A B : Set ℓ} (x : A) (p : A ≡ B) (y : B) : Prop ℓ where
---   constructor coe[]
---   field
---     []coe : coe p x ≡ y
--- open _≡[_]≡_ public
--- -}
+data Decᴾ (P : Prop ℓ) : Set ℓ where
+  yes : P → Decᴾ P
+  no  : (P → 𝟘) → Decᴾ P

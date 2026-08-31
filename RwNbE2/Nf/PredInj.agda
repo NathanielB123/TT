@@ -3,19 +3,12 @@
 open import Utils.Prop renaming (_,_ to _×,_)
 
 open import RwNbE2.Syntax
+open import RwNbE2.Nf.Pred
+open import RwNbE2.Nf.Raw
 
+-- Injectivity of normal form typing
 module RwNbE2.Nf.PredInj where
 
-open import RwNbE2.Nf.FirstOrder
-  public
-open import RwNbE2.Nf.Occurs
-  public
-open import RwNbE2.Nf.Pred
-  public
-open import RwNbE2.Nf.Raw
-  public
-open import RwNbE2.Nf.Nf
-  public
 
 injVarPred : VarPred Γ A₁ t₁ xᴿ → VarPred Γ A₂ t₂ xᴿ
            → A₁₂ ∶ A₁ ≡ A₂ ∧ t₁ ≡[ ap (Tm Γ) A₁₂ ]≡ t₂
