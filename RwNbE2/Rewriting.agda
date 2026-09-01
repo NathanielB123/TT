@@ -16,7 +16,7 @@ data RewEnv   (Δ : Ctx Ξ)
               (tsᴿ : Nfsᴿ (lenSig Ξ) (len Γ)) 
               {δ} (δᵀʰ~ : Thin~ Δ Γ δ)
           → Set where
-  εᴿᵉʷ    : RewEnv Δ • wsᴿ εᴿ εᴿ εᵀʰ~
+  εᴿᵉʷ    : RewEnv Δ • wsᴿ εᴿ εᴿ δᵀʰ~
   _,ᴿᵉʷ   : RewEnv Δ Γ wsᴿ usᴿ tsᴿ (wkᵀʰ~ ⨾ᵀʰ~ δᵀʰ~)
           → RewEnv Δ (Γ ▷ A) wsᴿ (usᴿ [ wkᴿ ]Nesᴿ) (tsᴿ [ wkᴿ ]Nfsᴿ) δᵀʰ~
   _,~ᴿᵉʷ_ : RewEnv Δ Γ wsᴿ usᴿ tsᴿ (wk~ᵀʰ~ ⨾ᵀʰ~ δᵀʰ~)
@@ -38,6 +38,13 @@ FullRewEnv Γ usᴿ tsᴿ = RewEnv Γ Γ usᴿ usᴿ tsᴿ idᵀʰ~
 
 -- TODO
 postulate
+  _[_]ᴿᵉʷ : (Γᴿᵉʷ : FullRewEnv Γ usᴿ tsᴿ) (δᵀʰ : Thin Δ Γ δ)
+          → FullRewEnv Δ (usᴿ [ δᵀʰ .raw ]Nesᴿ) (tsᴿ [ δᵀʰ .raw ]Nfsᴿ)
+
+  _[_]ᴿᵉʷ~ : (Δᴿᵉʷ : RewEnv Δ Γ wsᴿ usᴿ tsᴿ δᵀʰ~)
+             (σᵀʰ~ : Thin~ Θ Δ σ)
+           → RewEnv Θ Γ (wsᴿ [ σᵀʰ~ .raw ]Nesᴿ) usᴿ tsᴿ (δᵀʰ~ ⨾ᵀʰ~ σᵀʰ~)
+
   buildᴿᵉʷ : NiceCtx Γ usᴿ tsᴿ → FullRewEnv Γ usᴿ tsᴿ
 
   rw : PreNe Γ A usᴿ t → FONf Γ A usᴿ t ＋ Ne Γ A usᴿ t

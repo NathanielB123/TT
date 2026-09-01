@@ -167,3 +167,7 @@ tyOfᴼᶜᶜ (neIdᴼᶜᶜ t₁ᴼᶜᶜ t₂ᴼᶜᶜ uᴼᶜᶜ)    = Idᴼ�
 -- TODO: All inversion lemmas
 ne𝔹ᴼᶜᶜ⁻¹ : ¬OccursNf uᴿ (ne𝔹ᴿ tᴿ) → ¬OccursNe uᴿ tᴿ
 ne𝔹ᴼᶜᶜ⁻¹ (ne𝔹ᴼᶜᶜ tᴼᶜᶜ) = tᴼᶜᶜ
+
+postulate
+  _[_]F : Faulty usᴿ uᴿ → (δᴿ : Thinᴿ m n) 
+        → Faulty (usᴿ [ δᴿ ]Nesᴿ) (uᴿ [ δᴿ ]Neᴿ)

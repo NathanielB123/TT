@@ -195,11 +195,11 @@ data ThinPred[_] where
       → ThinPred[ qᵀʰ ] (Δ ▷ (A [ δ ]T)) (Γ ▷ A) (δ ^ A) (δᴿ ^ᴿ)
   _⁺ᴾ : ThinPred[ qᵀʰ ] Δ Γ δ δᴿ
       → ThinPred[ qᵀʰ ] (Δ ▷ A) Γ (δ ⨾ wk) (δᴿ ⁺ᴿ)
-  _^~ : ThinPred[ qᵀʰ ] Δ Γ δ δᴿ
-      → ThinPred[ qᵀʰ ] (Δ ▷ (t₁ [ δ ]) ~ (t₂ [ δ ])) (Γ ▷ t₁ ~ t₂)
+  _^~ᴾ : ThinPred[ qᵀʰ ] Δ Γ δ δᴿ
+       → ThinPred[ qᵀʰ ] (Δ ▷ (t₁ [ δ ]) ~ (t₂ [ δ ])) (Γ ▷ t₁ ~ t₂)
                         (δ ^ t₁ ~ t₂) δᴿ
-  _⁺~ : ThinPred~ Δ Γ δ δᴿ
-      → ThinPred~ (Δ ▷ t₁ ~ t₂) Γ (δ ⨾ wk~) δᴿ
+  _⁺~ᴾ : ThinPred~ Δ Γ δ δᴿ
+       → ThinPred~ (Δ ▷ t₁ ~ t₂) Γ (δ ⨾ wk~) δᴿ
 
 Id≡ : (Γ₁₂ : Γ₁ ≡ Γ₂) (A₁₂ : A₁ ≡[ ap Ty Γ₁₂ ]≡ A₂)
       (t₁₂  : t₁  ≡[ apd₂ Tm Γ₁₂ A₁₂ ]≡ t₂)

@@ -160,11 +160,36 @@ data Faulty : Nesᴿ l n → Neᴿ l n → Set where
   fz : Faulty (usᴿ ,ᴿ uᴿ) uᴿ
   fs : Faulty usᴿ uᴿ → Faulty (usᴿ ,ᴿ wᴿ) uᴿ
 
+idᴿ  : Thinᴿ n n
+idᴿ {n = zero}  = εᴿ
+idᴿ {n = suc n} = idᴿ ^ᴿ
+
+wkᴿ  : Thinᴿ (suc n) n
+wkᴿ = idᴿ ⁺ᴿ
+
+_⨾ᴿ_ : Thinᴿ m n → Thinᴿ l m → Thinᴿ l n
+εᴿ      ⨾ᴿ σᴿ = σᴿ
+(δᴿ ^ᴿ) ⨾ᴿ (σᴿ ^ᴿ) = (δᴿ ⨾ᴿ σᴿ) ^ᴿ
+(δᴿ ⁺ᴿ) ⨾ᴿ (σᴿ ^ᴿ) = (δᴿ ⨾ᴿ σᴿ) ⁺ᴿ
+δᴿ      ⨾ᴿ (σᴿ ⁺ᴿ) = (δᴿ ⨾ᴿ σᴿ) ⁺ᴿ
+
+Σᴿ-inj₁ : Σᴿ A₁ᴿ B₁ᴿ ≡ Σᴿ A₂ᴿ B₂ᴿ → A₁ᴿ ≡ A₂ᴿ
+Σᴿ-inj₁ refl = refl
+
+Σᴿ-inj₂ : Σᴿ A₁ᴿ B₁ᴿ ≡ Σᴿ A₂ᴿ B₂ᴿ → B₁ᴿ ≡ B₂ᴿ
+Σᴿ-inj₂ refl = refl
+
+pairᴿ-inj₁ : pairᴿ A₁ᴿ t₁ᴿ u₁ᴿ ≡ pairᴿ A₂ᴿ t₂ᴿ u₂ᴿ → A₁ᴿ ≡ A₂ᴿ 
+pairᴿ-inj₁ refl = refl
+
+pairᴿ-inj₂ : pairᴿ A₁ᴿ t₁ᴿ u₁ᴿ ≡ pairᴿ A₂ᴿ t₂ᴿ u₂ᴿ → t₁ᴿ ≡ t₂ᴿ 
+pairᴿ-inj₂ refl = refl
+
+pairᴿ-inj₃ : pairᴿ A₁ᴿ t₁ᴿ u₁ᴿ ≡ pairᴿ A₂ᴿ t₂ᴿ u₂ᴿ → u₁ᴿ ≡ u₂ᴿ 
+pairᴿ-inj₃ refl = refl
+
 -- TODO
 postulate
-  idᴿ  : Thinᴿ n n
-  wkᴿ  : Thinᴿ (suc n) n
-  _⨾ᴿ_ : Thinᴿ m n → Thinᴿ l m → Thinᴿ l n
 
   _[_]Varᴿ   : Varᴿ n → Thinᴿ m n → Varᴿ m
   _[_]Neᴿ    : Neᴿ l n → Thinᴿ m n → Neᴿ l m

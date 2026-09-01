@@ -34,7 +34,7 @@ record Sub (Δ : Ctx Φ) (Γ : Ctx Ψ) : Set
 
 variable  
   Γ Δ Θ Λ Γ₁ Γ₂ Δ₁ Δ₂ Θ₁ Θ₂ : Ctx _
-  A B C D A₁ A₂ A₃ B₁ B₂ B₃ P : Ty _
+  A B C D A₁ A₂ A₃ B₁ B₂ B₃ P A[] : Ty _
   t u v t₁ t₂ t₃ u₁ u₂ u₃ : Tm _ _
   ts us vs ts₁ ts₂ : Tms _ _
   φ ψ ξ : SigWk _ _
@@ -245,6 +245,9 @@ _,~_ : (δ : Sub Δ Γ) → t₁ [ δ ] ≡ t₂ [ δ ]
 
 π₂~ : (δ : Sub Δ (Γ ▷ t₁ ~ t₂)) → t₁ [ π₁~ δ ] ≡ t₂ [ π₁~ δ ]
 π₂~ δ = π₂~ᵀᵐˢ (δ .⇓ᵀᵐˢ)
+
+•η : δ ≡ ε (δ .⇓ᵂᵏ)
+•η {δ = δ} = ap (δ .⇓ᵂᵏ ∥_) •ηᵀᵐˢ
 
 wk : Sub (Γ ▷ A) Γ
 wk = π₁ id

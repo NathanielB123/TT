@@ -37,10 +37,11 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
            → TyNf Δ usᴿ (A [ δ ]T)
       -- TODO: Naturality of tyNf
 
-      unquoteᴺᶠ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
-                  (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
+      unquoteᴺᶠℱ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
+                   (A≡ : A[] ≡ A [ δ ]T)
+                   (tᴺᶠ : FONf Δ A[] usᴿ t)
                 → tyOfᴿ (tᴺᶠ .raw) ≡ tyNf ρ .raw 
-                → Val ρ t
+                → Val ρ (tr (Tm Δ) A≡ t)
       -- TODO: Naturality of unquoteᴺᶠ
 
       unquoteᴺᵉ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
@@ -64,6 +65,12 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
                 → FirstOrder (quoteⱽ ρ τ₁ .raw)
                 → τ₁ ≡[ ap (Val ρ) t₁₂ ]≡ τ₂
 
+    unquoteᴺᶠ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
+                (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
+              → tyOfᴿ (tᴺᶠ .raw) ≡ tyNf ρ .raw 
+              → Val ρ t
+    unquoteᴺᶠ ρ tᴺᶠ p = unquoteᴺᶠℱ ρ refl tᴺᶠ p
+    
     quote-inj : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                 (τ₁ τ₂ : Val ρ t)
                 → quoteⱽ ρ τ₁ .raw ≡ quoteⱽ ρ τ₂ .raw

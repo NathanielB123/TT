@@ -1,6 +1,6 @@
 {-# OPTIONS --rewriting --prop #-}
 
-open import Utils.Prop renaming (_,_ to _×,_) hiding (tt; ff)
+open import Utils.Prop renaming (_,_ to _×,_) hiding (tt; ff; Σ; Σᴾ; fst; snd)
 
 open import RwNbE2.Syntax
 
@@ -138,6 +138,34 @@ ne𝔹ᴺᶠ tᴺᵉ .raw    = ne𝔹ᴿ (tᴺᵉ .raw)
 ne𝔹ᴺᶠ tᴺᵉ .pred   = ne𝔹ᴾ (tᴺᵉ .pred)
 ne𝔹ᴺᶠ tᴺᵉ .stab f = ne𝔹ᴼᶜᶜ (tᴺᵉ .stab f)
 
+Σᴺᶠ : TyNf Γ usᴿ A → TyNf (Γ ▷ A) (usᴿ [ wkᴿ ]Nesᴿ) B
+    → TyNf Γ usᴿ (Σ A B)
+Σᴺᶠ Aᴺᶠ Bᴺᶠ .raw    = Σᴿ (Aᴺᶠ .raw) (Bᴺᶠ .raw)
+Σᴺᶠ Aᴺᶠ Bᴺᶠ .pred   = Σᴾ (Aᴺᶠ .pred) (Bᴺᶠ .pred)
+Σᴺᶠ Aᴺᶠ Bᴺᶠ .stab f = Σᴼᶜᶜ (Aᴺᶠ .stab f) (Bᴺᶠ .stab (f [ wkᴿ ]F))
+
+fstᴾᴺᵉ : TyNf Γ usᴿ A → TyNf (Γ ▷ A) (usᴿ [ wkᴿ ]Nesᴿ) B
+      → Ne Γ (Σ A B) usᴿ t → PreNe Γ A usᴿ (fst t)
+fstᴾᴺᵉ Aᴺᶠ Bᴺᶠ tᴺᵉ .raw    = fstᴿ (Aᴺᶠ .raw) (Bᴺᶠ .raw) (tᴺᵉ .raw)
+fstᴾᴺᵉ Aᴺᶠ Bᴺᶠ tᴺᵉ .pred   = fstᴾ (Aᴺᶠ .pred) (Bᴺᶠ .pred) (tᴺᵉ .pred)
+fstᴾᴺᵉ Aᴺᶠ Bᴺᶠ tᴺᵉ .stab f = 
+  fstᴼᶜᶜ (Aᴺᶠ .stab f) (Bᴺᶠ .stab (f [ wkᴿ ]F)) (tᴺᵉ .stab f)
+
+sndᴾᴺᵉ : TyNf Γ usᴿ A → TyNf (Γ ▷ A) (usᴿ [ wkᴿ ]Nesᴿ) B
+      → Ne Γ (Σ A B) usᴿ t → PreNe Γ (B [ id , fst t ]T) usᴿ (snd t)
+sndᴾᴺᵉ Aᴺᶠ Bᴺᶠ tᴺᵉ .raw    = sndᴿ (Aᴺᶠ .raw) (Bᴺᶠ .raw) (tᴺᵉ .raw)
+sndᴾᴺᵉ Aᴺᶠ Bᴺᶠ tᴺᵉ .pred   = sndᴾ (Aᴺᶠ .pred) (Bᴺᶠ .pred) (tᴺᵉ .pred)
+sndᴾᴺᵉ Aᴺᶠ Bᴺᶠ tᴺᵉ .stab f = 
+  sndᴼᶜᶜ (Aᴺᶠ .stab f) (Bᴺᶠ .stab (f [ wkᴿ ]F)) (tᴺᵉ .stab f)
+
+pairᴺᶠ : TyNf (Γ ▷ A) (usᴿ [ wkᴿ ]Nesᴿ) B 
+       → Nf Γ A usᴿ t → Nf Γ (B [ id , t ]T) usᴿ u
+       → Nf Γ (Σ A B) usᴿ (pair B t u)
+pairᴺᶠ Bᴺᶠ tᴺᶠ uᴺᶠ .raw    = pairᴿ (Bᴺᶠ .raw) (tᴺᶠ .raw) (uᴺᶠ .raw)
+pairᴺᶠ Bᴺᶠ tᴺᶠ uᴺᶠ .pred   = pairᴾ (Bᴺᶠ .pred) (tᴺᶠ .pred) (uᴺᶠ .pred)
+pairᴺᶠ Bᴺᶠ tᴺᶠ uᴺᶠ .stab f = 
+  pairᴼᶜᶜ (Bᴺᶠ .stab (f [ wkᴿ ]F)) (tᴺᶠ .stab f) (uᴺᶠ .stab f)
+
 module _ {t₁ᴺᶠ t₂ᴺᶠ : Nf Γ A usᴿ t} where
   postulate
     nf≡ : t₁ᴺᶠ .raw ≡ t₂ᴺᶠ .raw → t₁ᴺᶠ ≡ t₂ᴺᶠ
@@ -161,19 +189,41 @@ open Thin~ public
 variable
   δᵀʰ~ : Thin~ Δ Γ δ
 
+idᴾ : ThinPred[ qᵀʰ ] Γ Γ id idᴿ
+idᴾ {qᵀʰ = qᵀʰ} {Γ = •} = 
+  tr (λ □ → ThinPred[ qᵀʰ ] • • □ εᴿ) (sym •η) εᴾ
+idᴾ {Γ = Γ ▷ A}       = idᴾ ^ᴾ
+idᴾ {Γ = Γ ▷ t₁ ~ t₂} = idᴾ ^~ᴾ
+
+_⁺ᵀʰ : Thin Δ Γ δ → Thin (Δ ▷ A) Γ (δ ⨾ wk)
+(δᵀʰ ⁺ᵀʰ) .raw  = δᵀʰ .raw ⁺ᴿ
+(δᵀʰ ⁺ᵀʰ) .pred = δᵀʰ .pred ⁺ᴾ
+
+_⁺ᵀʰ~ : Thin~ Δ Γ δ → Thin~ (Δ ▷ A) Γ (δ ⨾ wk)
+(δᵀʰ ⁺ᵀʰ~) .raw  = δᵀʰ .raw ⁺ᴿ
+(δᵀʰ ⁺ᵀʰ~) .pred = δᵀʰ .pred ⁺ᴾ
+
+_⁺~ᵀʰ~ : Thin~ Δ Γ δ → Thin~ (Δ ▷ t₁ ~ t₂) Γ (δ ⨾ wk~)
+(δᵀʰ ⁺~ᵀʰ~) .raw  = δᵀʰ .raw
+(δᵀʰ ⁺~ᵀʰ~) .pred = δᵀʰ .pred ⁺~ᴾ
+
+idᵀʰ : Thin Γ Γ id
+idᵀʰ .raw  = idᴿ
+idᵀʰ .pred = idᴾ
+
+idᵀʰ~ : Thin~ Γ Γ id
+idᵀʰ~ .raw  = idᴿ
+idᵀʰ~ .pred = idᴾ
+
+wkᵀʰ~ : Thin~ (Γ ▷ A) Γ wk
+wkᵀʰ~ = idᵀʰ~ ⁺ᵀʰ~
+
+wkᵀʰ : Thin (Γ ▷ A) Γ wk
+wkᵀʰ = idᵀʰ ⁺ᵀʰ
+
+wk~ᵀʰ~ : Thin~ (Γ ▷ t₁ ~ t₂) Γ wk~
+wk~ᵀʰ~ = idᵀʰ~ ⁺~ᵀʰ~
+
 -- TODO
 postulate
-  εᵀʰ~ : Thin~ Δ • (ε idᵂᵏ)
-
-  _⁺ᵀʰ~ : Thin~ Δ Γ δ → Thin~ (Δ ▷ A) Γ (δ ⨾ wk)
-
-  _⁺~ᵀʰ~ : Thin~ Δ Γ δ → Thin~ (Δ ▷ t₁ ~ t₂) Γ (δ ⨾ wk~)
-
-
   _⨾ᵀʰ~_ : Thin~ Δ Γ δ → Thin~ Θ Δ σ → Thin~ Θ Γ (δ ⨾ σ)
-
-  idᵀʰ~ : Thin~ Γ Γ id
-
-  wkᵀʰ~ : Thin~ (Γ ▷ A) Γ wk
-
-  wk~ᵀʰ~ : Thin~ (Γ ▷ t₁ ~ t₂) Γ wk~
