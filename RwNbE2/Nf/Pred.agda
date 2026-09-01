@@ -45,7 +45,7 @@ data NfPred : (Γ : Ctx Ξ) (A : Ty Γ)
               (t : Tm Γ A) (tᴿ : Nfᴿ (lenSig Ξ) (len Γ))
             → Set
 
-data NfsPred : (Δ : Ctx Ξ) (Γ : Ctx Ξ) (δ : Sub Δ Γ) 
+data NfsPred : (Δ : Ctx Ξ) (Γ : Ctx Ξ) (δ : Tms Δ Γ) 
                (tsᴿ : Nfsᴿ (lenSig Ξ) (len Δ))
              → Set
 
@@ -66,7 +66,7 @@ data DefPred where
                 (eq [ ⇑ᵂᵏ defᵂᵏ ])
                 call 
                 dzᴿ
-  dsᴿ : DefPred Ξ Γ B eq₁ u dᴿ
+  dsᴾ : DefPred Ξ Γ {A} {t₁} {t₂} B eq₁ u dᴿ
       → DefPred (Ξ def Δ to C reflect eq₂ begin v end)
                 (Γ [ defᵂᵏ ]C) 
                 (B [ ⇑ᵂᵏ defᵂᵏ ]T) 
@@ -103,11 +103,11 @@ data NePred where
   
   callᴾ : {eq : Tm Γ (Id A u₁ u₂)} 
         → DefPred Ξ Γ B eq v dᴿ
-        → NfsPred Δ Γ δ tsᴿ
-        → NfPred Δ (A [ δ ]T) (u₁ [ δ ]) u₁ᴿ
-        → NfPred Δ (A [ δ ]T) (u₂ [ δ ]) u₂ᴿ
-        → NePred Δ (Id A u₁ u₂ [ δ ]T) (eq [ δ ]) eqᴿ
-        → NePred Δ (B [ δ ]T) (v [ δ ]) (callᴿ dᴿ tsᴿ u₁ᴿ u₂ᴿ eqᴿ)
+        → NfsPred Δ Γ ts tsᴿ
+        → NfPred Δ (A [ ⇑ᵀᵐˢ ts ]T) (u₁ [ ⇑ᵀᵐˢ ts ]) u₁ᴿ
+        → NfPred Δ (A [ ⇑ᵀᵐˢ ts ]T) (u₂ [ ⇑ᵀᵐˢ ts ]) u₂ᴿ
+        → NePred Δ (Id A u₁ u₂ [ ⇑ᵀᵐˢ ts ]T) (eq [ ⇑ᵀᵐˢ ts ]) eqᴿ
+        → NePred Δ (B [ ⇑ᵀᵐˢ ts ]T) (v [ ⇑ᵀᵐˢ ts ]) (callᴿ dᴿ tsᴿ u₁ᴿ u₂ᴿ eqᴿ)
 
   !ᴾ : TyNfPred Γ A Aᴿ → NfPred Γ A t tᴿ
      → (tyOfᴿ tᴿ ≡ Aᴿ → 𝟘)
@@ -144,14 +144,14 @@ data NfPred where
         → NfPred Γ (IF t A B) u (neIFᴿ tᴿ Aᴿ Bᴿ uᴿ)
 
 data NfsPred where
-  εᴾ   : NfsPred Δ • (ε idᵂᵏ) εᴿ
+  εᴾ   : NfsPred Δ • εᵀᵐˢ εᴿ
 
-  _,ᴾ_ : NfsPred Δ Γ δ tsᴿ 
-       → TyNfPred Δ (A [ δ ]T) Aᴿ × NfPred Δ (A [ δ ]T) t tᴿ
-       → NfsPred Δ (Γ ▷ A) (δ , t) (tsᴿ ,ᴿ tᴿ)
+  _,ᴾ_ : NfsPred Δ Γ ts tsᴿ 
+       → NfPred Δ (A [ ⇑ᵀᵐˢ ts ]T) t tᴿ
+       → NfsPred Δ (Γ ▷ A) (ts ,ᵀᵐˢ t) (tsᴿ ,ᴿ tᴿ)
 
-  _,~ᴾ : NfsPred Δ Γ δ tsᴿ
-       → NfsPred Δ (Γ ▷ u ~ u) (δ ,~ refl) tsᴿ
+  _,~ᴾ : NfsPred Δ Γ ts tsᴿ
+       → NfsPred Δ (Γ ▷ u ~ u) (ts ,~ᵀᵐˢ refl) tsᴿ
 
 data TyNfPred where
   Πᴾ : TyNfPred Γ A Aᴿ → TyNfPred (Γ ▷ A) B Bᴿ

@@ -1,13 +1,12 @@
-{-# OPTIONS --rewriting #-}
+{-# OPTIONS --rewriting --prop #-}
 -- Confluence check passes!
 -- But slows down downstream typechecking... (not sure why)
 -- {-# OPTIONS --local-confluence-check #-}
 
 open import Agda.Builtin.Equality.Rewrite renaming (primRewriteNoMatch to ⟨_⟩)
 
-open import Utils hiding (tt; ff) hiding (Σ; fst; snd; _,_)
-open import Utils.WithK
-open import Utils.Macro
+open import Utils.Prop hiding (tt; ff; Σ; fst; snd; _,_)
+open import Utils.MacroProp
 
 -- We postulate a strictified syntax
 module RwNbE2.Syntax where
@@ -28,14 +27,16 @@ variable
 
 postulate
   SigWk : Sig → Sig → Set
-  Sub   : Ctx Φ → Ctx Ψ → Set
+  Tms   : Ctx Ξ → Ctx Ξ → Set
   Ty    : Ctx Ξ → Set
   Tm    : (Γ : Ctx Ξ) → Ty Γ → Set
+record Sub (Δ : Ctx Φ) (Γ : Ctx Ψ) : Set
 
 variable  
   Γ Δ Θ Λ Γ₁ Γ₂ Δ₁ Δ₂ Θ₁ Θ₂ : Ctx _
   A B C D A₁ A₂ A₃ B₁ B₂ B₃ P : Ty _
   t u v t₁ t₂ t₃ u₁ u₂ u₃ : Tm _ _
+  ts us vs ts₁ ts₂ : Tms _ _
   φ ψ ξ : SigWk _ _
   δ σ γ δ₁ δ₂ : Sub _ _
   t₁₂ u₁₂ : _≡_ {A = Tm _ _} _ _
@@ -52,85 +53,111 @@ postulate
   idᵂᵏ  : SigWk Ψ Ψ
   _⨾ᵂᵏ_ : SigWk Φ Ψ → SigWk Ξ Φ → SigWk Ξ Ψ
 
-  id⨾ᵂᵏ : idᵂᵏ ⨾ᵂᵏ ψ ≡ ψ
+  id⨾ᵂᵏ : idᵂᵏ ⨾ᵂᵏ ψ ≡S ψ
   {-# REWRITE id⨾ᵂᵏ #-}
-  ⨾idᵂᵏ : ψ ⨾ᵂᵏ idᵂᵏ ≡ ψ
+  ⨾idᵂᵏ : ψ ⨾ᵂᵏ idᵂᵏ ≡S ψ
   {-# REWRITE ⨾idᵂᵏ #-}
-  ⨾⨾ᵂᵏ  : (ψ ⨾ᵂᵏ φ) ⨾ᵂᵏ ξ ≡ ψ ⨾ᵂᵏ (φ ⨾ᵂᵏ ξ)
+  ⨾⨾ᵂᵏ  : (ψ ⨾ᵂᵏ φ) ⨾ᵂᵏ ξ ≡S ψ ⨾ᵂᵏ (φ ⨾ᵂᵏ ξ)
   {-# REWRITE ⨾⨾ᵂᵏ #-}
 
 -- Contexts are a presheaf over signature weakenings
 postulate
   _[_]C : Ctx Ψ → SigWk Φ Ψ → Ctx Φ
 
-  [id]C : Γ [ idᵂᵏ ]C ≡ Γ
+  [id]C : Γ [ idᵂᵏ ]C ≡S Γ
   {-# REWRITE [id]C #-}
-  [][]C : Γ [ ψ ]C [ φ ]C ≡ Γ [ ψ ⨾ᵂᵏ φ ]C
+  [][]C : Γ [ ψ ]C [ φ ]C ≡S Γ [ ψ ⨾ᵂᵏ φ ]C
   {-# REWRITE [][]C #-}
 
--- Substitutions are a category, and embed signature weakenings
-postulate
-  ⇑ᵂᵏ  : (ψ : SigWk Φ Ψ) → Sub (Γ [ ψ ]C) Γ
-id    : Sub Γ Γ
-id = ⇑ᵂᵏ idᵂᵏ
-{-# DISPLAY ⇑ᵂᵏ idᵂᵏ = id #-}
-postulate
-  _⨾_  : Sub Δ Γ → Sub Θ Δ → Sub Θ Γ
+-- Global substitutions are pairs of signature weakenings and local 
+-- substitutions
+record Sub {Φ} {Ψ} Δ Γ where
+  constructor _∥_
+  eta-equality
+  field
+    ⇓ᵂᵏ  : SigWk Φ Ψ
+    ⇓ᵀᵐˢ : Tms Δ (Γ [ ⇓ᵂᵏ ]C)
+open Sub public
 
-  id⨾ : id ⨾ δ ≡ δ
-  {-# REWRITE id⨾ #-}
-  ⨾id : δ ⨾ id ≡ δ
-  {-# REWRITE ⨾id #-}
-  ⨾⨾  : (δ ⨾ σ) ⨾ γ ≡ δ ⨾ (σ ⨾ γ)
-  {-# REWRITE ⨾⨾ #-}
-  ⇑⨾ᵂᵏ : {ψ : SigWk Φ Ψ} {φ : SigWk Ξ Φ}
-       → ⇑ᵂᵏ {Γ = Γ} (ψ ⨾ᵂᵏ φ) ≡ ⇑ᵂᵏ ψ ⨾ ⇑ᵂᵏ φ
-  {-# REWRITE ⇑⨾ᵂᵏ #-}
+-- Local substitutions are both displayed presheaves over signature weakenings 
+-- and form a category
+-- We can achieve this with a single operator (which folds substitution over
+-- the list of terms)
+postulate
+  idᵀᵐˢ : Tms Γ Γ
+  _[_]* : Tms Δ Γ → (δ : Sub Θ Δ) → Tms Θ (Γ [ δ .⇓ᵂᵏ ]C)
 
-_[_]S : Sub Δ Γ → (ψ : SigWk Φ Ψ) → Sub (Δ [ ψ ]C) Γ
-δ [ ψ ]S = δ ⨾ ⇑ᵂᵏ ψ
+id : Sub Γ Γ
+id = idᵂᵏ ∥ idᵀᵐˢ
+
+⇑ᵂᵏ : (ψ : SigWk Φ Ψ) → Sub (Γ [ ψ ]C) Γ
+⇑ᵂᵏ ψ = ψ ∥ idᵀᵐˢ
+
+⇑ᵀᵐˢ : Tms Δ Γ → Sub Δ Γ
+⇑ᵀᵐˢ δ = idᵂᵏ ∥ δ
+
+_⨾_ : Sub Δ Γ → Sub Θ Δ → Sub Θ Γ
+(δ ⨾ σ) .⇓ᵂᵏ  = δ .⇓ᵂᵏ ⨾ᵂᵏ σ .⇓ᵂᵏ
+(δ ⨾ σ) .⇓ᵀᵐˢ = δ .⇓ᵀᵐˢ [ σ ]*
+
+_⨾ᵀᵐˢ_ : Tms Δ Γ → Tms Θ Δ → Tms Θ Γ
+ts ⨾ᵀᵐˢ us = ts [ ⇑ᵀᵐˢ us ]*
+
+postulate
+  [id]* : ts [ id ]* ≡S ts
+  {-# REWRITE [id]* #-}
+
+  id[]* : idᵀᵐˢ [ δ ]* ≡S δ .⇓ᵀᵐˢ
+  {-# REWRITE id[]* #-}
+
+  [][]* : ts [ δ ]* [ σ ]* ≡S ts [ δ ⨾ σ ]*
+
+[][]*' : _[_]* {Γ = ⟨ _ ⟩} (ts [ δ ]*) σ ≡S ts [ δ ⨾ σ ]*
+[][]*' {ts = ts} {δ = δ} = [][]* {ts = ts} {δ = δ}
+{-# REWRITE [][]*' #-}
+
+-- Global substitutions are a category
+id⨾ : id ⨾ δ ≡ δ
+id⨾ = refl
+⨾id : δ ⨾ id ≡ δ
+⨾id = refl
+⨾⨾  : (δ ⨾ σ) ⨾ γ ≡ δ ⨾ (σ ⨾ γ)
+⨾⨾ = refl
+
+-- Local substitutions are a category
+id⨾ᵀᵐˢ : idᵀᵐˢ ⨾ᵀᵐˢ ts ≡S ts
+id⨾ᵀᵐˢ = refl
+⨾idᵀᵐˢ : ts ⨾ᵀᵐˢ idᵀᵐˢ ≡S ts
+⨾idᵀᵐˢ = refl
+⨾⨾ᵀᵐˢ  : (ts ⨾ᵀᵐˢ us) ⨾ᵀᵐˢ vs ≡S ts ⨾ᵀᵐˢ (us ⨾ᵀᵐˢ vs)
+⨾⨾ᵀᵐˢ = refl
 
 -- Types and terms are presheaves over substitutions
-
 postulate
   _[_]T : Ty Γ → Sub Δ Γ → Ty Δ
   _[_]  : Tm Γ A → ∀ δ → Tm Δ (A [ δ ]T)
 
-  [id]T : A [ id ]T ≡ A
+  [id]T : A [ id ]T ≡S A
   {-# REWRITE [id]T  #-}
-  [id]  : t [ id ] ≡ t
+  [id]  : t [ id ] ≡S t
   {-# REWRITE [id] #-}
 
-  [][]T : A [ δ ]T [ σ ]T ≡ A [ δ ⨾ σ ]T
+  [][]T : A [ δ ]T [ σ ]T ≡S A [ δ ⨾ σ ]T
   {-# REWRITE [][]T #-}
-  [][]  : t [ δ ] [ σ ] ≡ t [ δ ⨾ σ ]
+  [][]  : t [ δ ] [ σ ] ≡S t [ δ ⨾ σ ]
 
-[][]' : _[_] {A = ⟨ _ ⟩} (t [ δ ]) σ ≡ t [ δ ⨾ σ ]
+[][]' : _[_] {A = ⟨ _ ⟩} (t [ δ ]) σ ≡S t [ δ ⨾ σ ]
 [][]' {t = t} {δ = δ} = [][] {t = t} {δ = δ}
 {-# REWRITE [][]' #-}
-
--- Specialised congruence with extra computation rules for confluence
-_[_]≡ : _≡_ {A = Tm Γ A} t₁ t₂ → (δ : Sub Δ Γ) → t₁ [ δ ] ≡ t₂ [ δ ]
-refl [ δ ]≡ = refl
-
-[id]≡ : t₁₂ [ id ]≡ ≡ t₁₂
-[id]≡ {t₁₂ = refl} = refl
-
-[][]≡ : _[_]≡ {A = ⟨ _ ⟩} {t₁ = ⟨ _ ⟩} {t₂ = ⟨ _ ⟩} (t₁₂ [ δ ]≡) σ
-      ≡ t₁₂ [ δ ⨾ σ ]≡
-[][]≡ {t₁₂ = refl} = refl
-
-{-# REWRITE [id]≡ [][]≡ #-}
-
 -- Context operator are natural w.r.t. signature weakening
 postulate
-  •[] : • [ ψ ]C ≡ •
+  •[] : • [ ψ ]C ≡S •
   {-# REWRITE •[] #-}
 
-  ▷[] : (Γ ▷ A) [ ψ ]C ≡ (Γ [ ψ ]C) ▷ (A [ ⇑ᵂᵏ ψ ]T)
+  ▷[] : (Γ ▷ A) [ ψ ]C ≡S (Γ [ ψ ]C) ▷ (A [ ⇑ᵂᵏ ψ ]T)
   {-# REWRITE ▷[] #-}
 
-  ▷~[] : (Γ ▷ t₁ ~ t₂) [ ψ ]C ≡ (Γ [ ψ ]C) ▷ (t₁ [ ⇑ᵂᵏ ψ ]) ~ (t₂ [ ⇑ᵂᵏ ψ ])
+  ▷~[] : (Γ ▷ t₁ ~ t₂) [ ψ ]C ≡S (Γ [ ψ ]C) ▷ (t₁ [ ⇑ᵂᵏ ψ ]) ~ (t₂ [ ⇑ᵂᵏ ψ ])
   {-# REWRITE ▷~[] #-}
 
 -- Context comprehension (for ordinary context extension, and extension
@@ -138,96 +165,98 @@ postulate
 -- We take |wk|/|vz| as primitive as opposed to |π₁|/|π₂| to get a confluent 
 -- rewrite system
 postulate
-  _,_  : (δ : Sub Δ Γ) → Tm Δ (A [ δ ]T) → Sub Δ (Γ ▷ A)
-  _,~_ : (δ : Sub Δ Γ) → t₁ [ δ ] ≡ t₂ [ δ ]
-       → Sub Δ (Γ ▷ t₁ ~ t₂)
-  wk   : Sub (Γ ▷ A) Γ
-  vz   : Tm (Γ ▷ A) (A [ wk ]T)
-  wk~  : Sub (_▷_~_ Γ {A = A} t₁ t₂) Γ
-  ez~  : t₁ [ wk~ {t₁ = t₁} {t₂ = t₂} ] ≡ t₂ [ wk~ ]
+  εᵀᵐˢ    : Tms Δ •
+  _,ᵀᵐˢ_  : (ts : Tms Δ Γ) → Tm Δ (A [ ⇑ᵀᵐˢ ts ]T) → Tms Δ (Γ ▷ A)
+  _,~ᵀᵐˢ_ : {t₁ t₂ : Tm Γ A} (ts : Tms Δ Γ)
+          → t₁ [ ⇑ᵀᵐˢ ts ] ≡ t₂ [ ⇑ᵀᵐˢ ts ]
+          → Tms Δ (Γ ▷ t₁ ~ t₂)
+  π₁ᵀᵐˢ   : Tms Δ (Γ ▷ A) → Tms Δ Γ
+  π₁~ᵀᵐˢ  : Tms Δ (Γ ▷ t₁ ~ t₂) → Tms Δ Γ
+  π₂ᵀᵐˢ   : (ts : Tms Δ (Γ ▷ A)) → Tm Δ (A [ ⇑ᵀᵐˢ (π₁ᵀᵐˢ ts) ]T)
+  π₂~ᵀᵐˢ  : (ts : Tms Δ (Γ ▷ t₁ ~ t₂)) 
+          → t₁ [ ⇑ᵀᵐˢ (π₁~ᵀᵐˢ ts) ] ≡ t₂ [ ⇑ᵀᵐˢ (π₁~ᵀᵐˢ ts) ]
 
-  ,⨾  : (δ , t) ⨾ σ ≡ (δ ⨾ σ) , (t [ σ ])
-  {-# REWRITE ,⨾ #-}
+  •ηᵀᵐˢ : ts ≡ εᵀᵐˢ
 
-  ,~⨾ : (δ ,~ t₁₂) ⨾ σ ≡ (δ ⨾ σ) ,~ (t₁₂ [ σ ]≡)
-  {-# REWRITE ,~⨾ #-}
-
-  wk, : wk ⨾ (δ , t) ≡ δ
-  {-# REWRITE wk, #-}
-  vz, : vz [ δ , t ] ≡ t
-
-vz,' : _[_] {A = ⟨ _ ⟩} vz (δ , t) ≡ t
-vz,' {δ = δ} = vz, {δ = δ}
-{-# REWRITE vz,' #-}
+ε[]* : εᵀᵐˢ {Δ = Δ} [ δ ]* ≡S εᵀᵐˢ
+ε[]* = ↑≡ •ηᵀᵐˢ
+{-# REWRITE ε[]* #-}
 
 postulate
-  wk,~ : wk~ ⨾ (δ ,~ t₁₂) ≡ δ
-  {-# REWRITE wk,~ #-}
+  ,[]*  : (ts ,ᵀᵐˢ t) [ δ ]* ≡S (ts [ δ ]*) ,ᵀᵐˢ (t [ δ ])
+  {-# REWRITE ,[]* #-}
 
-ez,~ : ez~ [ δ ,~ t₁₂ ]≡ ≡ t₁₂
-ez,~ = uip
+  ,~[]*  : {ts : Tms {Ψ} Δ Γ}
+           {t₁ t₂ : Tm Γ A}
+           {t₁₂ : t₁ [ ⇑ᵀᵐˢ ts ] ≡ t₂ [ ⇑ᵀᵐˢ ts ]}
+           {δ : Sub {Φ} {Ψ} Θ Δ} 
+         → (_,~ᵀᵐˢ_ {t₁ = t₁} {t₂ = t₂} ts t₁₂) [ δ ]* 
+         ≡S (ts [ δ ]*) ,~ᵀᵐˢ (ap (_[ δ ]) t₁₂)
+  {-# REWRITE ,~[]* #-}
 
-ez,~' : _[_]≡ {A = ⟨ _ ⟩} {t₁ = ⟨ _ ⟩} {t₂ = ⟨ _ ⟩} ez~ (δ ,~ t₁₂) ≡ t₁₂
-ez,~' {δ = δ} = ez,~ {δ = δ}
-{-# REWRITE ez,~' #-}
+  π₁[]*  : π₁ᵀᵐˢ ts [ δ ]* ≡S π₁ᵀᵐˢ (ts [ δ ]*)
+  {-# REWRITE π₁[]* #-}
+
+  π₂[] : π₂ᵀᵐˢ ts [ δ ] ≡S π₂ᵀᵐˢ (ts [ δ ]*)
+
+π₂[]' : _[_] {A = ⟨ _ ⟩} (π₂ᵀᵐˢ ts) δ ≡S π₂ᵀᵐˢ (ts [ δ ]*)
+π₂[]' {ts = ts} = π₂[] {ts = ts}
+{-# REWRITE π₂[]' #-}
 
 postulate
-  id▷  : id {Γ = Γ ▷ A} ≡ wk , vz
-  id▷~ : id {Γ = Γ ▷ t₁ ~ t₂} ≡ wk~ ,~ ez~ 
+  π₁~[]*  : π₁~ᵀᵐˢ ts [ δ ]* ≡S π₁~ᵀᵐˢ (ts [ δ ]*)
+  {-# REWRITE π₁~[]* #-}
+
+  ▷β₁ᵀᵐˢ : π₁ᵀᵐˢ (ts ,ᵀᵐˢ t) ≡S ts
+  {-# REWRITE ▷β₁ᵀᵐˢ #-}
+  ▷β₂ᵀᵐˢ : π₂ᵀᵐˢ (ts ,ᵀᵐˢ t) ≡S t
+  {-# REWRITE ▷β₂ᵀᵐˢ #-}
+
+  ▷~β₁ᵀᵐˢ : π₁~ᵀᵐˢ (ts ,~ᵀᵐˢ t₁₂) ≡S ts
+  {-# REWRITE ▷~β₁ᵀᵐˢ #-}
+
+  ▷ηᵀᵐˢ : π₁ᵀᵐˢ ts ,ᵀᵐˢ π₂ᵀᵐˢ ts ≡S ts
+  {-# REWRITE ▷ηᵀᵐˢ #-}
+  ▷~ηᵀᵐˢ : π₁~ᵀᵐˢ ts ,~ᵀᵐˢ π₂~ᵀᵐˢ ts ≡S ts
+  {-# REWRITE ▷~ηᵀᵐˢ #-}
+
+ε : (ψ : SigWk Φ Ψ) → Sub {Φ} {Ψ} Δ •
+ε ψ = ψ ∥ εᵀᵐˢ
+
+_,_  : (δ : Sub Δ Γ) → Tm Δ (A [ δ ]T) → Sub Δ (Γ ▷ A)
+(δ , t) .⇓ᵂᵏ  = δ .⇓ᵂᵏ
+(δ , t) .⇓ᵀᵐˢ = δ .⇓ᵀᵐˢ ,ᵀᵐˢ t
+
+_,~_ : (δ : Sub Δ Γ) → t₁ [ δ ] ≡ t₂ [ δ ]
+      → Sub Δ (Γ ▷ t₁ ~ t₂)
+(δ ,~ t₁₂) .⇓ᵂᵏ  = δ .⇓ᵂᵏ
+(δ ,~ t₁₂) .⇓ᵀᵐˢ = δ .⇓ᵀᵐˢ ,~ᵀᵐˢ t₁₂
 
 π₁ : Sub Δ (Γ ▷ A) → Sub Δ Γ
-π₁ δ = wk ⨾ δ
+π₁ δ .⇓ᵂᵏ  = δ .⇓ᵂᵏ
+π₁ δ .⇓ᵀᵐˢ = π₁ᵀᵐˢ (δ .⇓ᵀᵐˢ)
 
 π₂ : (δ : Sub Δ (Γ ▷ A)) → Tm Δ (A [ π₁ δ ]T)
-π₂ δ = vz [ δ ]
+π₂ δ = π₂ᵀᵐˢ (δ .⇓ᵀᵐˢ)
 
 π₁~ : Sub Δ (Γ ▷ t₁ ~ t₂) → Sub Δ Γ
-π₁~ δ = wk~ ⨾ δ
+π₁~ δ .⇓ᵂᵏ  = δ .⇓ᵂᵏ
+π₁~ δ .⇓ᵀᵐˢ = π₁~ᵀᵐˢ (δ .⇓ᵀᵐˢ)
 
 π₂~ : (δ : Sub Δ (Γ ▷ t₁ ~ t₂)) → t₁ [ π₁~ δ ] ≡ t₂ [ π₁~ δ ]
-π₂~ δ = ez~ [ δ ]≡
+π₂~ δ = π₂~ᵀᵐˢ (δ .⇓ᵀᵐˢ)
 
-▷η : δ ≡ (π₁ δ) , (π₂ δ)
-▷η {δ = δ} =
-  δ
-  ≡⟨⟩
-  ⌜ id ⌝ ⨾ δ
-  ≡⟨ ap! id▷ ⟩
-  (wk , vz) ⨾ δ
-  ≡⟨⟩
-  (wk ⨾ δ) , (vz [ δ ])
-  ≡⟨⟩ 
-  (π₁ δ) , (π₂ δ) ∎
+wk : Sub (Γ ▷ A) Γ
+wk = π₁ id
 
-▷η~ : δ ≡ (π₁~ δ) ,~ (π₂~ δ)
-▷η~ {δ = δ} =
-  δ
-  ≡⟨⟩
-  ⌜ id ⌝ ⨾ δ
-  ≡⟨ ap! id▷~ ⟩
-  (wk~ ,~ ez~) ⨾ δ
-  ≡⟨⟩
-  (wk~ ⨾ δ) ,~ (ez~ [ δ ]≡)
-  ≡⟨⟩ 
-  (π₁~ δ) ,~ (π₂~ δ) ∎
+vz : Tm (Γ ▷ A) (A [ wk ]T)
+vz = π₂ id
 
-id▷' : wk , vz ≡ id {Γ = Γ ▷ A}
-id▷' = sym id▷
+wk~ : Sub (_▷_~_ Γ {A = A} t₁ t₂) Γ
+wk~ = π₁~ id
 
-▷η' : (wk ⨾ δ) , (_[_] {A = ⟨ _ ⟩} vz δ) ≡ δ
-▷η' = sym ▷η
-{-# REWRITE id▷' ▷η' #-}
-
-id▷~' : wk~ ,~ ez~ ≡ id {Γ = Γ ▷ t₁ ~ t₂}
-id▷~' = sym id▷~
-
-▷η~' : (wk~ ⨾ δ) ,~ (_[_]≡ {A = ⟨ _ ⟩} {t₁ = ⟨ _ ⟩} {t₂ = ⟨ _ ⟩} ez~ δ) ≡ δ
-▷η~' = sym ▷η~
-{-# REWRITE id▷~' ▷η~' #-}
-
-postulate
-  ε  : SigWk Φ Ψ → Sub {Φ} {Ψ} Δ •
-  •η : δ ≡ ε ψ
+ez~ : t₁ [ wk~ {t₁ = t₁} {t₂ = t₂} ] ≡ t₂ [ wk~ ]
+ez~ = π₂~ id
 
 _^_ : ∀ δ A → Sub (Δ ▷ (A [ δ ]T)) (Γ ▷ A)
 δ ^ A = (δ ⨾ wk) , vz
@@ -241,20 +270,18 @@ _^_~_ : ∀ δ (t₁ t₂ : Tm Γ A) → Sub (Δ ▷ t₁ [ δ ] ~ (t₂ [ δ ])
   t₂ [ δ ] [ wk~ ]
   ≡⟨⟩
   t₂ [ δ ⨾ wk~ ] ∎)
-
-
 postulate
-  -- Π types
+  -- Dependent function types
   Π     : ∀ A → Ty (Γ ▷ A) → Ty Γ
   lam   : Tm (Γ ▷ A) B → Tm Γ (Π A B)
   app   : Tm Γ (Π A B) → Tm (Γ ▷ A) B
 
-  Π[]   : Π A B [ δ ]T ≡ Π (A [ δ ]T) (B [ δ ^ A ]T)
+  Π[]   : Π A B [ δ ]T ≡S Π (A [ δ ]T) (B [ δ ^ A ]T)
   {-# REWRITE Π[] #-}
-  lam[] : lam t [ δ ] ≡ lam (t [ δ ^ A ])
+  lam[] : lam t [ δ ] ≡S lam (t [ δ ^ A ])
   {-# REWRITE lam[] #-}
 
-  Πβ : app (lam t) ≡ t
+  Πβ : app (lam t) ≡S t
   {-# REWRITE Πβ #-}
   Πη : t ≡ lam (app t)
 
@@ -274,10 +301,10 @@ postulate
   Id  : (A : Ty Γ) → Tm Γ A → Tm Γ A → Ty Γ
   rfl : Tm Γ (Id A t t)
 
-  Id[] : Id A t₁ t₂ [ δ ]T ≡ Id (A [ δ ]T) (t₁ [ δ ]) (t₂ [ δ ])
+  Id[] : Id A t₁ t₂ [ δ ]T ≡S Id (A [ δ ]T) (t₁ [ δ ]) (t₂ [ δ ])
   {-# REWRITE Id[] #-}
 
-  rfl[] : rfl {t = t} [ δ ] ≡ rfl 
+  rfl[] : rfl {t = t} [ δ ] ≡S rfl 
   {-# REWRITE rfl[] #-}
 
   -- Note we don't need the J rule because it is derivable (in a sense) from 
@@ -287,10 +314,13 @@ variable
   eq eq' eq₁ eq₂ : Tm _ (Id _ _ _)
 
 rflℱ : t₁ ≡ t₂ → Tm Γ (Id A t₁ t₂)
-rflℱ refl = rfl
+rflℱ t₁₂ with refl ← ↑≡ t₁₂ 
+  = rfl
 
-rflℱ[] : rflℱ t₁₂ [ δ ] ≡ rflℱ (t₁₂ [ δ ]≡)
-rflℱ[] {t₁₂ = refl} = refl
+rflℱ[] : rflℱ t₁₂ [ δ ] ≡S rflℱ (ap (_[ δ ]) t₁₂)
+rflℱ[] {t₁₂ = t₁₂}
+  with refl ← ↑≡ t₁₂  
+  = refl
 {-# REWRITE rflℱ[] #-}
 
 -- Signatures
@@ -329,36 +359,36 @@ postulate
         → (b : Tm Γ 𝔹) → Tm Γ (P [ id , b ]T)
   IF    : Tm Γ 𝔹 → Ty Γ → Ty Γ → Ty Γ
 
-  𝔹[]  : 𝔹 [ δ ]T ≡ 𝔹
+  𝔹[]  : 𝔹 [ δ ]T ≡S 𝔹
   {-# REWRITE 𝔹[] #-}
 
-  tt[] : tt [ δ ] ≡ tt
+  tt[] : tt [ δ ] ≡S tt
   {-# REWRITE tt[] #-}
 
-  ff[] : ff [ δ ] ≡ ff
+  ff[] : ff [ δ ] ≡S ff
   {-# REWRITE ff[] #-}
 
-  if[] : if P t u v [ δ ] ≡ if (P [ δ ^ 𝔹 ]T) (t [ δ ]) (u [ δ ]) (v [ δ ])
+  if[] : if P t u v [ δ ] ≡S if (P [ δ ^ 𝔹 ]T) (t [ δ ]) (u [ δ ]) (v [ δ ])
 
 if[]' : _[_] {A = ⟨ _ ⟩} (if P t u v) δ 
-      ≡ if (P [ δ ^ 𝔹 ]T) (t [ δ ]) (u [ δ ]) (v [ δ ])
+      ≡S if (P [ δ ^ 𝔹 ]T) (t [ δ ]) (u [ δ ]) (v [ δ ])
 if[]' {P = P} = if[] {P = P}
 {-# REWRITE if[]' #-}
 
 postulate
-  IF[] : IF t A B [ δ ]T ≡ IF (t [ δ ]) (A [ δ ]T) (B [ δ ]T)
+  IF[] : IF t A B [ δ ]T ≡S IF (t [ δ ]) (A [ δ ]T) (B [ δ ]T)
   {-# REWRITE IF[] #-}
 
-  IF-tt : IF tt A B ≡ A
+  IF-tt : IF tt A B ≡S A
   {-# REWRITE IF-tt #-}
 
-  IF-ff : IF ff A B ≡ B
+  IF-ff : IF ff A B ≡S B
   {-# REWRITE IF-ff #-}
 
-  𝔹β₁ : if P t u tt ≡ t
+  𝔹β₁ : if P t u tt ≡S t
   {-# REWRITE 𝔹β₁ #-}
 
-  𝔹β₂ : if P t u ff ≡ u
+  𝔹β₂ : if P t u ff ≡S u
   {-# REWRITE 𝔹β₂ #-}
 
 -- Dependent sums
@@ -368,33 +398,33 @@ postulate
   fst  : Tm Γ (Σ A B) → Tm Γ A
   snd  : (t : Tm Γ (Σ A B)) → Tm Γ (B [ id , fst t ]T)
 
-  Σ[]  : Σ A B [ δ ]T ≡ Σ (A [ δ ]T) (B [ δ ^ A ]T)
+  Σ[]  : Σ A B [ δ ]T ≡S Σ (A [ δ ]T) (B [ δ ^ A ]T)
   {-# REWRITE Σ[] #-} 
 
-  pair[] : pair B t u [ δ ] ≡ pair (B [ δ ^ A ]T) (t [ δ ]) (u [ δ ])
+  pair[] : {δ : Sub Δ Γ}
+         → pair B t u [ δ ] ≡S pair (B [ δ ^ A ]T) (t [ δ ]) (u [ δ ])
   {-# REWRITE pair[] #-}
 
-  fst[] : fst t [ δ ] ≡ fst (t [ δ ])
+  fst[] : fst t [ δ ] ≡S fst (t [ δ ])
   {-# REWRITE fst[] #-}
 
-  snd[] : snd t [ δ ] ≡ snd (t [ δ ])
+  snd[] : {δ : Sub Δ Γ}
+        → snd t [ δ ] ≡S snd (t [ δ ])
 
-snd[]' : _[_] {A = ⟨ _ ⟩} (snd t) δ ≡ snd (t [ δ ])
+snd[]' : {δ : Sub Δ Γ}
+       → _[_] {A = ⟨ _ ⟩} (snd t) δ ≡S snd (t [ δ ])
 snd[]' {t = t} = snd[] {t = t}
 {-# REWRITE snd[]' #-}
 
 postulate
-  Σβ₁ : fst (pair B t u) ≡ t
+  Σβ₁ : fst (pair B t u) ≡S t
   {-# REWRITE Σβ₁ #-}
 
-  Σβ₂ : snd (pair B t u) ≡ u
+  Σβ₂ : snd (pair B t u) ≡S u
   {-# REWRITE Σβ₂ #-}
 
-  Ση : t ≡ pair B (fst t) (snd t)
-  
-Ση' : pair B (fst t) (snd t) ≡ t
-Ση' = sym Ση
-{-# REWRITE Ση' #-}
+  Ση : pair B (fst t) (snd t) ≡S t
+  {-# REWRITE Ση #-}
 
 -- Natural numbers and induction
 postulate
@@ -402,13 +432,13 @@ postulate
   ze  : Tm Γ ℕ
   su  : Tm Γ ℕ → Tm Γ ℕ
 
-  ℕ[] : ℕ [ δ ]T ≡ ℕ
+  ℕ[] : ℕ [ δ ]T ≡S ℕ
   {-# REWRITE ℕ[] #-}
   
-  ze[] : ze [ δ ] ≡ ze
+  ze[] : ze [ δ ] ≡S ze
   {-# REWRITE ze[] #-}
   
-  su[] : su t [ δ ] ≡ su (t [ δ ])
+  su[] : su t [ δ ] ≡S su (t [ δ ])
   {-# REWRITE su[] #-}
   
   
@@ -419,53 +449,15 @@ postulate
       → Tm Γ (P [ id , t ]T)
 
   ind[] : ind P t u v [ δ ] 
-        ≡ ind (P [ δ ^ ℕ ]T) (t [ δ ]) (u [ (δ ^ ℕ) ^ P ]) (v [ δ ])
+        ≡S ind (P [ δ ^ ℕ ]T) (t [ δ ]) (u [ (δ ^ ℕ) ^ P ]) (v [ δ ])
 
 ind[]' : _[_] {A = ⟨ _ ⟩} (ind P t u v) δ
-       ≡ ind (P [ δ ^ ℕ ]T) (t [ δ ]) (u [ (δ ^ ℕ) ^ P ]) (v [ δ ])
+       ≡S ind (P [ δ ^ ℕ ]T) (t [ δ ]) (u [ (δ ^ ℕ) ^ P ]) (v [ δ ])
 ind[]' {P = P} = ind[] {P = P}
 {-# REWRITE ind[]' #-}
 
 postulate
-  ℕβ₁ : ind P t u ze     ≡ t
+  ℕβ₁ : ind P t u ze     ≡S t
   {-# REWRITE ℕβ₁ #-}
-  ℕβ₂ : ind P t u (su v) ≡ u [ (id , v) , ind P t u v ]
+  ℕβ₂ : ind P t u (su v) ≡S u [ (id , v) , ind P t u v ]
   {-# REWRITE ℕβ₂ #-}
-
--- Disjoint unions and dependent case
--- (I am removing these from the paper because they are not so different
--- from Booleans - in fact, we can essentially get disjoint unions just from
--- dependent sums and large IF!)
-postulate
-  _⊎_  : Ty Γ → Ty Γ → Ty Γ
-  inL  : Tm Γ A → Tm Γ (A ⊎ B)
-  inR  : Tm Γ B → Tm Γ (A ⊎ B)
-
-  ⊎[] : (A ⊎ B) [ δ ]T ≡ (A [ δ ]T) ⊎ (B [ δ ]T)
-  {-# REWRITE ⊎[] #-}
-
-  inL[]  : inL {B = B} t [ δ ] ≡ inL (t [ δ ])
-  {-# REWRITE inL[] #-}
-
-  inR[] : inR {A = A} t [ δ ] ≡ inR (t [ δ ])
-  {-# REWRITE inR[] #-}
-
-  case : (P : Ty (Γ ▷ (A ⊎ B))) 
-       → Tm (Γ ▷ A) (P [ wk , inL vz ]T)
-       → Tm (Γ ▷ B) (P [ wk , inR vz ]T)
-       → (t : Tm Γ (A ⊎ B))
-       → Tm Γ (P [ id , t ]T)
-
-  case[] : case P t u v [ δ ] 
-         ≡ case (P [ δ ^ (A ⊎ B) ]T) (t [ δ ^ A ]) (u [ δ ^ B ]) (v [ δ ])
-
-case[]' : _[_] {A = ⟨ _ ⟩} (case P t u v) δ 
-        ≡ case (P [ δ ^ (A ⊎ B) ]T) (t [ δ ^ A ]) (u [ δ ^ B ]) (v [ δ ])
-case[]' {P = P} = case[] {P = P} 
-{-# REWRITE case[]' #-}
-
-postulate
-  ⊎β₁ : case P t u (inL v) ≡ (t [ id , v ])
-  {-# REWRITE ⊎β₁ #-}
-  ⊎β₂ : case P t u (inR v) ≡ (u [ id , v ])
-  {-# REWRITE ⊎β₂ #-}

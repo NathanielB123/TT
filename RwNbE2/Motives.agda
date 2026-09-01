@@ -2,15 +2,11 @@
 
 open import Utils.Prop
 open import RwNbE2.Syntax
+open import RwNbE2.SyntaxExtras
 open import RwNbE2.Nf.Nf
 open import RwNbE2.Rewriting
 
 module RwNbE2.Motives where
-
--- TODO
-postulate
-  ⇓ᵂᵏ  : Sub {Φ} {Ψ} Δ Γ → SigWk Φ Ψ
-  ⇓ˢᵘᵇ : (δ : Sub Δ Γ) → Sub Δ (Γ [ ⇓ᵂᵏ δ ]C)
 
 variable
   Γᴿᵉʷ Δᴿᵉʷ Θᴿᵉʷ : RewEnv _ _ _ _ _ _
@@ -24,7 +20,7 @@ record CtxNS (Ψ : Sig) (Γ : Ctx Ψ) : Set₁ where
     -- TODO: Env thinning and functor laws
 
     quote* : (ρ : Env usᴿ Δᴿᵉʷ δ)
-           → Nfs Δ (Γ [ ⇓ᵂᵏ δ ]C) usᴿ (⇓ˢᵘᵇ δ)
+           → Nfs Δ (Γ [ ⇓ᵂᵏ δ ]C) usᴿ (δ .⇓ᵀᵐˢ)
     -- TODO: Naturality of quote*
 
 module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ) 
@@ -85,7 +81,7 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
 module _ (Δᴹ : CtxNS Φ Δ) (Γᴹ : CtxNS Ψ Γ) (δ : Sub Δ Γ) 
          (let module Δᴹ = CtxNS Δᴹ) (let module Γᴹ = CtxNS Γᴹ)
          where
-  record TmsNS : Set where
+  record SubNS : Set where
     field
       eval* : (ρ : Δᴹ.Env usᴿ Θᴿᵉʷ σ)
             → Γᴹ.Env usᴿ Θᴿᵉʷ (δ ⨾ σ)
@@ -101,3 +97,26 @@ module _ (Γᴹ : CtxNS Ψ Γ) (Aᴹ : TyNS Γᴹ A)
              (t : Tm Γ A)
            → Aᴹ.Val ρ (t [ δ ])
     -- TODO: Naturality of |eval|
+
+open CtxNS public
+open TyNS  public
+open TmNS  public
+open SubNS public
+
+Ctxᴹ : (Ψ : Sig) → Ctx Ψ → Set₁
+Tyᴹ  : Ctxᴹ Ψ Γ → Ty Γ → Set₁
+Tmᴹ  : (⟦Γ⟧ : Ctxᴹ Ψ Γ) → Tyᴹ ⟦Γ⟧ A → Tm Γ A → Set
+Subᴹ : Ctxᴹ Φ Δ → Ctxᴹ Ψ Γ → Sub Δ Γ → Set
+Tmsᴹ : Ctxᴹ Ψ Δ → Ctxᴹ Ψ Γ → Tms Δ Γ → Set
+
+Ctxᴹ = CtxNS
+Tyᴹ  = TyNS
+Tmᴹ  = TmNS
+Subᴹ = SubNS
+Tmsᴹ Δᴹ Γᴹ ts = SubNS Δᴹ Γᴹ (⇑ᵀᵐˢ ts)
+
+variable
+  Γᴹ Δᴹ Θᴹ : Ctxᴹ _ _
+  Aᴹ Bᴹ Cᴹ : Tyᴹ _ _
+  tᴹ uᴹ vᴹ : Tmᴹ _ _ _
+  δᴹ σᴹ γᴹ : Subᴹ _ _ _

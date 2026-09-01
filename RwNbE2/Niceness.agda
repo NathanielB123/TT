@@ -15,14 +15,12 @@ data NiceCtx {Ξ} : (Γ : Ctx Ξ) (usᴿ : Nesᴿ (lenSig Ξ) (len Γ))
   _▷ᴺ_  : NiceCtx Γ usᴿ tsᴿ 
         → NiceCtx (Γ ▷ A) (usᴿ [ wkᴿ ]Nesᴿ) (tsᴿ [ wkᴿ ]Nfsᴿ)
   _▷~ᴺ_ : NiceCtx Γ usᴿ tsᴿ
-        → ((Aᴺᶠ ×, t₁ᴺᵉ ×, t₂ᴺᶠ ×, _) 
-          : (Aᴺᶠ  ∶ TyNf Γ usᴿ A
-          × t₁ᴺᵉ  ∶ Ne Γ A Aᴿ usᴿ t₁
-          × t₂ᴺᶠ  ∶ Nf Γ A Aᴿ usᴿ t₂
-          × Aᴼᶜᶜ  ∶ ¬OccursTyNf (Aᴺᶠ .raw) (t₁ᴺᵉ .raw) (Aᴺᶠ .raw)
-          × t₂ᴼᶜᶜ ∶ ¬OccursNf (Aᴺᶠ .raw) (t₁ᴺᵉ .raw) (Aᴺᶠ .raw) (t₂ᴺᶠ .raw)
-          × usᴼᶜᶜ ∶ ¬OccursFaults (Aᴺᶠ .raw) (t₁ᴺᵉ .raw) usᴿ
-          ×         ¬OccursNfs (Aᴺᶠ .raw) (t₁ᴺᵉ .raw) tsᴿ))
+        → ((t₁ᴺᵉ ×, t₂ᴺᶠ ×, _) 
+          : (t₁ᴺᵉ  ∶ Ne Γ A usᴿ t₁
+          × t₂ᴺᶠ  ∶ Nf Γ A usᴿ t₂
+          × t₂ᴼᶜᶜ ∶ ¬OccursNf (t₁ᴺᵉ .raw) (t₂ᴺᶠ .raw)
+          × usᴼᶜᶜ ∶ ¬OccursFaults (t₁ᴺᵉ .raw) usᴿ
+          ×         ¬OccursNfs (t₁ᴺᵉ .raw) tsᴿ))
         → NiceCtx (Γ ▷ t₁ ~ t₂) 
-                  (usᴿ ,ᴿ (Aᴺᶠ .raw ×, t₁ᴺᵉ .raw)) 
-                  (tsᴿ ,ᴿ (Aᴺᶠ .raw ×, t₂ᴺᶠ .raw))
+                  (usᴿ ,ᴿ t₁ᴺᵉ .raw) 
+                  (tsᴿ ,ᴿ t₂ᴺᶠ .raw)

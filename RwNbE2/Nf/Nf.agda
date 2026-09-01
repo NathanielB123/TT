@@ -1,6 +1,6 @@
 {-# OPTIONS --rewriting --prop #-}
 
-open import Utils.Prop
+open import Utils.Prop renaming (_,_ to _×,_)
 
 open import RwNbE2.Syntax
 
@@ -63,11 +63,11 @@ record FONf (Γ : Ctx Ξ) (A : Ty Γ) (usᴿ : Nesᴿ (lenSig Ξ) (len Γ)) (t :
   forgetFO = record {raw = raw; pred = pred; stab = stab}
 
 record Nfs (Δ : Ctx Ξ) (Γ : Ctx Ξ) (usᴿ : Nesᴿ (lenSig Ξ) (len Δ)) 
-           (δ : Sub Δ Γ)
+           (ts : Tms Δ Γ)
          : Set where
   field
     raw  : Nfsᴿ (lenSig Ξ) (len Δ)
-    pred : NfsPred Δ Γ δ raw
+    pred : NfsPred Δ Γ ts raw
     stab : StableNfs usᴿ raw
 
 record TyNf (Γ : Ctx Ξ) (usᴿ : Nesᴿ (lenSig Ξ) (len Γ)) (A : Ty Γ) : Set where
@@ -84,6 +84,19 @@ open Nf public
 open FONf public
 open Nfs public
 open TyNf public
+
+-- TODO: All constructors for normal forms
+
+εᴺᶠ : Nfs Δ • usᴿ εᵀᵐˢ
+εᴺᶠ .raw    = εᴿ
+εᴺᶠ .pred   = εᴾ
+εᴺᶠ .stab f = εᴼᶜᶜ
+
+_,ᴺᶠ_ : Nfs Δ Γ usᴿ ts → Nf Δ (A [ ⇑ᵀᵐˢ ts ]T) usᴿ t
+      → Nfs Δ (Γ ▷ A) usᴿ (ts ,ᵀᵐˢ t)
+(tsᴺᶠ ,ᴺᶠ tᴺᶠ) .raw    = tsᴺᶠ .raw ,ᴿ tᴺᶠ .raw
+(tsᴺᶠ ,ᴺᶠ tᴺᶠ) .pred   = tsᴺᶠ .pred ,ᴾ tᴺᶠ .pred
+(tsᴺᶠ ,ᴺᶠ tᴺᶠ) .stab f = tsᴺᶠ .stab f ,ᴼᶜᶜ tᴺᶠ .stab f
 
 !ᴺᵉ : (Aᴺᶠ : TyNf Γ usᴿ A) (tᴺᶠ : Nf Γ A usᴿ t) 
     → (tyOfᴿ (tᴺᶠ .raw) ≡ Aᴺᶠ .raw → 𝟘) 

@@ -5,6 +5,7 @@ open import Utils.Prop hiding (Σ; Σᴾ; fst; snd)
 
 open import RwNbE2.Syntax
 open import RwNbE2.Nf.Nf
+open import RwNbE2.Niceness
 
 module RwNbE2.Rewriting where
 
@@ -37,4 +38,6 @@ FullRewEnv Γ usᴿ tsᴿ = RewEnv Γ Γ usᴿ usᴿ tsᴿ idᵀʰ~
 
 -- TODO
 postulate
+  buildᴿᵉʷ : NiceCtx Γ usᴿ tsᴿ → FullRewEnv Γ usᴿ tsᴿ
+
   rw : PreNe Γ A usᴿ t → FONf Γ A usᴿ t ＋ Ne Γ A usᴿ t
