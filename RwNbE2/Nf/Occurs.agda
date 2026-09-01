@@ -31,8 +31,9 @@ data ¬OccursNe where
   -- Exceptions are always fully neutral
   -- Note |¬OccursNe| is still a proposition because exceptions cannot
   -- be pre-neutral
-  !ᴼᶜᶜ : ¬OccursTyNf uᴿ Aᴿ → ¬OccursNf uᴿ tᴿ
-       → ¬OccursNe uᴿ (!ᴿ Aᴿ tᴿ)
+  !ᴼᶜᶜ : ¬OccursTyNf uᴿ A₁ᴿ → ¬OccursTyNf uᴿ A₂ᴿ
+       → ¬OccursNf uᴿ tᴿ
+       → ¬OccursNe uᴿ (!ᴿ A₁ᴿ A₂ᴿ tᴿ)
 
 data ¬OccursPreNe where
   varᴼᶜᶜ : ¬OccursPreNe uᴿ (varᴿ xᴿ)
@@ -162,3 +163,7 @@ tyOfᴼᶜᶜ (ne𝔹ᴼᶜᶜ tᴼᶜᶜ)                 = 𝔹ᴼᶜᶜ
 tyOfᴼᶜᶜ (neℕᴼᶜᶜ tᴼᶜᶜ)                 = ℕᴼᶜᶜ
 tyOfᴼᶜᶜ (neIFᴼᶜᶜ tᴼᶜᶜ Aᴼᶜᶜ Bᴼᶜᶜ uᴼᶜᶜ) = IFᴼᶜᶜ tᴼᶜᶜ Aᴼᶜᶜ Bᴼᶜᶜ
 tyOfᴼᶜᶜ (neIdᴼᶜᶜ t₁ᴼᶜᶜ t₂ᴼᶜᶜ uᴼᶜᶜ)    = Idᴼᶜᶜ (tyOfᴼᶜᶜ t₁ᴼᶜᶜ) t₁ᴼᶜᶜ t₂ᴼᶜᶜ
+
+-- TODO: All inversion lemmas
+ne𝔹ᴼᶜᶜ⁻¹ : ¬OccursNf uᴿ (ne𝔹ᴿ tᴿ) → ¬OccursNe uᴿ tᴿ
+ne𝔹ᴼᶜᶜ⁻¹ (ne𝔹ᴼᶜᶜ tᴼᶜᶜ) = tᴼᶜᶜ

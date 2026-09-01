@@ -82,7 +82,7 @@ injNePred (callᴾ d₁ᴾ ts₁ᴾ u₁ᴾ u₁'ᴾ eq₁ᴾ)
        ← injDefPred d₁ᴾ d₂ᴾ
   with refl ← injNfsPred ts₁ᴾ ts₂ᴾ
   = refl ∧, refl[]
-injNePred (!ᴾ A₁ᴾ t₁ᴾ e₁) (!ᴾ A₂ᴾ t₂ᴾ e₂) 
+injNePred (!ᴾ A₁ᴾ A₁'ᴾ t₁ᴾ e₁) (!ᴾ A₂ᴾ A₂'ᴾ t₂ᴾ e₂) 
   = injNfPred t₁ᴾ t₂ᴾ
 
 injNfPred (lamᴾ A₁ᴾ t₁ᴾ) (lamᴾ A₂ᴾ t₂ᴾ) 

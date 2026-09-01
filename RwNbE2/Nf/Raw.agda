@@ -66,7 +66,7 @@ data Neᴿ where
   -- Exceptional neutrals
   -- Specifically, we can think of these as stuck |unquoteᴺᶠ|s due to lack
   -- of uniqueness of type normal forms
-  !ᴿ : (Aᴺᶠ : TyNfᴿ l n) (tᴺᶠ : Nfᴿ l n) → Neᴿ l n
+  !ᴿ : (A₁ᴺᶠ A₂ᴺᶠ : TyNfᴿ l n) (tᴺᶠ : Nfᴿ l n) → Neᴿ l n
 
 -- Normal forms do not need so many annotations because their predicate are
 -- indexed by type normal forms!

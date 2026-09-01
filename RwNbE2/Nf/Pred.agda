@@ -109,9 +109,9 @@ data NePred where
         → NePred Δ (Id A u₁ u₂ [ ⇑ᵀᵐˢ ts ]T) (eq [ ⇑ᵀᵐˢ ts ]) eqᴿ
         → NePred Δ (B [ ⇑ᵀᵐˢ ts ]T) (v [ ⇑ᵀᵐˢ ts ]) (callᴿ dᴿ tsᴿ u₁ᴿ u₂ᴿ eqᴿ)
 
-  !ᴾ : TyNfPred Γ A Aᴿ → NfPred Γ A t tᴿ
-     → (tyOfᴿ tᴿ ≡ Aᴿ → 𝟘)
-     → NePred Γ A t (!ᴿ Aᴿ tᴿ)
+  !ᴾ : TyNfPred Γ A A₁ᴿ → TyNfPred Γ A A₂ᴿ → NfPred Γ A t tᴿ
+     → (A₁ᴿ ≡ A₂ᴿ → 𝟘)
+     → NePred Γ A t (!ᴿ A₁ᴿ A₂ᴿ tᴿ)
 
 data NfPred where
   lamᴾ : TyNfPred Γ A Aᴿ

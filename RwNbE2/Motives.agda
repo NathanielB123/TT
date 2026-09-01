@@ -2,7 +2,6 @@
 
 open import Utils.Prop
 open import RwNbE2.Syntax
-open import RwNbE2.SyntaxExtras
 open import RwNbE2.Nf.Nf
 open import RwNbE2.Rewriting
 
@@ -58,18 +57,27 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
       -- i.e. the normalisation structure for which we cannot prove this
       -- during construction of the model is that of function types, and
       -- quotation at function type always produces abstractions
-      quote-inj : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
-                  (τ₁ τ₂ : Val ρ t)
-                  (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
-                → quoteⱽ ρ τ₁ .raw ≡ tᴺᶠ .raw 
+      quote-injℱ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
+                   (t₁₂ : t₁ ≡ t₂)
+                   (τ₁ : Val ρ t₁) (τ₂ : Val ρ t₂)
+                → quoteⱽ ρ τ₁ .raw ≡ quoteⱽ ρ τ₂ .raw
+                → FirstOrder (quoteⱽ ρ τ₁ .raw)
+                → τ₁ ≡[ ap (Val ρ) t₁₂ ]≡ τ₂
+
+    quote-inj : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
+                (τ₁ τ₂ : Val ρ t)
+                → quoteⱽ ρ τ₁ .raw ≡ quoteⱽ ρ τ₂ .raw
+                → FirstOrder (quoteⱽ ρ τ₁ .raw)
                 → τ₁ ≡ τ₂
+    quote-inj ρ τ₁ τ₂ eqᴺᶠ tFO = quote-injℱ ρ refl τ₁ τ₂ eqᴺᶠ tFO .[]coe
 
     try-unquoteᴺᶠ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                  (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
                → Val ρ t
     try-unquoteᴺᶠ ρ tᴺᶠ with tyOfᴿ (tᴺᶠ .raw) ≡TyNfᴿ? tyNf ρ .raw
     ... | yes p = unquoteᴺᶠ ρ tᴺᶠ p
-    ... | no  e = unquoteᴺᵉ ρ (!ᴺᵉ (tyNf ρ) (forgetFO tᴺᶠ) e)
+    ... | no  e = unquoteᴺᵉ ρ (!ᴺᵉ (tyOfᴺᶠ (forgetFO tᴺᶠ)) (tyNf ρ) 
+                                   (forgetFO tᴺᶠ) e)
 
     unquoteᴾᴺᵉ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                  (tᴾᴺᵉ : PreNe Δ (A [ δ ]T) usᴿ t)
