@@ -72,7 +72,7 @@ postulate
 -- Global substitutions are pairs of signature weakenings and local 
 -- substitutions
 record Sub {Φ} {Ψ} Δ Γ where
-  constructor _∥_
+  constructor _⇑_
   eta-equality
   field
     ⇓ᵂᵏ  : SigWk Φ Ψ
@@ -88,13 +88,13 @@ postulate
   _[_]* : Tms Δ Γ → (δ : Sub Θ Δ) → Tms Θ (Γ [ δ .⇓ᵂᵏ ]C)
 
 id : Sub Γ Γ
-id = idᵂᵏ ∥ idᵀᵐˢ
+id = idᵂᵏ ⇑ idᵀᵐˢ
 
 ⇑ᵂᵏ : (ψ : SigWk Φ Ψ) → Sub (Γ [ ψ ]C) Γ
-⇑ᵂᵏ ψ = ψ ∥ idᵀᵐˢ
+⇑ᵂᵏ ψ = ψ ⇑ idᵀᵐˢ
 
 ⇑ᵀᵐˢ : Tms Δ Γ → Sub Δ Γ
-⇑ᵀᵐˢ δ = idᵂᵏ ∥ δ
+⇑ᵀᵐˢ δ = idᵂᵏ ⇑ δ
 
 _⨾_ : Sub Δ Γ → Sub Θ Δ → Sub Θ Γ
 (δ ⨾ σ) .⇓ᵂᵏ  = δ .⇓ᵂᵏ ⨾ᵂᵏ σ .⇓ᵂᵏ
@@ -221,7 +221,7 @@ postulate
   {-# REWRITE ▷~ηᵀᵐˢ #-}
 
 ε : (ψ : SigWk Φ Ψ) → Sub {Φ} {Ψ} Δ •
-ε ψ = ψ ∥ εᵀᵐˢ
+ε ψ = ψ ⇑ εᵀᵐˢ
 
 _,_  : (δ : Sub Δ Γ) → Tm Δ (A [ δ ]T) → Sub Δ (Γ ▷ A)
 (δ , t) .⇓ᵂᵏ  = δ .⇓ᵂᵏ
@@ -247,7 +247,7 @@ _,~_ : (δ : Sub Δ Γ) → t₁ [ δ ] ≡ t₂ [ δ ]
 π₂~ δ = π₂~ᵀᵐˢ (δ .⇓ᵀᵐˢ)
 
 •η : δ ≡ ε (δ .⇓ᵂᵏ)
-•η {δ = δ} = ap (δ .⇓ᵂᵏ ∥_) •ηᵀᵐˢ
+•η {δ = δ} = ap (δ .⇓ᵂᵏ ⇑_) •ηᵀᵐˢ
 
 wk : Sub (Γ ▷ A) Γ
 wk = π₁ id

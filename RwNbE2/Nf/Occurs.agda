@@ -67,10 +67,8 @@ data ¬OccursPreNe where
          → ¬OccursPreNe uᴿ (sndᴿ Aᴿ Bᴿ tᴿ)
   
   callᴼᶜᶜ : ¬OccursNfs vᴿ tsᴿ
-          → ¬OccursNf vᴿ u₁ᴿ
-          → ¬OccursNf vᴿ u₂ᴿ
           → ¬OccursNe vᴿ eqᴿ
-          → ¬OccursPreNe vᴿ (callᴿ dᴿ tsᴿ u₁ᴿ u₂ᴿ eqᴿ)
+          → ¬OccursPreNe vᴿ (callᴿ dᴿ tsᴿ eqᴿ)
   
 data ¬OccursNf where
   lamᴼᶜᶜ : ¬OccursTyNf uᴿ Aᴿ

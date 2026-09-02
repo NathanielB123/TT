@@ -35,8 +35,8 @@ module _ (Γᴹ : Ctxᴹ Ψ Γ) (ψ : SigWk Φ Ψ)
 module _ (ψ : SigWk Φ Ψ) {ts} (tsᴹ : Tmsᴹ Δᴹ (Γᴹ [ ψ ]Cᴹ) ts)
          (let module tsᴹ = SubNS tsᴹ)
          where
-  _∥ᴹ_ : Subᴹ Δᴹ Γᴹ (ψ ∥ ts)
-  _∥ᴹ_ .eval* ρ = tsᴹ.eval* ρ
+  _⇑ᴹ_ : Subᴹ Δᴹ Γᴹ (ψ ⇑ ts)
+  _⇑ᴹ_ .eval* ρ = tsᴹ.eval* ρ
 
 module _ (tsᴹ : Tmsᴹ Δᴹ Γᴹ ts) (δᴹ : Subᴹ Θᴹ Δᴹ δ)
          where
@@ -81,7 +81,7 @@ module _ {Γᴹ : Ctxᴹ Ψ Γ} (ρ : Γᴹ .Env usᴿ Δᴿᵉʷ δ)
   -- TODO (needs environment thinning)
   postulate
     _^ᴱ_ : (Γᴹ ▷ᴹ Aᴹ).Env (usᴿ [ wkᴿ ]Nesᴿ) (Δᴿᵉʷ [ wkᵀʰ ]ᴿᵉʷ) (δ ^ A)
-    
+
 module _ (Aᴹ : Tyᴹ Γᴹ A) (Bᴹ : Tyᴹ (Γᴹ ▷ᴹ Aᴹ) B) 
          (let module Γᴹ = CtxNS Γᴹ)
          (let module Aᴹ = TyNS Aᴹ)

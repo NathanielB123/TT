@@ -58,9 +58,7 @@ data Neᴿ where
   fstᴿ sndᴿ : (Aᴿ : TyNfᴿ l n) (Bᴿ : TyNfᴿ l (suc n)) (tᴿ : Neᴿ l n) 
             → Neᴿ l n
 
-  callᴿ : (dᴿ : Defᴿ l) (tsᴿ : Nfsᴿ l n) 
-          (u₁ᴿ u₂ᴿ : Nfᴿ l n) 
-          (eqᴿ : Neᴿ l n) 
+  callᴿ : (dᴿ : Defᴿ l) (tsᴿ : Nfsᴿ l n) (eqᴿ : Neᴿ l n) 
         → Neᴿ l n
 
   -- Exceptional neutrals

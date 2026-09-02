@@ -104,10 +104,8 @@ data NePred where
   callᴾ : {eq : Tm Γ (Id A u₁ u₂)} 
         → DefPred Ξ Γ B eq v dᴿ
         → NfsPred Δ Γ ts tsᴿ
-        → NfPred Δ (A [ ⇑ᵀᵐˢ ts ]T) (u₁ [ ⇑ᵀᵐˢ ts ]) u₁ᴿ
-        → NfPred Δ (A [ ⇑ᵀᵐˢ ts ]T) (u₂ [ ⇑ᵀᵐˢ ts ]) u₂ᴿ
         → NePred Δ (Id A u₁ u₂ [ ⇑ᵀᵐˢ ts ]T) (eq [ ⇑ᵀᵐˢ ts ]) eqᴿ
-        → NePred Δ (B [ ⇑ᵀᵐˢ ts ]T) (v [ ⇑ᵀᵐˢ ts ]) (callᴿ dᴿ tsᴿ u₁ᴿ u₂ᴿ eqᴿ)
+        → NePred Δ (B [ ⇑ᵀᵐˢ ts ]T) (v [ ⇑ᵀᵐˢ ts ]) (callᴿ dᴿ tsᴿ eqᴿ)
 
   !ᴾ : TyNfPred Γ A A₁ᴿ → TyNfPred Γ A A₂ᴿ → NfPred Γ A t tᴿ
      → (A₁ᴿ ≡ A₂ᴿ → 𝟘)

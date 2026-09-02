@@ -76,8 +76,8 @@ injNePred (sndᴾ A₁ᴾ B₁ᴾ t₁ᴾ) (sndᴾ A₂ᴾ B₂ᴾ t₂ᴾ)
   with refl ← injTyNfPred B₁ᴾ B₂ᴾ
   with _ ∧, refl[] ← injNePred t₁ᴾ t₂ᴾ
   = refl ∧, refl[]
-injNePred (callᴾ d₁ᴾ ts₁ᴾ u₁ᴾ u₁'ᴾ eq₁ᴾ) 
-          (callᴾ d₂ᴾ ts₂ᴾ u₂ᴾ u₂'ᴾ eq₂ᴾ) 
+injNePred (callᴾ d₁ᴾ ts₁ᴾ eq₁ᴾ) 
+          (callᴾ d₂ᴾ ts₂ᴾ eq₂ᴾ) 
   with refl ∧, _ ∧, _ ∧, _ ∧, refl[] ∧, _ ∧, refl[]
        ← injDefPred d₁ᴾ d₂ᴾ
   with refl ← injNfsPred ts₁ᴾ ts₂ᴾ
