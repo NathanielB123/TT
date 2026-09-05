@@ -46,8 +46,8 @@ ff-tt-disj : ff ≡ tt → 𝟘
 ff-tt-disj ()
 
 ℤ₂ : Grpdᴰ ⟦Γ⟧
-ℤ₂ .fst .Carᴰ ρ         = 𝟙
-ℤ₂ .fst .Relᴰ ρ₁ ρ₂ ρ₁₂ = Bool
+ℤ₂ .fst .Obᴰ  ρ         = 𝟙
+ℤ₂ .fst .Homᴰ ρ₁ ρ₂ ρ₁₂ = Bool
 
 ℤ₂ .snd .idᴰ  ⟨⟩    = tt
 ℤ₂ .snd ._⁻¹ᴰ b     = b

@@ -24,9 +24,9 @@ module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧))
     module ⟦p⟧ = _⇒ᴰ_ ⟦p⟧
 
   -- Helper
-  tu-pres : ∀ {ρ₁ ρ₂} (ρ₁₂ : ⟦Γ⟧ .fst .Rel ρ₁ ρ₂) 
+  tu-pres : ∀ {ρ₁ ρ₂} (ρ₁₂ : ⟦Γ⟧ .fst .Hom ρ₁ ρ₂) 
          → (⟦p⟧.act ρ₁ ⟦A⟧.⁻¹ᴰ) ⟦A⟧.∘ᴰ (⟦t⟧.pres ρ₁₂ ⟦A⟧.∘ᴰ ⟦p⟧.act ρ₂)
-         ≡[ ap (⟦A⟧ .fst .Relᴰ _ _) (⟦Γ⟧.id⁻¹∘∘id ρ₁₂) 
+         ≡[ ap (⟦A⟧ .fst .Homᴰ _ _) (⟦Γ⟧.id⁻¹∘∘id ρ₁₂) 
          ]≡ ⟦u⟧.pres ρ₁₂
   tu-pres {ρ₁ = ρ₁} {ρ₂ = ρ₂} ρ₁₂ 
     rewrite ↑≡ ⟦Γ⟧.∘id ρ₁₂
@@ -46,7 +46,7 @@ module _ (⟦P⟧ : ⟦Ty⟧ (⟦▷⟧ ⟦Γ⟧ ⟦A⟧))
   ⟦tr⟧ .act  ρ   = ⟦P⟧.coeG (⟦Γ⟧.id ρ , ⟦p⟧.act ρ) (⟦d⟧.act ρ)
   ⟦tr⟧ .pres {x₁ = ρ₁} {x₂ = ρ₂} ρ₁₂ 
       rewrite ↑≡ ⟦Γ⟧.id⁻¹∘∘id ρ₁₂
-      = tr (λ □ → ⟦P⟧ .fst .Relᴰ _ _ (ρ₁₂ , □)) (tu-pres ρ₁₂ .[]coe)
+      = tr (λ □ → ⟦P⟧ .fst .Homᴰ _ _ (ρ₁₂ , □)) (tu-pres ρ₁₂ .[]coe)
       ((⟦P⟧.cohG (⟦Γ⟧.id ρ₁ , ⟦p⟧.act ρ₁) (⟦d⟧.act ρ₁) ⟦P⟧.⁻¹ᴰ) ⟦P⟧.∘ᴰ 
       (⟦d⟧.pres ρ₁₂ ⟦P⟧.∘ᴰ ⟦P⟧.cohG (⟦Γ⟧.id ρ₂ , ⟦p⟧.act ρ₂) (⟦d⟧.act ρ₂)))
   ⟦tr⟧ .pres-∘ᴰ {x₁ = ρ₁} {x₂ = ρ₂} {x₃ = ρ₃} ρ₁₂ ρ₂₃ 
