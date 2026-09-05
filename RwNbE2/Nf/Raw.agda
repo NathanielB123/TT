@@ -211,6 +211,9 @@ postulate
   _[_]TyNfᴿ  : TyNfᴿ l n → Thinᴿ m n → TyNfᴿ l m
   _[_]Nfsᴿ   : Nfsᴿ l n → Thinᴿ m n → Nfsᴿ l m
 
+  tyOf[]ᴿ : tyOfᴿ (tᴿ [ δᴿ ]Nfᴿ) ≡S tyOfᴿ tᴿ [ δᴿ ]TyNfᴿ
+  {-# REWRITE tyOf[]ᴿ #-}
+
 _[_]Nesᴿ   : Nesᴿ l n → Thinᴿ m n → Nesᴿ l m
 εᴿ          [ δᴿ ]Nesᴿ = εᴿ
 (usᴿ ,ᴿ uᴿ) [ δᴿ ]Nesᴿ = (usᴿ [ δᴿ ]Nesᴿ) ,ᴿ (uᴿ [ δᴿ ]Neᴿ)

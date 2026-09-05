@@ -1,6 +1,7 @@
-{-# OPTIONS --prop --rewriting --allow-unsolved-metas #-}
+{-# OPTIONS --prop --rewriting --show-irrelevant #-}
 
 open import Utils.Prop
+open import Utils.MacroProp
 open import RwNbE2.Syntax
 open import RwNbE2.Nf.Nf
 open import RwNbE2.Rewriting
@@ -26,7 +27,7 @@ record CtxNS (Ψ : Sig) (Γ : Ctx Ψ) : Set₁ where
           → ρ [ σᵀʰ ]ᴱ [ γᵀʰ ]ᴱ ≡ ρ [ σᵀʰ ⨾ᵀʰ γᵀʰ ]ᴱ
 
     quote*[] : (ρ : Env {Φ} usᴿ Δᴿᵉʷ δ) (σᵀʰ : Thin Θ Δ vs)
-             → quote* (ρ [ σᵀʰ ]ᴱ) ≡ quote* ρ [ σᵀʰ ]Nfs
+             → quote* (ρ [ σᵀʰ ]ᴱ) .raw ≡ (quote* ρ [ σᵀʰ ]Nfs) .raw
 
 module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
          (let module Γᴹ = CtxNS Γᴹ)
@@ -80,8 +81,8 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
             ≡[ ap (λ □ → Val □ _) (Γᴹ.[][]ᴱ ρ σᵀʰ γᵀʰ)
             ]≡ τ [ σᵀʰ ⨾ᵀʰ γᵀʰ ]ⱽ
 
-      tyNf[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)  (σᵀʰ : Thin Θ Δ vs)
-             → tyNf (ρ Γᴹ.[ σᵀʰ ]ᴱ) ≡ tyNf ρ [ σᵀʰ ]TyNf
+      tyNf[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ) (σᵀʰ : Thin Θ Δ vs)
+             → tyNf (ρ Γᴹ.[ σᵀʰ ]ᴱ) .raw ≡ (tyNf ρ [ σᵀʰ ]TyNf) .raw
 
     unquoteᴺᶠ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                 (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
@@ -93,7 +94,12 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
       unquoteᴺᶠ[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ) (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
                     (σᵀʰ : Thin Θ Δ vs)
                     (eq : tyOfᴿ (tᴺᶠ .raw) ≡ tyNf ρ .raw)
-                  → unquoteᴺᶠ (ρ Γᴹ.[ σᵀʰ ]ᴱ) (tᴺᶠ [ σᵀʰ ]FONf) {!!}
+                  → unquoteᴺᶠ (ρ Γᴹ.[ σᵀʰ ]ᴱ) (tᴺᶠ [ σᵀʰ ]FONf)
+                              (tyOfᴿ ((tᴺᶠ [ σᵀʰ ]FONf) .raw)
+                              ≡⟨ ap (_[ σᵀʰ .raw ]TyNfᴿ) eq ⟩
+                              (tyNf ρ [ σᵀʰ ]TyNf) .raw
+                              ≡⟨ sym (tyNf[] ρ σᵀʰ) ⟩
+                              tyNf (ρ Γᴹ.[ σᵀʰ ]ᴱ) .raw ∎)
                   ≡ unquoteᴺᶠ ρ tᴺᶠ eq [ σᵀʰ ]ⱽ
 
       unquoteᴺᵉ[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ) (tᴺᵉ : Ne Δ (A [ δ ]T) usᴿ t)
@@ -102,8 +108,8 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
                   ≡ unquoteᴺᵉ ρ tᴺᵉ [ σᵀʰ ]ⱽ
 
       quote[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ) (τ : Val ρ t) (σᵀʰ : Thin Θ Δ vs)
-              → quoteⱽ (ρ Γᴹ.[ σᵀʰ ]ᴱ) (τ [ σᵀʰ ]ⱽ)
-              ≡ quoteⱽ ρ τ [ σᵀʰ ]Nf
+              → quoteⱽ (ρ Γᴹ.[ σᵀʰ ]ᴱ) (τ [ σᵀʰ ]ⱽ) .raw
+              ≡ (quoteⱽ ρ τ [ σᵀʰ ]Nf) .raw
 
     quote-inj : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                 (τ₁ τ₂ : Val ρ t)
@@ -126,6 +132,10 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
     unquoteᴾᴺᵉ {Δᴿᵉʷ = Δᴿᵉʷ} ρ tᴾᴺᵉ with rw Δᴿᵉʷ tᴾᴺᵉ
     ... | inl tᴺᶠ = try-unquoteᴺᶠ ρ tᴺᶠ
     ... | inr tᴺᵉ = unquoteᴺᵉ ρ tᴺᵉ
+
+    vzⱽ : (ρ : Γᴹ.Env {Δ = Δ ▷ (A [ δ ]T)} usᴿ Δᴿᵉʷ (δ ⨾ wk))
+        → Val ρ vz
+    vzⱽ ρ = unquoteᴾᴺᵉ ρ vzᴾᴺᵉ
 
 module _ (Δᴹ : CtxNS Φ Δ) (Γᴹ : CtxNS Ψ Γ) (δ : Sub Δ Γ)
          (let module Δᴹ = CtxNS Δᴹ) (let module Γᴹ = CtxNS Γᴹ)

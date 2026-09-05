@@ -116,6 +116,11 @@ _,~ᴺᶠ : Nfs Δ Γ usᴿ ts → Nfs Δ (Γ ▷ t₁ ~ t₂) usᴿ (ts ,~ᵀ�
 (tsᴺᶠ ,~ᴺᶠ) .pred   = tsᴺᶠ .pred ,~ᴾ
 (tsᴺᶠ ,~ᴺᶠ) .stab f = tsᴺᶠ .stab f
 
+vzᴾᴺᵉ : PreNe (Γ ▷ A) (A [ wk ]T) usᴿ vz
+vzᴾᴺᵉ {Γ = Γ} .raw    = varᴿ (vzᴿ {n = vars Γ})
+vzᴾᴺᵉ         .pred   = varᴾ vzᴾ
+vzᴾᴺᵉ         .stab f = varᴼᶜᶜ
+
 !ᴺᵉ : (A₁ᴺᶠ A₂ᴺᶠ : TyNf Γ usᴿ A) (tᴺᶠ : Nf Γ A usᴿ t)
     → (A₁ᴺᶠ .raw ≡ A₂ᴺᶠ .raw → 𝟘)
     → Ne Γ A usᴿ t
@@ -265,22 +270,45 @@ _⨾ᵀʰ_ : Thin Δ Γ ts → Thin Θ Δ us → Thin Θ Γ (ts ⨾ᵀᵐˢ us)
 -- Note normal forms *are* stable under arbitrary (including
 -- conversion-extending) thinnings, as long as we don't also have
 -- to extend the list of faults!
-postulate
-  _[_]TyNf : (Aᴺᶠ : TyNf Γ usᴿ A)
-             (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
-           → TyNf Δ (usᴿ [ δᵀʰ .raw ]Nesᴿ) (A [ ⇑ᵀᵐˢ vs ]T)
-  _[_]Nf  : (tᴺᶠ : Nf Γ A usᴿ t)
+
+open import RwNbE2.Cheat
+
+_[_]TyNf  : (Aᴺᶠ : TyNf Γ usᴿ A)
             (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
-          → Nf Δ (A [ ⇑ᵀᵐˢ vs ]T) (usᴿ [ δᵀʰ .raw ]Nesᴿ) (t [ ⇑ᵀᵐˢ vs ])
-  _[_]Nfs : (tsᴺᶠ : Nfs Δ Γ usᴿ ts)
-            (σᵀʰ : Thin[ qᵀʰ ] Θ Δ vs)
-          → Nfs Θ Γ (usᴿ [ σᵀʰ .raw ]Nesᴿ) (ts ⨾ᵀᵐˢ vs)
+          → TyNf Δ (usᴿ [ δᵀʰ .raw ]Nesᴿ) (A [ ⇑ᵀᵐˢ vs ]T)
+(Aᴺᶠ [ δᵀʰ ]TyNf) .raw  = Aᴺᶠ .raw [ δᵀʰ .raw ]TyNfᴿ
+(Aᴺᶠ [ δᵀʰ ]TyNf) .pred = todo
+(Aᴺᶠ [ δᵀʰ ]TyNf) .stab = todo
 
-  _[_]Ne : Ne Γ A usᴿ t → (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
-        → Ne Δ (A [ ⇑ᵀᵐˢ vs ]T) (usᴿ [ δᵀʰ .raw ]Nesᴿ) (t [ ⇑ᵀᵐˢ vs ])
+_[_]Nf  : (tᴺᶠ : Nf Γ A usᴿ t)
+          (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
+        → Nf Δ (A [ ⇑ᵀᵐˢ vs ]T) (usᴿ [ δᵀʰ .raw ]Nesᴿ) (t [ ⇑ᵀᵐˢ vs ])
+(tᴺᶠ [ δᵀʰ ]Nf) .raw  = tᴺᶠ .raw [ δᵀʰ .raw ]Nfᴿ
+(tᴺᶠ [ δᵀʰ ]Nf) .pred = todo
+(tᴺᶠ [ δᵀʰ ]Nf) .stab = todo
 
-  _[_]FONf : FONf Γ A usᴿ t → (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
-           → FONf Δ (A [ ⇑ᵀᵐˢ vs ]T) (usᴿ [ δᵀʰ .raw ]Nesᴿ) (t [ ⇑ᵀᵐˢ vs ])
+_[_]Nfs : (tsᴺᶠ : Nfs Δ Γ usᴿ ts)
+          (σᵀʰ : Thin[ qᵀʰ ] Θ Δ vs)
+        → Nfs Θ Γ (usᴿ [ σᵀʰ .raw ]Nesᴿ) (ts ⨾ᵀᵐˢ vs)
+(tsᴺᶠ [ δᵀʰ ]Nfs) .raw  = tsᴺᶠ .raw [ δᵀʰ .raw ]Nfsᴿ
+(tsᴺᶠ [ δᵀʰ ]Nfs) .pred = todo
+(tsᴺᶠ [ δᵀʰ ]Nfs) .stab = todo
 
-  _[_]PreNe : PreNe Γ A usᴿ t → (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
-            → PreNe Δ (A [ ⇑ᵀᵐˢ vs ]T) (usᴿ [ δᵀʰ .raw ]Nesᴿ) (t [ ⇑ᵀᵐˢ vs ])
+_[_]Ne : Ne Γ A usᴿ t → (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
+      → Ne Δ (A [ ⇑ᵀᵐˢ vs ]T) (usᴿ [ δᵀʰ .raw ]Nesᴿ) (t [ ⇑ᵀᵐˢ vs ])
+(tᴺᵉ [ δᵀʰ ]Ne) .raw  = tᴺᵉ .raw [ δᵀʰ .raw ]Neᴿ
+(tᴺᵉ [ δᵀʰ ]Ne) .pred = todo
+(tᴺᵉ [ δᵀʰ ]Ne) .stab = todo
+
+_[_]FONf : FONf Γ A usᴿ t → (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
+          → FONf Δ (A [ ⇑ᵀᵐˢ vs ]T) (usᴿ [ δᵀʰ .raw ]Nesᴿ) (t [ ⇑ᵀᵐˢ vs ])
+(tᴺᶠ [ δᵀʰ ]FONf) .raw  = tᴺᶠ .raw [ δᵀʰ .raw ]Nfᴿ
+(tᴺᶠ [ δᵀʰ ]FONf) .pred = todo
+(tᴺᶠ [ δᵀʰ ]FONf) .stab = todo
+(tᴺᶠ [ δᵀʰ ]FONf) .fo   = todo
+
+_[_]PreNe : PreNe Γ A usᴿ t → (δᵀʰ : Thin[ qᵀʰ ] Δ Γ vs)
+          → PreNe Δ (A [ ⇑ᵀᵐˢ vs ]T) (usᴿ [ δᵀʰ .raw ]Nesᴿ) (t [ ⇑ᵀᵐˢ vs ])
+(tᴾᴺᵉ [ δᵀʰ ]PreNe) .raw  = tᴾᴺᵉ .raw [ δᵀʰ .raw ]Neᴿ
+(tᴾᴺᵉ [ δᵀʰ ]PreNe) .pred = todo
+(tᴾᴺᵉ [ δᵀʰ ]PreNe) .stab = todo

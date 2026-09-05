@@ -167,6 +167,15 @@ tyOfᴼᶜᶜ (neIdᴼᶜᶜ t₁ᴼᶜᶜ t₂ᴼᶜᶜ uᴼᶜᶜ)    = Idᴼ�
 ne𝔹ᴼᶜᶜ⁻¹ : ¬OccursNf uᴿ (ne𝔹ᴿ tᴿ) → ¬OccursNe uᴿ tᴿ
 ne𝔹ᴼᶜᶜ⁻¹ (ne𝔹ᴼᶜᶜ tᴼᶜᶜ) = tᴼᶜᶜ
 
+pair₁ᴼᶜᶜ⁻¹ : ¬OccursNf wᴿ (pairᴿ Bᴿ tᴿ uᴿ) → ¬OccursTyNf (wᴿ [ wkᴿ ]Neᴿ) Bᴿ
+pair₁ᴼᶜᶜ⁻¹ (pairᴼᶜᶜ Bᴼᶜᶜ tᴼᶜᶜ uᴼᶜᶜ) = Bᴼᶜᶜ
+
+pair₂ᴼᶜᶜ⁻¹ : ¬OccursNf wᴿ (pairᴿ Bᴿ tᴿ uᴿ) → ¬OccursNf wᴿ tᴿ
+pair₂ᴼᶜᶜ⁻¹ (pairᴼᶜᶜ Bᴼᶜᶜ tᴼᶜᶜ uᴼᶜᶜ) = tᴼᶜᶜ
+
+pair₃ᴼᶜᶜ⁻¹ : ¬OccursNf wᴿ (pairᴿ Bᴿ tᴿ uᴿ) → ¬OccursNf wᴿ uᴿ
+pair₃ᴼᶜᶜ⁻¹ (pairᴼᶜᶜ Bᴼᶜᶜ tᴼᶜᶜ uᴼᶜᶜ) = uᴼᶜᶜ
+
 postulate
   _[_]F : Faulty usᴿ uᴿ → (δᴿ : Thinᴿ m n)
         → Faulty (usᴿ [ δᴿ ]Nesᴿ) (uᴿ [ δᴿ ]Neᴿ)
