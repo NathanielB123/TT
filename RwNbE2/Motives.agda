@@ -1,4 +1,4 @@
-{-# OPTIONS --prop --rewriting #-}
+{-# OPTIONS --prop --rewriting --allow-unsolved-metas #-}
 
 open import Utils.Prop
 open import RwNbE2.Syntax
@@ -7,52 +7,58 @@ open import RwNbE2.Rewriting
 
 module RwNbE2.Motives where
 
-variable
-  Γᴿᵉʷ Δᴿᵉʷ Θᴿᵉʷ : RewEnv _ _ _ _ _ _
-
 record CtxNS (Ψ : Sig) (Γ : Ctx Ψ) : Set₁ where
   field
-    Env : (usᴿ : Nesᴿ (lenSig Φ) (len Δ))
+    Env : (usᴿ : Nesᴿ (defs Φ) (vars Δ))
           (Δᴿᵉʷ : FullRewEnv Δ usᴿ tsᴿ)
           (δ : Sub Δ Γ)
         → Set
-    -- TODO: Env thinning and functor laws
+
+    _[_]ᴱ : (ρ : Env usᴿ Δᴿᵉʷ δ)
+            (σᵀʰ : Thin Θ Δ vs)
+          → Env (usᴿ [ σᵀʰ .raw ]Nesᴿ) (Δᴿᵉʷ [ σᵀʰ ]ᴿᵉʷ) (δ ⨾ ⇑ᵀᵐˢ vs)
 
     quote* : (ρ : Env usᴿ Δᴿᵉʷ δ)
            → Nfs Δ (Γ [ ⇓ᵂᵏ δ ]C) usᴿ (δ .⇓ᵀᵐˢ)
-    -- TODO: Naturality of quote*
 
-module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ) 
+    [id]ᴱ : (ρ : Env {Φ} {Δ} usᴿ Δᴿᵉʷ δ) → ρ [ idᵀʰ ]ᴱ ≡ ρ
+    [][]ᴱ : (ρ : Env usᴿ Δᴿᵉʷ δ) (σᵀʰ : Thin Θ Δ vs) (γᵀʰ : Thin Λ Θ ws)
+          → ρ [ σᵀʰ ]ᴱ [ γᵀʰ ]ᴱ ≡ ρ [ σᵀʰ ⨾ᵀʰ γᵀʰ ]ᴱ
+
+    quote*[] : (ρ : Env {Φ} usᴿ Δᴿᵉʷ δ) (σᵀʰ : Thin Θ Δ vs)
+             → quote* (ρ [ σᵀʰ ]ᴱ) ≡ quote* ρ [ σᵀʰ ]Nfs
+
+module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
          (let module Γᴹ = CtxNS Γᴹ)
          where
-          
+  private variable
+    ρ : Γᴹ.Env _ _ _
+
   record TyNS  : Set₁ where
     field
       Val : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
             (t : Tm Δ (A [ δ ]T))
           → Set
-      -- TODO: Val thinning and functor lawsy
+
+      _[_]ⱽ : (τ : Val ρ t) (σᵀʰ : Thin Θ Δ vs)
+            → Val (ρ Γᴹ.[ σᵀʰ ]ᴱ) (t [ ⇑ᵀᵐˢ vs ])
 
       tyNf : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
            → TyNf Δ usᴿ (A [ δ ]T)
-      -- TODO: Naturality of tyNf
 
       unquoteᴺᶠℱ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                    (A≡ : A[] ≡ A [ δ ]T)
                    (tᴺᶠ : FONf Δ A[] usᴿ t)
-                → tyOfᴿ (tᴺᶠ .raw) ≡ tyNf ρ .raw 
+                → tyOfᴿ (tᴺᶠ .raw) ≡ tyNf ρ .raw
                 → Val ρ (tr (Tm Δ) A≡ t)
-      -- TODO: Naturality of unquoteᴺᶠ
 
       unquoteᴺᵉ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                   (tᴺᵉ : Ne Δ (A [ δ ]T) usᴿ t)
                 → Val ρ t
-      -- TODO: Naturality of unquoteᴺᵉ
 
       quoteⱽ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                (τ : Val ρ t)
               → Nf Δ (A [ δ ]T) usᴿ t
-      -- TODO: Naturality of quoteⱽ
 
       -- Quotation is injective on first order normal forms
       -- i.e. the normalisation structure for which we cannot prove this
@@ -65,12 +71,40 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
                 → FirstOrder (quoteⱽ ρ τ₁ .raw)
                 → τ₁ ≡[ ap (Val ρ) t₁₂ ]≡ τ₂
 
+      [id]ⱽ : {ρ : Γᴹ.Env {Φ} {Δ} usᴿ Δᴿᵉʷ δ} (τ : Val ρ t)
+            → τ [ idᵀʰ ]ⱽ ≡[ ap (λ □ → Val □ t) (Γᴹ.[id]ᴱ ρ) ]≡ τ
+
+      [][]ⱽ : {ρ : Γᴹ.Env {Φ} {Δ} {tsᴿ} usᴿ Δᴿᵉʷ δ} (τ : Val ρ t)
+              (σᵀʰ : Thin Θ Δ vs) (γᵀʰ : Thin Λ Θ ws)
+            → τ [ σᵀʰ ]ⱽ [ γᵀʰ ]ⱽ
+            ≡[ ap (λ □ → Val □ _) (Γᴹ.[][]ᴱ ρ σᵀʰ γᵀʰ)
+            ]≡ τ [ σᵀʰ ⨾ᵀʰ γᵀʰ ]ⱽ
+
+      tyNf[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)  (σᵀʰ : Thin Θ Δ vs)
+             → tyNf (ρ Γᴹ.[ σᵀʰ ]ᴱ) ≡ tyNf ρ [ σᵀʰ ]TyNf
+
     unquoteᴺᶠ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                 (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
-              → tyOfᴿ (tᴺᶠ .raw) ≡ tyNf ρ .raw 
+              → tyOfᴿ (tᴺᶠ .raw) ≡ tyNf ρ .raw
               → Val ρ t
     unquoteᴺᶠ ρ tᴺᶠ p = unquoteᴺᶠℱ ρ refl tᴺᶠ p
-    
+
+    field
+      unquoteᴺᶠ[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ) (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
+                    (σᵀʰ : Thin Θ Δ vs)
+                    (eq : tyOfᴿ (tᴺᶠ .raw) ≡ tyNf ρ .raw)
+                  → unquoteᴺᶠ (ρ Γᴹ.[ σᵀʰ ]ᴱ) (tᴺᶠ [ σᵀʰ ]FONf) {!!}
+                  ≡ unquoteᴺᶠ ρ tᴺᶠ eq [ σᵀʰ ]ⱽ
+
+      unquoteᴺᵉ[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ) (tᴺᵉ : Ne Δ (A [ δ ]T) usᴿ t)
+                    (σᵀʰ : Thin Θ Δ vs)
+                  → unquoteᴺᵉ (ρ Γᴹ.[ σᵀʰ ]ᴱ) (tᴺᵉ [ σᵀʰ ]Ne)
+                  ≡ unquoteᴺᵉ ρ tᴺᵉ [ σᵀʰ ]ⱽ
+
+      quote[] : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ) (τ : Val ρ t) (σᵀʰ : Thin Θ Δ vs)
+              → quoteⱽ (ρ Γᴹ.[ σᵀʰ ]ᴱ) (τ [ σᵀʰ ]ⱽ)
+              ≡ quoteⱽ ρ τ [ σᵀʰ ]Nf
+
     quote-inj : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                 (τ₁ τ₂ : Val ρ t)
                 → quoteⱽ ρ τ₁ .raw ≡ quoteⱽ ρ τ₂ .raw
@@ -79,28 +113,30 @@ module _ (Γᴹ : CtxNS Ψ Γ) (A : Ty Γ)
     quote-inj ρ τ₁ τ₂ eqᴺᶠ tFO = quote-injℱ ρ refl τ₁ τ₂ eqᴺᶠ tFO .[]coe
 
     try-unquoteᴺᶠ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
-                 (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
-               → Val ρ t
+                    (tᴺᶠ : FONf Δ (A [ δ ]T) usᴿ t)
+                  → Val ρ t
     try-unquoteᴺᶠ ρ tᴺᶠ with tyOfᴿ (tᴺᶠ .raw) ≡TyNfᴿ? tyNf ρ .raw
     ... | yes p = unquoteᴺᶠ ρ tᴺᶠ p
-    ... | no  e = unquoteᴺᵉ ρ (!ᴺᵉ (tyOfᴺᶠ (forgetFO tᴺᶠ)) (tyNf ρ) 
+    ... | no  e = unquoteᴺᵉ ρ (!ᴺᵉ (tyOfᴺᶠ (forgetFO tᴺᶠ)) (tyNf ρ)
                                    (forgetFO tᴺᶠ) e)
 
     unquoteᴾᴺᵉ : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
                  (tᴾᴺᵉ : PreNe Δ (A [ δ ]T) usᴿ t)
                → Val ρ t
-    unquoteᴾᴺᵉ ρ tᴾᴺᵉ with rw tᴾᴺᵉ
+    unquoteᴾᴺᵉ {Δᴿᵉʷ = Δᴿᵉʷ} ρ tᴾᴺᵉ with rw Δᴿᵉʷ tᴾᴺᵉ
     ... | inl tᴺᶠ = try-unquoteᴺᶠ ρ tᴺᶠ
     ... | inr tᴺᵉ = unquoteᴺᵉ ρ tᴺᵉ
 
-module _ (Δᴹ : CtxNS Φ Δ) (Γᴹ : CtxNS Ψ Γ) (δ : Sub Δ Γ) 
+module _ (Δᴹ : CtxNS Φ Δ) (Γᴹ : CtxNS Ψ Γ) (δ : Sub Δ Γ)
          (let module Δᴹ = CtxNS Δᴹ) (let module Γᴹ = CtxNS Γᴹ)
          where
   record SubNS : Set where
     field
       eval* : (ρ : Δᴹ.Env usᴿ Θᴿᵉʷ σ)
             → Γᴹ.Env usᴿ Θᴿᵉʷ (δ ⨾ σ)
-      -- TODO: Naturality of |eval*|
+
+      eval*[] : (ρ : Δᴹ.Env usᴿ Θᴿᵉʷ σ) (γᵀʰ : Thin Λ Θ vs)
+              → eval* (ρ Δᴹ.[ γᵀʰ ]ᴱ) ≡ (eval* ρ Γᴹ.[ γᵀʰ ]ᴱ)
 
 module _ (Γᴹ : CtxNS Ψ Γ) (Aᴹ : TyNS Γᴹ A)
          (t : Tm Γ A)
@@ -108,10 +144,12 @@ module _ (Γᴹ : CtxNS Ψ Γ) (Aᴹ : TyNS Γᴹ A)
          where
   record TmNS : Set where
     field
-      eval : (ρ : Γᴹ.Env {Δ = Δ} usᴿ Δᴿᵉʷ δ)
-             (t : Tm Γ A)
+      eval : (ρ : Γᴹ.Env usᴿ Δᴿᵉʷ δ)
            → Aᴹ.Val ρ (t [ δ ])
-    -- TODO: Naturality of |eval|
+
+      eval[] : (ρ : Γᴹ.Env {Δ = Δ} usᴿ Δᴿᵉʷ δ)
+               (σᵀʰ : Thin Θ Δ vs)
+             → eval (ρ Γᴹ.[ σᵀʰ ]ᴱ) ≡ eval ρ Aᴹ.[ σᵀʰ ]ⱽ
 
 open CtxNS public
 open TyNS  public
@@ -133,5 +171,5 @@ Tmsᴹ Δᴹ Γᴹ ts = SubNS Δᴹ Γᴹ (⇑ᵀᵐˢ ts)
 variable
   Γᴹ Δᴹ Θᴹ : Ctxᴹ _ _
   Aᴹ Bᴹ Cᴹ : Tyᴹ _ _
-  tᴹ uᴹ vᴹ : Tmᴹ _ _ _
+  tᴹ uᴹ vᴹ t₁ᴹ t₂ᴹ : Tmᴹ _ _ _
   δᴹ σᴹ γᴹ : Subᴹ _ _ _

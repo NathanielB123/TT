@@ -8,7 +8,7 @@ open import RwNbE2.Nf.Raw
 -- positive version
 module RwNbE2.Nf.Occurs where
 
-data ¬OccursPreNe : (uᴿ : Neᴿ l n) (tᴿ : Neᴿ l n) 
+data ¬OccursPreNe : (uᴿ : Neᴿ l n) (tᴿ : Neᴿ l n)
                   → Set
 
 data ¬OccursNe : (uᴿ : Neᴿ l n) (tᴿ : Neᴿ l n)
@@ -25,14 +25,15 @@ data ¬OccursNfs : (uᴿ : Neᴿ l m) (tsᴿ : Nfsᴿ l m)
 
 data ¬OccursNe where
   neᴼᶜᶜ : (uᴿ ≡ tᴿ → 𝟘)
-        → ¬OccursPreNe uᴿ tᴿ 
+        → ¬OccursPreNe uᴿ tᴿ
         → ¬OccursNe uᴿ tᴿ
-  
+
   -- Exceptions are always fully neutral
   -- Note |¬OccursNe| is still a proposition because exceptions cannot
   -- be pre-neutral
   !ᴼᶜᶜ : ¬OccursTyNf uᴿ A₁ᴿ → ¬OccursTyNf uᴿ A₂ᴿ
        → ¬OccursNf uᴿ tᴿ
+       → (A₁ᴿ ≡ A₂ᴿ → 𝟘)
        → ¬OccursNe uᴿ (!ᴿ A₁ᴿ A₂ᴿ tᴿ)
 
 data ¬OccursPreNe where
@@ -43,7 +44,7 @@ data ¬OccursPreNe where
          → ¬OccursNe vᴿ tᴿ
          → ¬OccursNf vᴿ uᴿ
          → ¬OccursPreNe vᴿ (appᴿ Aᴿ Bᴿ tᴿ uᴿ)
-  
+
   ifᴼᶜᶜ  : ¬OccursTyNf (wᴿ [ wkᴿ ]Neᴿ) Pᴿ
          → ¬OccursNf wᴿ tᴿ
          → ¬OccursNf wᴿ uᴿ
@@ -65,11 +66,11 @@ data ¬OccursPreNe where
          → ¬OccursTyNf (uᴿ [ wkᴿ ]Neᴿ) Bᴿ
          → ¬OccursNe uᴿ tᴿ
          → ¬OccursPreNe uᴿ (sndᴿ Aᴿ Bᴿ tᴿ)
-  
+
   callᴼᶜᶜ : ¬OccursNfs vᴿ tsᴿ
           → ¬OccursNe vᴿ eqᴿ
           → ¬OccursPreNe vᴿ (callᴿ dᴿ tsᴿ eqᴿ)
-  
+
 data ¬OccursNf where
   lamᴼᶜᶜ : ¬OccursTyNf uᴿ Aᴿ
          → ¬OccursNf (uᴿ [ wkᴿ ]Neᴿ) tᴿ
@@ -82,7 +83,7 @@ data ¬OccursNf where
   suᴼᶜᶜ : ¬OccursNf uᴿ tᴿ
         → ¬OccursNf uᴿ (suᴿ tᴿ)
 
-  pairᴼᶜᶜ : ¬OccursTyNf (vᴿ [ wkᴿ ]Neᴿ) Bᴿ 
+  pairᴼᶜᶜ : ¬OccursTyNf (vᴿ [ wkᴿ ]Neᴿ) Bᴿ
           → ¬OccursNf vᴿ tᴿ
           → ¬OccursNf vᴿ uᴿ
           → ¬OccursNf vᴿ (pairᴿ Bᴿ tᴿ uᴿ)
@@ -114,13 +115,13 @@ data ¬OccursTyNf where
   Πᴼᶜᶜ : ¬OccursTyNf uᴿ Aᴿ
        → ¬OccursTyNf (uᴿ [ wkᴿ ]Neᴿ) Bᴿ
        → ¬OccursTyNf uᴿ (Πᴿ Aᴿ Bᴿ)
-  
+
   Σᴼᶜᶜ : ¬OccursTyNf uᴿ Aᴿ
        → ¬OccursTyNf (uᴿ [ wkᴿ ]Neᴿ) Bᴿ
        → ¬OccursTyNf uᴿ (Σᴿ Aᴿ Bᴿ)
-  
+
   𝔹ᴼᶜᶜ : ¬OccursTyNf uᴿ 𝔹ᴿ
-  
+
   ℕᴼᶜᶜ : ¬OccursTyNf uᴿ ℕᴿ
 
   IFᴼᶜᶜ : ¬OccursNe uᴿ tᴿ
@@ -133,20 +134,20 @@ data ¬OccursTyNf where
         → ¬OccursNf uᴿ t₂ᴿ
         → ¬OccursTyNf uᴿ (Idᴿ Aᴿ t₁ᴿ t₂ᴿ)
 
-StablePreNe : Nesᴿ l n → Neᴿ l n → Set
-StableNe    : Nesᴿ l n → Neᴿ l n → Set
-StableNf    : Nesᴿ l n → Nfᴿ l n → Set
-StableNfs   : Nesᴿ l n → Nfsᴿ l n → Set
-StableTyNf  : Nesᴿ l n → TyNfᴿ l n → Set
+PreNeStab : Nesᴿ l n → Neᴿ l n → Set
+NeStab    : Nesᴿ l n → Neᴿ l n → Set
+NfStab    : Nesᴿ l n → Nfᴿ l n → Set
+NfsStab   : Nesᴿ l n → Nfsᴿ l n → Set
+TyNfStab  : Nesᴿ l n → TyNfᴿ l n → Set
 
-StablePreNe usᴿ tᴿ  = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursPreNe uᴿ tᴿ
-StableNe    usᴿ tᴿ  = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursNe uᴿ tᴿ
-StableNf    usᴿ tᴿ  = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursNf uᴿ tᴿ
-StableNfs   usᴿ tsᴿ = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursNfs uᴿ tsᴿ
-StableTyNf  usᴿ Aᴿ  = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursTyNf uᴿ Aᴿ
+PreNeStab usᴿ tᴿ  = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursPreNe uᴿ tᴿ
+NeStab    usᴿ tᴿ  = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursNe uᴿ tᴿ
+NfStab    usᴿ tᴿ  = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursNf uᴿ tᴿ
+NfsStab   usᴿ tsᴿ = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursNfs uᴿ tsᴿ
+TyNfStab  usᴿ Aᴿ  = ∀ {uᴿ} → Faulty usᴿ uᴿ → ¬OccursTyNf uᴿ Aᴿ
 
-¬OccursFaults : (uᴿ : Neᴿ l n) (wsᴿ : Nesᴿ l n) → Set
-¬OccursFaults uᴿ wsᴿ = ∀ {wᴿ} → Faulty wsᴿ wᴿ → ¬OccursNe uᴿ wᴿ
+¬OccursNes : (uᴿ : Neᴿ l n) (wsᴿ : Nesᴿ l n) → Set
+¬OccursNes uᴿ wsᴿ = ∀ {wᴿ} → Faulty wsᴿ wᴿ → ¬OccursNe uᴿ wᴿ
 
 tyOfᴼᶜᶜ : ¬OccursNf uᴿ tᴿ
         → ¬OccursTyNf uᴿ (tyOfᴿ tᴿ)
@@ -167,5 +168,5 @@ ne𝔹ᴼᶜᶜ⁻¹ : ¬OccursNf uᴿ (ne𝔹ᴿ tᴿ) → ¬OccursNe uᴿ tᴿ
 ne𝔹ᴼᶜᶜ⁻¹ (ne𝔹ᴼᶜᶜ tᴼᶜᶜ) = tᴼᶜᶜ
 
 postulate
-  _[_]F : Faulty usᴿ uᴿ → (δᴿ : Thinᴿ m n) 
+  _[_]F : Faulty usᴿ uᴿ → (δᴿ : Thinᴿ m n)
         → Faulty (usᴿ [ δᴿ ]Nesᴿ) (uᴿ [ δᴿ ]Neᴿ)

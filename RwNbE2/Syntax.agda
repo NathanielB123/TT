@@ -14,9 +14,9 @@ module RwNbE2.Syntax where
 -- We define signatures and contexts as inductive datatypes in order to get
 -- pattern matching and automatic disjointness/injectivity
 --
--- Contexts also feature a signature weakening operator |_[_]C| plus equations, 
+-- Contexts also feature a signature weakening operator |_[_]C| plus equations,
 -- so it is technically not immediate that all contexts can be formed purely in
--- terms of |•|, |_▷_| and |_▷_~_| and that these operators are 
+-- terms of |•|, |_▷_| and |_▷_~_| and that these operators are
 -- disjoint/injective.
 -- We could show this manually by way of a simple context-normalisation model.
 data Sig           : Set
@@ -32,11 +32,11 @@ postulate
   Tm    : (Γ : Ctx Ξ) → Ty Γ → Set
 record Sub (Δ : Ctx Φ) (Γ : Ctx Ψ) : Set
 
-variable  
+variable
   Γ Δ Θ Λ Γ₁ Γ₂ Δ₁ Δ₂ Θ₁ Θ₂ : Ctx _
   A B C D A₁ A₂ A₃ B₁ B₂ B₃ P A[] : Ty _
   t u v t₁ t₂ t₃ u₁ u₂ u₃ : Tm _ _
-  ts us vs ts₁ ts₂ : Tms _ _
+  ts us vs ws ts₁ ts₂ : Tms _ _
   φ ψ ξ : SigWk _ _
   δ σ γ δ₁ δ₂ : Sub _ _
   t₁₂ u₁₂ : _≡_ {A = Tm _ _} _ _
@@ -69,7 +69,7 @@ postulate
   [][]C : Γ [ ψ ]C [ φ ]C ≡S Γ [ ψ ⨾ᵂᵏ φ ]C
   {-# REWRITE [][]C #-}
 
--- Global substitutions are pairs of signature weakenings and local 
+-- Global substitutions are pairs of signature weakenings and local
 -- substitutions
 record Sub {Φ} {Ψ} Δ Γ where
   constructor _⇑_
@@ -79,7 +79,7 @@ record Sub {Φ} {Ψ} Δ Γ where
     ⇓ᵀᵐˢ : Tms Δ (Γ [ ⇓ᵂᵏ ]C)
 open Sub public
 
--- Local substitutions are both displayed presheaves over signature weakenings 
+-- Local substitutions are both displayed presheaves over signature weakenings
 -- and form a category
 -- We can achieve this with a single operator (which folds substitution over
 -- the list of terms)
@@ -162,7 +162,7 @@ postulate
 
 -- Context comprehension (for ordinary context extension, and extension
 -- by convertibility assumptions)
--- We take |wk|/|vz| as primitive as opposed to |π₁|/|π₂| to get a confluent 
+-- We take |wk|/|vz| as primitive as opposed to |π₁|/|π₂| to get a confluent
 -- rewrite system
 postulate
   εᵀᵐˢ    : Tms Δ •
@@ -173,7 +173,7 @@ postulate
   π₁ᵀᵐˢ   : Tms Δ (Γ ▷ A) → Tms Δ Γ
   π₁~ᵀᵐˢ  : Tms Δ (Γ ▷ t₁ ~ t₂) → Tms Δ Γ
   π₂ᵀᵐˢ   : (ts : Tms Δ (Γ ▷ A)) → Tm Δ (A [ ⇑ᵀᵐˢ (π₁ᵀᵐˢ ts) ]T)
-  π₂~ᵀᵐˢ  : (ts : Tms Δ (Γ ▷ t₁ ~ t₂)) 
+  π₂~ᵀᵐˢ  : (ts : Tms Δ (Γ ▷ t₁ ~ t₂))
           → t₁ [ ⇑ᵀᵐˢ (π₁~ᵀᵐˢ ts) ] ≡ t₂ [ ⇑ᵀᵐˢ (π₁~ᵀᵐˢ ts) ]
 
   •ηᵀᵐˢ : ts ≡ εᵀᵐˢ
@@ -189,8 +189,8 @@ postulate
   ,~[]*  : {ts : Tms {Ψ} Δ Γ}
            {t₁ t₂ : Tm Γ A}
            {t₁₂ : t₁ [ ⇑ᵀᵐˢ ts ] ≡ t₂ [ ⇑ᵀᵐˢ ts ]}
-           {δ : Sub {Φ} {Ψ} Θ Δ} 
-         → (_,~ᵀᵐˢ_ {t₁ = t₁} {t₂ = t₂} ts t₁₂) [ δ ]* 
+           {δ : Sub {Φ} {Ψ} Θ Δ}
+         → (_,~ᵀᵐˢ_ {t₁ = t₁} {t₂ = t₂} ts t₁₂) [ δ ]*
          ≡S (ts [ δ ]*) ,~ᵀᵐˢ (ap (_[ δ ]) t₁₂)
   {-# REWRITE ,~[]* #-}
 
@@ -265,7 +265,7 @@ _^_ : ∀ δ A → Sub (Δ ▷ (A [ δ ]T)) (Γ ▷ A)
 δ ^ A = (δ ⨾ wk) , vz
 
 _^_~_ : ∀ δ (t₁ t₂ : Tm Γ A) → Sub (Δ ▷ t₁ [ δ ] ~ (t₂ [ δ ])) (Γ ▷ t₁ ~ t₂)
-δ ^ t₁ ~ t₂ = (δ ⨾ wk~) ,~ 
+δ ^ t₁ ~ t₂ = (δ ⨾ wk~) ,~
   (t₁ [ δ ⨾ wk~ ]
   ≡⟨⟩
   t₁ [ δ ] [ wk~ ]
@@ -290,7 +290,7 @@ postulate
 
 app[] : {t : Tm Γ (Π A B)}
       → app (t [ δ ]) ≡ app t [ δ ^ A ]
-app[] {A = A} {δ = δ} {t = t} = 
+app[] {A = A} {δ = δ} {t = t} =
   app (⌜ t ⌝ [ δ ])
   ≡⟨ ap! (Πη {t = t}) ⟩
   app (lam (app t) [ δ ])
@@ -307,22 +307,22 @@ postulate
   Id[] : Id A t₁ t₂ [ δ ]T ≡S Id (A [ δ ]T) (t₁ [ δ ]) (t₂ [ δ ])
   {-# REWRITE Id[] #-}
 
-  rfl[] : rfl {t = t} [ δ ] ≡S rfl 
+  rfl[] : rfl {t = t} [ δ ] ≡S rfl
   {-# REWRITE rfl[] #-}
 
-  -- Note we don't need the J rule because it is derivable (in a sense) from 
+  -- Note we don't need the J rule because it is derivable (in a sense) from
   -- local equality reflection
 
 variable
   eq eq' eq₁ eq₂ : Tm _ (Id _ _ _)
 
 rflℱ : t₁ ≡ t₂ → Tm Γ (Id A t₁ t₂)
-rflℱ t₁₂ with refl ← ↑≡ t₁₂ 
+rflℱ t₁₂ with refl ← ↑≡ t₁₂
   = rfl
 
 rflℱ[] : rflℱ t₁₂ [ δ ] ≡S rflℱ (ap (_[ δ ]) t₁₂)
 rflℱ[] {t₁₂ = t₁₂}
-  with refl ← ↑≡ t₁₂  
+  with refl ← ↑≡ t₁₂
   = refl
 {-# REWRITE rflℱ[] #-}
 
@@ -331,9 +331,9 @@ data Sig where
   []                  : Sig
   -- Paper uses separator 'in' but Agda reserves that identifier
   -- I think 'begin' is cute
-  _def_to_reflect_begin_end 
-    : ∀ (Ξ : Sig) (Γ : Ctx Ξ) B {A} {t₁ t₂ : Tm Γ A} (eq : Tm Γ (Id A t₁ t₂)) 
-    → Tm ((Γ ▷ t₁ ~ t₂) ▷ eq [ wk~ ] ~ rflℱ ez~) 
+  _def_to_reflect_begin_end
+    : ∀ (Ξ : Sig) (Γ : Ctx Ξ) B {A} {t₁ t₂ : Tm Γ A} (eq : Tm Γ (Id A t₁ t₂))
+    → Tm ((Γ ▷ t₁ ~ t₂) ▷ eq [ wk~ ] ~ rflℱ ez~)
          (B [ wk~ ⨾ wk~ ]T)
     → Sig
 
@@ -343,15 +343,15 @@ postulate
 
 -- Calls to definitions
 postulate
-  call : Tm {Ξ = Ξ def Γ to B reflect t begin u end} 
+  call : Tm {Ξ = Ξ def Γ to B reflect eq begin u end}
             (Γ [ defᵂᵏ ]C) (B [ ⇑ᵂᵏ defᵂᵏ ]T)
 
   defβ : {eq : Tm Γ (Id A t₁ t₂)}
-         {u : Tm ((Γ ▷ t₁ ~ t₂) ▷ (eq [ wk~ ]) ~ rflℱ ez~) (B [ wk~ ⨾ wk~ ]T)} 
-         {δ : Sub Δ (Γ [ defᵂᵏ {B = B} {u = u} ]C)} 
+         {u : Tm ((Γ ▷ t₁ ~ t₂) ▷ (eq [ wk~ ]) ~ rflℱ ez~) (B [ wk~ ⨾ wk~ ]T)}
+         {δ : Sub Δ (Γ [ defᵂᵏ {B = B} {u = u} ]C)}
          (t₁₂ : t₁ [ ⇑ᵂᵏ defᵂᵏ ⨾ δ ] ≡ t₂ [ ⇑ᵂᵏ defᵂᵏ ⨾ δ ])
          (eqrfl : eq [ ⇑ᵂᵏ defᵂᵏ ⨾ δ ] ≡ rflℱ t₁₂)
-       → call {t = eq} [ δ ] 
+       → call {eq = eq} [ δ ]
        ≡ u [ ((⇑ᵂᵏ defᵂᵏ ⨾ δ) ,~ t₁₂) ,~ eqrfl ]
 
 -- Booleans and large elimination
@@ -373,7 +373,7 @@ postulate
 
   if[] : if P t u v [ δ ] ≡S if (P [ δ ^ 𝔹 ]T) (t [ δ ]) (u [ δ ]) (v [ δ ])
 
-if[]' : _[_] {A = ⟨ _ ⟩} (if P t u v) δ 
+if[]' : _[_] {A = ⟨ _ ⟩} (if P t u v) δ
       ≡S if (P [ δ ^ 𝔹 ]T) (t [ δ ]) (u [ δ ]) (v [ δ ])
 if[]' {P = P} = if[] {P = P}
 {-# REWRITE if[]' #-}
@@ -402,7 +402,7 @@ postulate
   snd  : (t : Tm Γ (Σ A B)) → Tm Γ (B [ id , fst t ]T)
 
   Σ[]  : Σ A B [ δ ]T ≡S Σ (A [ δ ]T) (B [ δ ^ A ]T)
-  {-# REWRITE Σ[] #-} 
+  {-# REWRITE Σ[] #-}
 
   pair[] : {δ : Sub Δ Γ}
          → pair B t u [ δ ] ≡S pair (B [ δ ^ A ]T) (t [ δ ]) (u [ δ ])
@@ -437,21 +437,21 @@ postulate
 
   ℕ[] : ℕ [ δ ]T ≡S ℕ
   {-# REWRITE ℕ[] #-}
-  
+
   ze[] : ze [ δ ] ≡S ze
   {-# REWRITE ze[] #-}
-  
+
   su[] : su t [ δ ] ≡S su (t [ δ ])
   {-# REWRITE su[] #-}
-  
-  
-  ind : (P : Ty {Ξ} (Γ ▷ ℕ)) 
-      → Tm Γ (P [ id , ze ]T) 
+
+
+  ind : (P : Ty {Ξ} (Γ ▷ ℕ))
+      → Tm Γ (P [ id , ze ]T)
       → Tm ((Γ ▷ ℕ) ▷ P) (P [ (wk , su vz) ⨾ wk ]T)
       → (t : Tm Γ ℕ)
       → Tm Γ (P [ id , t ]T)
 
-  ind[] : ind P t u v [ δ ] 
+  ind[] : ind P t u v [ δ ]
         ≡S ind (P [ δ ^ ℕ ]T) (t [ δ ]) (u [ (δ ^ ℕ) ^ P ]) (v [ δ ])
 
 ind[]' : _[_] {A = ⟨ _ ⟩} (ind P t u v) δ
